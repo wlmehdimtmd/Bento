@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ChevronLeft, Plus, Trash2, Loader2, GripVertical } from "lucide-react";
+import { ChevronLeft, Plus, Trash2, Loader2, GripVertical, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -12,14 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ImageUploader } from "@/components/product/ImageUploader";
 import { createClient } from "@/lib/supabase/client";
 
@@ -322,33 +314,36 @@ export function BundleForm({
 
             <div className="space-y-1.5">
               <Label>Catégorie de produits *</Label>
-              <Select
-                value={slotCategoryValues[idx] ?? ""}
-                onValueChange={(val) => {
-                  if (val) setSlotCategory(idx, val);
-                }}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger>
-                  {slotCategoryValues[idx] ? (
-                    <span>
-                      {(() => {
-                        const cat = categories.find((c) => c.id === slotCategoryValues[idx]);
-                        return cat ? `${cat.icon_emoji} ${cat.name}` : "Choisir une catégorie…";
-                      })()}
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground">Choisir une catégorie…</span>
-                  )}
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
+              <div className="flex flex-wrap gap-1.5">
+                {categories.map((c) => {
+                  const active = slotCategoryValues[idx] === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setSlotCategory(idx, c.id)}
+                      disabled={isSubmitting}
+                      className={
+                        active
+                          ? "rounded-full border border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/10 px-2.5 py-1 text-xs font-medium text-foreground"
+                          : "rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-muted-foreground"
+                      }
+                    >
                       {c.icon_emoji} {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    </button>
+                  );
+                })}
+              </div>
+              {slotCategoryValues[idx] ? (
+                <button
+                  type="button"
+                  onClick={() => setSlotCategory(idx, "")}
+                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Désélectionner la catégorie
+                </button>
+              ) : null}
               {errors.slots?.[idx]?.category_id && (
                 <p className="text-xs text-destructive">
                   {errors.slots[idx].category_id?.message}
@@ -470,7 +465,7 @@ export function BundleForm({
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="sticky bottom-0 mt-auto flex justify-end gap-2 border-t border-border bg-background py-3">
         <Button
           type="button"
           variant="outline"

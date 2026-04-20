@@ -248,7 +248,7 @@ export function ProductForm({
         <Input
           id="name"
           {...register("name")}
-          placeholder="Salade César, Burger du chef…"
+          placeholder="Ex: Ramen tonkotsu"
           disabled={isSubmitting}
           autoFocus
         />
@@ -263,7 +263,7 @@ export function ProductForm({
         <Textarea
           id="description"
           {...register("description")}
-          placeholder="Description du produit…"
+          placeholder="Décrivez brièvement votre produit"
           rows={2}
           disabled={isSubmitting}
         />
@@ -349,7 +349,7 @@ export function ProductForm({
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="sticky bottom-0 mt-auto flex justify-end gap-2 border-t border-border bg-background py-3">
         <Button
           type="button"
           variant="outline"

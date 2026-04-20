@@ -18,7 +18,7 @@ import { createClient } from "@/lib/supabase/client";
 // ─── Schema ───────────────────────────────────────────────────
 const categorySchema = z.object({
   name: z.string().min(1, "Nom requis"),
-  description: z.string().optional(),
+  description: z.string().max(32, "Maximum 32 caractères").optional(),
   icon_emoji: z.string().optional(),
   is_active: z.boolean(),
 });
@@ -223,8 +223,15 @@ export function CategoryForm({
           {...register("description")}
           placeholder="Description optionnelle de la catégorie…"
           rows={2}
+          maxLength={32}
           disabled={isSubmitting}
         />
+        <p className="text-xs text-muted-foreground text-right">
+          {(watch("description") ?? "").length}/32
+        </p>
+        {errors.description && (
+          <p className="text-xs text-destructive">{errors.description.message}</p>
+        )}
       </div>
 
       <div className="space-y-1.5">
@@ -252,7 +259,7 @@ export function CategoryForm({
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="sticky bottom-0 mt-auto flex justify-end gap-2 border-t border-border bg-background py-3">
         <Button
           type="button"
           variant="outline"
