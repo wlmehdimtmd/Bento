@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/auth-utils";
+import { resolveIsAdmin } from "@/lib/auth-utils";
 import type { CategoryRow } from "@/components/product/CategoryForm";
 import type { ProductRow } from "@/components/product/ProductForm";
 import type { BundleRow } from "@/components/product/BundleForm";
@@ -10,7 +10,7 @@ import type { BundleRow } from "@/components/product/BundleForm";
 async function requireAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user || !isAdmin(user)) throw new Error("Unauthorized");
+  if (!user || !(await resolveIsAdmin(supabase, user))) throw new Error("Unauthorized");
   return createServiceClient();
 }
 
@@ -77,6 +77,12 @@ export async function adminSaveCategory(
 
 export async function adminDeleteCategory(shopId: string, categoryId: string) {
   const service = await requireAdmin();
+  const { error: slotsError } = await service
+    .from("bundle_slots")
+    .delete()
+    .eq("category_id", categoryId);
+  if (slotsError) throw new Error(slotsError.message);
+
   const { error } = await service.from("categories").delete().eq("id", categoryId);
   if (error) throw new Error(error.message);
   revalidatePath(managePath(shopId));

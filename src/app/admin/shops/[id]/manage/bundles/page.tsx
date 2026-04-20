@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/auth-utils";
+import { resolveIsAdmin } from "@/lib/auth-utils";
 import {
   adminSaveBundle,
   adminDeleteBundle,
@@ -19,7 +19,7 @@ export default async function AdminManageBundlesPage({ params }: { params: Param
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  if (!isAdmin(user)) redirect("/dashboard");
+  if (!(await resolveIsAdmin(supabase, user))) redirect("/dashboard");
 
   const service = createServiceClient();
 

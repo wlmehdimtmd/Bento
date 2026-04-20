@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/auth-utils";
+import { resolveIsAdmin } from "@/lib/auth-utils";
 import { adminSaveProduct, adminDeleteProduct } from "@/app/admin/manage-actions";
 import { ProductsClient } from "@/components/product/ProductsClient";
 import { buttonVariants } from "@/components/ui/button";
@@ -15,7 +15,7 @@ export default async function AdminManageProductsPage({ params }: { params: Para
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  if (!isAdmin(user)) redirect("/dashboard");
+  if (!(await resolveIsAdmin(supabase, user))) redirect("/dashboard");
 
   const service = createServiceClient();
 

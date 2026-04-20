@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/auth-utils";
+import { resolveIsAdmin } from "@/lib/auth-utils";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { resolveDashboardOnboardingResumePath } from "@/lib/onboarding-flow";
 import { isOnboardingComplete } from "@/lib/onboarding-status";
@@ -20,7 +20,7 @@ export default async function Layout({
     redirect("/login");
   }
 
-  if (isAdmin(user)) {
+  if (await resolveIsAdmin(supabase, user)) {
     redirect("/admin");
   }
 

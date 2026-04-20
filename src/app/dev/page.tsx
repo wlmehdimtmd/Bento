@@ -12,6 +12,8 @@ const LINKS = [
   { href: "/dev/ui", label: "Playground UI" },
   { href: "/dev/da", label: "Charte / DA" },
   { href: "/dev/onboarding", label: "Onboarding dev" },
+  { href: "/dev/dashboard", label: "Dashboard (dev)" },
+  { href: "/dev/votre-slug", label: "Boutique (dev via slug)" },
 ] as const;
 
 export default function DevHubPage() {

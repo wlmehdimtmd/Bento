@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logAuthEvent } from "@/lib/auth-logger";
+import { resolveIsAdmin } from "@/lib/auth-utils";
 
 function getClientMeta(request: Request) {
   return {
@@ -36,7 +37,11 @@ export async function POST(request: Request) {
     }
 
     await logAuthEvent("login", data.user.id, meta);
-    return NextResponse.json({ success: true });
+    const admin = await resolveIsAdmin(supabase, data.user);
+    return NextResponse.json({
+      success: true,
+      redirectTo: admin ? "/admin" : "/dashboard",
+    });
   } catch (err) {
     console.error("[api/auth/login] Unhandled error:", err);
     return NextResponse.json(

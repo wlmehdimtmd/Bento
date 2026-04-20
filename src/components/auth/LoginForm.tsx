@@ -18,6 +18,12 @@ const loginSchema = z.object({
 });
 
 type LoginValues = z.infer<typeof loginSchema>;
+type LoginResponse = {
+  success?: boolean;
+  redirectTo?: string;
+  error?: string;
+  code?: string;
+};
 
 export function LoginForm() {
   const router = useRouter();
@@ -71,7 +77,11 @@ export function LoginForm() {
         return;
       }
 
-      router.push("/dashboard");
+      const data: LoginResponse = await res
+        .json()
+        .catch(() => ({ success: true, redirectTo: "/dashboard" }));
+      const redirectTo = data.redirectTo === "/admin" ? "/admin" : "/dashboard";
+      router.push(redirectTo);
     } catch {
       setServerError("Une erreur inattendue s'est produite. Veuillez réessayer.");
     }

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/auth-utils";
+import { resolveIsAdmin } from "@/lib/auth-utils";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /** Erreur d’accès admin (fail closed) — gérer en 401/403 côté routes API. */
@@ -25,7 +25,7 @@ export async function requireAdmin(): Promise<SupabaseClient> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new AdminAuthError(401, "Unauthorized");
-  if (!isAdmin(user)) throw new AdminAuthError(403, "Forbidden");
+  if (!(await resolveIsAdmin(supabase, user))) throw new AdminAuthError(403, "Forbidden");
   return createServiceClient();
 }
 

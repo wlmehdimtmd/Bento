@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/auth-utils";
+import { resolveIsAdmin } from "@/lib/auth-utils";
 
 type Params = Promise<{ id: string }>;
 
@@ -19,7 +19,7 @@ export default async function AdminManageOrdersPage({ params }: { params: Params
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  if (!isAdmin(user)) redirect("/dashboard");
+  if (!(await resolveIsAdmin(supabase, user))) redirect("/dashboard");
 
   const service = createServiceClient();
 

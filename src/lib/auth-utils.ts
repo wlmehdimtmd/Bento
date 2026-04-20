@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 
 /**
  * Admin : uniquement `app_metadata.user_role` (hook / serveur Supabase).
@@ -19,4 +19,34 @@ export function isAdmin(user: User | null): boolean {
   );
   const email = user.email?.toLowerCase() ?? "";
   return allow.has(email);
+}
+
+function isAdminRole(role: string | null | undefined): boolean {
+  return role === "admin" || role === "super_admin";
+}
+
+/**
+ * Résout le rôle admin de façon robuste:
+ * 1) JWT/app_metadata ou allowlist env (isAdmin)
+ * 2) fallback sur la colonne `users.role` en base
+ */
+export async function resolveIsAdmin(
+  supabase: SupabaseClient,
+  user: User | null
+): Promise<boolean> {
+  if (!user) return false;
+  if (isAdmin(user)) return true;
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle<{ role: string | null }>();
+
+  if (error) {
+    console.error("[auth] resolveIsAdmin users.role lookup failed:", error);
+    return false;
+  }
+
+  return isAdminRole(data?.role);
 }

@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
+import type { User } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { authRatelimit } from "@/lib/ratelimit";
+import { resolveIsAdmin } from "@/lib/auth-utils";
 
 const RATE_LIMITED_PATHS = [
   "/api/auth/login",
@@ -16,7 +18,10 @@ function hasSupabaseSession(request: NextRequest): boolean {
     .some(({ name }) => name.startsWith("sb-") && name.endsWith("-auth-token"));
 }
 
-async function refreshSupabaseSession(request: NextRequest): Promise<NextResponse> {
+function createSupabaseFromRequest(request: NextRequest): {
+  response: NextResponse;
+  supabase: ReturnType<typeof createServerClient>;
+} {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -38,8 +43,17 @@ async function refreshSupabaseSession(request: NextRequest): Promise<NextRespons
     }
   );
 
-  await supabase.auth.getUser();
-  return response;
+  return { response, supabase };
+}
+
+async function getSupabaseUserAndResponse(
+  request: NextRequest
+): Promise<{ response: NextResponse; user: User | null; supabase: ReturnType<typeof createServerClient> }> {
+  const { response, supabase } = createSupabaseFromRequest(request);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return { response, user, supabase };
 }
 
 export async function proxy(request: NextRequest) {
@@ -79,7 +93,7 @@ export async function proxy(request: NextRequest) {
       redirect.headers.set("Cache-Control", "no-store");
       return redirect;
     }
-    const response = await refreshSupabaseSession(request);
+    const { response } = await getSupabaseUserAndResponse(request);
     response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
     return response;
   }
@@ -87,8 +101,9 @@ export async function proxy(request: NextRequest) {
   // Auth routes — redirect already-authenticated users to /dashboard
   if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
     if (hasSupabaseSession(request)) {
+      const { user, supabase } = await getSupabaseUserAndResponse(request);
       const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = (await resolveIsAdmin(supabase, user)) ? "/admin" : "/dashboard";
       const redirect = NextResponse.redirect(url);
       redirect.headers.set("Cache-Control", "no-store");
       return redirect;

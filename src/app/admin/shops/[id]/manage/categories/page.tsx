@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/auth-utils";
+import { resolveIsAdmin } from "@/lib/auth-utils";
 import { adminSaveCategory, adminDeleteCategory } from "@/app/admin/manage-actions";
 import { CategoriesClient } from "@/components/product/CategoriesClient";
 import type { CategorySavePayload, CategoryRow } from "@/components/product/CategoryForm";
@@ -13,7 +13,7 @@ export default async function AdminManageCategoriesPage({ params }: { params: Pa
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  if (!isAdmin(user)) redirect("/dashboard");
+  if (!(await resolveIsAdmin(supabase, user))) redirect("/dashboard");
 
   const service = createServiceClient();
 
