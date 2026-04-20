@@ -4,6 +4,8 @@ import type { ShopType, OrderStatus, FulfillmentMode } from "./types";
 export const SHOP_DESCRIPTION_MAX_LINES = 6;
 /** Longueur max de description boutique dans les formulaires de config. */
 export const SHOP_DESCRIPTION_MAX_CHARS = 240;
+/** Troncature affichée sur la carte info vitrine en dessous du breakpoint `md`. */
+export const SHOP_INFO_DESCRIPTION_MOBILE_MAX_CHARS = 168;
 
 export const ALLERGENS: { value: string; label: string; emoji: string }[] = [
   { value: "gluten",      label: "Gluten",         emoji: "🌾" },
@@ -67,3 +69,6 @@ export const FULFILLMENT_MODES: {
   { value: "takeaway", label: "À emporter", icon: "ShoppingBag" },
   { value: "delivery", label: "Livraison", icon: "Truck" },
 ];
+
+/** Fond du bandeau sticky vitrine démo (#111111 à 70 % d’opacité). */
+export const DEMO_PUBLIC_HEADER_BACKGROUND = "#111111b3";

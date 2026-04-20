@@ -4,6 +4,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { resolveIsAdmin } from "@/lib/auth-utils";
 import { adminSaveProduct, adminDeleteProduct } from "@/app/admin/manage-actions";
 import { ProductsClient } from "@/components/product/ProductsClient";
+import { fetchShopLabelsForDashboard } from "@/lib/shop-labels";
 import { buttonVariants } from "@/components/ui/button";
 import type { ProductSavePayload, ProductRow } from "@/components/product/ProductForm";
 
@@ -71,11 +72,15 @@ export default async function AdminManageProductsPage({ params }: { params: Para
     return adminDeleteProduct(shopId, id);
   }
 
+  const labelRows = await fetchShopLabelsForDashboard(service, shopId);
+  const shopLabels = labelRows.map(({ value, label, color }) => ({ value, label, color }));
+
   return (
     <ProductsClient
       shopId={shopId}
       categories={cats}
       initialProducts={initialProducts}
+      shopLabels={shopLabels}
       adminActions={{ onSave, onDelete }}
     />
   );

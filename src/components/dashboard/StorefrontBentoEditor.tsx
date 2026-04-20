@@ -37,6 +37,11 @@ import {
   type CategoryThemeKey,
 } from "@/lib/categoryThemeTokens";
 import { getStorefrontThemePreviewStyle, type StorefrontThemeOverrides } from "@/lib/storefrontTheme";
+import {
+  formatLayoutSaveError,
+  getSupabaseSqlEditorUrl,
+  isMissingStorefrontLayoutColumn,
+} from "@/lib/storefrontSchemaErrors";
 
 const GridLayoutWithWidth = WidthProvider(ReactGridLayout);
 
@@ -49,32 +54,6 @@ function whToBentoSize(w: number, h: number): BentoSize {
   if (cw === 2 && ch === 1) return "2x1";
   if (cw === 1 && ch === 2) return "1x2";
   return "1x1";
-}
-
-function isMissingStorefrontLayoutColumn(message: string) {
-  return /storefront_bento_layout|storefront_theme_key|storefront_theme_overrides|schema cache/i.test(message);
-}
-
-function formatLayoutSaveError(message: string): string {
-  if (isMissingStorefrontLayoutColumn(message)) {
-    return "Une colonne vitrine requise (« storefront_bento_layout », « storefront_theme_key » ou « storefront_theme_overrides ») n’existe pas encore sur la table « shops ». Exécutez les migrations SQL de vitrine, attendez ~1 minute (cache schéma), puis réessayez.";
-  }
-  return message;
-}
-
-/** Lien vers l’éditeur SQL du projet (dérivé de NEXT_PUBLIC_SUPABASE_URL). */
-function getSupabaseSqlEditorUrl(): string | null {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!url) return null;
-  try {
-    const host = new URL(url).hostname;
-    if (host.includes("localhost")) return null;
-    const projectRef = host.split(".")[0];
-    if (!projectRef) return null;
-    return `https://supabase.com/dashboard/project/${projectRef}/sql/new`;
-  } catch {
-    return null;
-  }
 }
 
 function layoutToJson(layout: Layout) {

@@ -9,6 +9,7 @@ import {
   type PublicShopPagePayload,
 } from "@/lib/fetchPublicShopPagePayload";
 import { DEFAULT_CATEGORY_THEME_KEY } from "@/lib/categoryThemeTokens";
+import { coerceStorefrontThemeOverrides } from "@/lib/storefrontTheme";
 import {
   backfillLegacyVitrineThenRedirectToCatalog,
   loadOwnedShopForOnboarding,
@@ -68,6 +69,8 @@ function emptyPayloadFromShop(shop: {
     storefrontPhotos: [],
     savedStorefrontLayout: null,
     storefrontThemeKey: DEFAULT_CATEGORY_THEME_KEY,
+    storefrontThemeOverrides: coerceStorefrontThemeOverrides(null),
+    shopLabels: [],
     stripeAccountId: shop.stripe_account_id,
   };
 }

@@ -10,6 +10,7 @@ import type { PublicProduct } from "@/components/product/ProductDetail";
 import type { CategoryInfo, BundleInfo, ShopInfo } from "@/components/bento/StoreView";
 import type { ShopReviews } from "@/lib/types";
 import { DemoUnifiedTopBar } from "@/components/demo/DemoUnifiedTopBar";
+import { DEMO_PUBLIC_HEADER_BACKGROUND } from "@/lib/constants";
 
 // ── Static demo data ────────────────────────────────────────────
 
@@ -144,8 +145,11 @@ export function DemoView({ reviews }: { reviews?: ShopReviews | null }) {
       >
         <CartDrawerProvider>
           <div className="min-h-screen bg-background flex flex-col">
-            <div className="sticky top-0 z-50 border-b border-border/60 bg-card/95 shadow-sm backdrop-blur-md">
-              <DemoUnifiedTopBar demoDetailMd="Vitrine interactive, aucune commande réelle." />
+            <div
+              className="sticky top-0 z-50 border-b border-white/10 text-white shadow-sm backdrop-blur-md"
+              style={{ backgroundColor: DEMO_PUBLIC_HEADER_BACKGROUND }}
+            >
+              <DemoUnifiedTopBar />
             </div>
 
             {/* ── Contenu principal (ISO avec la vraie page) ── */}

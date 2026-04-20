@@ -166,6 +166,20 @@
     --bento-outer-r: var(--radius-2xl);
   }
 
+  /* Cartes shadcn : pas de ring type bordure, ombre légère au survol */
+  [data-slot="card"] {
+    @apply ring-0 shadow-none transition-shadow duration-200 ease-out;
+  }
+  [data-slot="card"]:hover {
+    box-shadow: 0 6px 24px -4px rgb(0 0 0 / 0.1);
+  }
+  .dark [data-slot="card"]:hover {
+    box-shadow: 0 8px 28px -4px rgb(0 0 0 / 0.45);
+  }
+  [data-slot="card-footer"] {
+    @apply border-t-0;
+  }
+
   /* Landing : bandeaux catégories (marquee lent, boucle sans couture) */
   @keyframes landing-marquee {
     from {

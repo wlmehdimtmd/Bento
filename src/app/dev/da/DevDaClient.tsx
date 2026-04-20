@@ -10,18 +10,28 @@ import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
+  CATEGORY_THEME_CARD_DARK_SEMI,
+  CATEGORY_THEME_CARD_SEMI,
   CATEGORY_THEME_KEYS,
   CATEGORY_THEME_TOKENS,
+  DEFAULT_CATEGORY_THEME_KEY,
+  STOREFRONT_GLOBAL_ACCENT_HEX,
   type CategoryThemeKey,
 } from "@/lib/categoryThemeTokens";
 import { createClient } from "@/lib/supabase/client";
 import {
-  buildStorefrontThemeDefaults,
   coerceStorefrontThemeKey,
   coerceStorefrontThemeOverrides,
   getStorefrontThemeScaleWithOverrides,
   type StorefrontThemeOverrides,
 } from "@/lib/storefrontTheme";
+import {
+  formatLayoutSaveError,
+  getSupabaseSqlEditorUrl,
+  isMissingStorefrontLayoutColumn,
+  isShopRowLevelSecurityDenied,
+} from "@/lib/storefrontSchemaErrors";
+import { ensureDefaultShopForOwner } from "@/lib/merchant-bootstrap";
 import { cn } from "@/lib/utils";
 
 function Section({
@@ -95,13 +105,22 @@ export function DevDaClient() {
   const [overrides, setOverrides] = useState<StorefrontThemeOverrides>({});
   const [loadingShop, setLoadingShop] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  const defaultsByTheme = useMemo(() => buildStorefrontThemeDefaults(), []);
+  const [shopLoadBanner, setShopLoadBanner] = useState<{
+    text: string;
+    sqlUrl: string | null;
+  } | null>(null);
+  /** Pourquoi « Enregistrer » reste désactivé alors que le reset (local) fonctionne. */
+  const [saveBlockedReason, setSaveBlockedReason] = useState<"guest" | "no_shop" | null>(
+    null
+  );
 
   useEffect(() => {
     let alive = true;
+
     async function loadShopThemeEditorContext() {
       setLoadingShop(true);
+      setShopLoadBanner(null);
+      setSaveBlockedReason(null);
       const {
         data: { user },
         error: userError,
@@ -109,38 +128,145 @@ export function DevDaClient() {
 
       if (!alive) return;
       if (userError || !user) {
+        setShopId(null);
+        setShopName(null);
+        setOverrides({});
+        setSelectedThemeKey(DEFAULT_CATEGORY_THEME_KEY);
+        setSaveBlockedReason("guest");
         setLoadingShop(false);
         return;
       }
 
-      const { data: shop, error: shopError } = await supabase
+      const { data: shopBase, error: baseError } = await supabase
         .from("shops")
-        .select("id, name, storefront_theme_key, storefront_theme_overrides")
+        .select("id, name")
         .eq("owner_id", user.id)
         .order("created_at", { ascending: true })
         .limit(1)
         .maybeSingle();
 
       if (!alive) return;
-      setLoadingShop(false);
 
-      if (shopError) {
-        console.error("[DevDaClient] unable to load shop editor context", shopError);
+      if (baseError) {
+        console.error("[DevDaClient] unable to load shop (base)", baseError);
+        const raw = baseError.message ?? "";
+        setShopLoadBanner({
+          text: formatLayoutSaveError(raw),
+          sqlUrl: isMissingStorefrontLayoutColumn(raw) ? getSupabaseSqlEditorUrl() : null,
+        });
         toast.error("Impossible de charger la boutique pour l’éditeur de couleurs.");
+        setShopId(null);
+        setShopName(null);
+        setSaveBlockedReason("no_shop");
+        setLoadingShop(false);
         return;
       }
 
-      if (!shop) return;
+      let resolvedId: string | null = null;
+      let resolvedName: string | null = null;
 
-      setShopId(shop.id);
-      setShopName(shop.name);
-      setSelectedThemeKey(coerceStorefrontThemeKey(shop.storefront_theme_key));
-      setOverrides(coerceStorefrontThemeOverrides(shop.storefront_theme_overrides));
+      if (shopBase) {
+        resolvedId = shopBase.id;
+        resolvedName = shopBase.name;
+      } else {
+        const displayName =
+          typeof user.user_metadata?.full_name === "string"
+            ? user.user_metadata.full_name
+            : (user.email?.split("@")[0] ?? null);
+        const ensured = await ensureDefaultShopForOwner(supabase, user.id, displayName);
+        if (!alive) return;
+        if (!ensured.ok) {
+          console.error("[DevDaClient] ensureDefaultShopForOwner", ensured.error);
+          setShopLoadBanner({
+            text: `Aucune boutique pour ce compte et création automatique impossible : ${ensured.error}. Créez une boutique depuis l’onboarding ou le tableau de bord.`,
+            sqlUrl: null,
+          });
+          toast.error("Enregistrement désactivé : aucune boutique utilisable.");
+          setShopId(null);
+          setShopName(null);
+          setSaveBlockedReason("no_shop");
+          setLoadingShop(false);
+          return;
+        }
+        const { data: row } = await supabase
+          .from("shops")
+          .select("id, name")
+          .eq("id", ensured.shopId)
+          .maybeSingle();
+        resolvedId = row?.id ?? ensured.shopId;
+        resolvedName = row?.name ?? null;
+        if (ensured.created) {
+          toast.success("Boutique créée pour pouvoir enregistrer la charte sur la base.");
+        }
+      }
+
+      if (!resolvedId) {
+        setShopId(null);
+        setShopName(null);
+        setSaveBlockedReason("no_shop");
+        setLoadingShop(false);
+        return;
+      }
+
+      setShopId(resolvedId);
+      setShopName(resolvedName);
+      setSaveBlockedReason(null);
+      setLoadingShop(false);
+
+      const { data: shopTheme, error: themeError } = await supabase
+        .from("shops")
+        .select("storefront_theme_key, storefront_theme_overrides")
+        .eq("id", resolvedId)
+        .maybeSingle();
+
+      if (!alive) return;
+
+      if (themeError) {
+        console.error("[DevDaClient] unable to load shop theme columns", themeError);
+        const raw = themeError.message ?? "";
+        const friendly = formatLayoutSaveError(raw);
+        const sqlUrl = isMissingStorefrontLayoutColumn(raw)
+          ? getSupabaseSqlEditorUrl()
+          : null;
+        setShopLoadBanner({ text: friendly, sqlUrl });
+        toast.error(
+          "Boutique détectée, mais les colonnes thème n’ont pas pu être lues. Valeurs par défaut affichées ; l’enregistrement peut encore échouer tant que le schéma n’est pas à jour."
+        );
+        setSelectedThemeKey(DEFAULT_CATEGORY_THEME_KEY);
+        setOverrides({});
+        return;
+      }
+
+      if (shopTheme) {
+        setSelectedThemeKey(coerceStorefrontThemeKey(shopTheme.storefront_theme_key));
+        setOverrides(coerceStorefrontThemeOverrides(shopTheme.storefront_theme_overrides));
+      }
     }
 
     void loadShopThemeEditorContext();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (!alive) return;
+      if (event === "SIGNED_OUT") {
+        setShopId(null);
+        setShopName(null);
+        setOverrides({});
+        setSelectedThemeKey(DEFAULT_CATEGORY_THEME_KEY);
+        setShopLoadBanner(null);
+        setSaveBlockedReason(null);
+        setLoadingShop(false);
+        return;
+      }
+      if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+        void loadShopThemeEditorContext();
+      }
+    });
+
     return () => {
       alive = false;
+      subscription.unsubscribe();
     };
   }, [supabase]);
 
@@ -212,10 +338,35 @@ export function DevDaClient() {
 
     if (error) {
       console.error("[DevDaClient] unable to save theme overrides", error);
-      toast.error(error.message || "Impossible d’enregistrer les couleurs.");
+      const raw = error.message ?? "";
+      const friendly = formatLayoutSaveError(raw);
+      const sqlUrl = isMissingStorefrontLayoutColumn(raw)
+        ? getSupabaseSqlEditorUrl()
+        : null;
+      if (isMissingStorefrontLayoutColumn(raw) || isShopRowLevelSecurityDenied(raw)) {
+        setShopLoadBanner({
+          text: friendly,
+          sqlUrl: isMissingStorefrontLayoutColumn(raw) ? getSupabaseSqlEditorUrl() : null,
+        });
+      }
+      toast.error(friendly, {
+        duration:
+          isMissingStorefrontLayoutColumn(raw) || isShopRowLevelSecurityDenied(raw)
+            ? 22_000
+            : undefined,
+        ...(sqlUrl
+          ? {
+              action: {
+                label: "Ouvrir l’éditeur SQL",
+                onClick: () => window.open(sqlUrl, "_blank", "noopener,noreferrer"),
+              },
+            }
+          : {}),
+      });
       return;
     }
 
+    setShopLoadBanner(null);
     toast.success("Couleurs enregistrées sur la boutique.");
   }
 
@@ -282,12 +433,56 @@ export function DevDaClient() {
               </div>
             </div>
           </div>
+
+          <div className="space-y-3 rounded-lg border border-border bg-muted/15 p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Accent vitrine global (tous les thèmes)
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Constantes partagées — tu pourras les brancher plus tard sur les composants
+              souhaités (CTA, liens, anneaux de focus, etc.). Les boutons{" "}
+              <strong className="font-medium text-foreground">primaires</strong> vitrine restent
+              monochrome : noir sur fond clair, blanc sur fond sombre (pas ces bleus).
+            </p>
+            <div className="flex flex-wrap gap-6">
+              <div className="space-y-2">
+                <div
+                  className="h-16 w-28 rounded-xl border border-border shadow-sm"
+                  style={{ backgroundColor: STOREFRONT_GLOBAL_ACCENT_HEX.light }}
+                />
+                <p className="text-xs font-medium">Mode clair</p>
+                <code className="text-[10px] text-muted-foreground">
+                  {STOREFRONT_GLOBAL_ACCENT_HEX.light}
+                </code>
+              </div>
+              <div className="space-y-2">
+                <div
+                  className="h-16 w-28 rounded-xl border border-border shadow-sm"
+                  style={{ backgroundColor: STOREFRONT_GLOBAL_ACCENT_HEX.dark }}
+                />
+                <p className="text-xs font-medium">Mode sombre</p>
+                <code className="text-[10px] text-muted-foreground">
+                  {STOREFRONT_GLOBAL_ACCENT_HEX.dark}
+                </code>
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Carte vitrine — clair :{" "}
+              <code className="rounded bg-muted px-1">{CATEGORY_THEME_CARD_SEMI}</code>{" "}
+              (blanc 70 %). Sombre :{" "}
+              <code className="rounded bg-muted px-1">{CATEGORY_THEME_CARD_DARK_SEMI}</code>{" "}
+              (#FBFBFB 10 %). Texte des thèmes :{" "}
+              <code className="rounded bg-muted px-1">#111111</code> /{" "}
+              <code className="rounded bg-muted px-1">#ffffff</code>.
+            </p>
+          </div>
+
           <p className="text-xs text-muted-foreground">
-            Référence documentaire (CLAUDE.md) : fond clair type{" "}
+            Référence documentaire (CLAUDE.md) : fonds de page marketing type{" "}
             <code className="rounded bg-muted px-1">#faf9f6</code>, texte{" "}
-            <code className="rounded bg-muted px-1">#1a1a1a</code>, marque désormais
-            monochrome (sans accent chromatique) — portés
-            en CSS via <code className="rounded bg-muted px-1">--color-cream</code>,{" "}
+            <code className="rounded bg-muted px-1">#1a1a1a</code> — distincts des tokens
+            vitrine ci-dessus. Variables globales :{" "}
+            <code className="rounded bg-muted px-1">--color-cream</code>,{" "}
             <code className="rounded bg-muted px-1">--color-bento-accent</code>, etc.
           </p>
         </Section>
@@ -415,12 +610,46 @@ export function DevDaClient() {
         >
           <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 p-3">
-              <div className="text-xs text-muted-foreground">
-                {loadingShop
-                  ? "Chargement de la boutique…"
-                  : shopId
-                    ? `Boutique connectee : ${shopName ?? shopId}`
-                    : "Aucune boutique detectee (connecte-toi pour sauvegarder)."}
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <p>
+                  {loadingShop
+                    ? "Chargement de la boutique…"
+                    : shopId
+                      ? `Boutique connectée : ${shopName ?? shopId}`
+                      : saveBlockedReason === "guest"
+                        ? "Non connecté"
+                        : "Aucune boutique liée à ce compte"}
+                </p>
+                {!loadingShop && !shopId ? (
+                  <p className="rounded-md border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-foreground">
+                    {saveBlockedReason === "guest" ? (
+                      <>
+                        Le bouton « Reset theme courant » ne modifie que l’aperçu dans le
+                        navigateur. Pour enregistrer en base,{" "}
+                        <Link
+                          href="/login"
+                          className="font-medium text-primary underline underline-offset-2"
+                        >
+                          connectez-vous
+                        </Link>{" "}
+                        avec le compte propriétaire d’une boutique.
+                      </>
+                    ) : (
+                      <>
+                        L’enregistrement nécessite une ligne <code className="rounded bg-muted px-1">shops</code>{" "}
+                        pour votre utilisateur. Une création automatique a été tentée ; si le
+                        message d’erreur persiste, passez par{" "}
+                        <Link
+                          href="/onboarding/shop"
+                          className="font-medium text-primary underline underline-offset-2"
+                        >
+                          l’onboarding boutique
+                        </Link>{" "}
+                        ou le tableau de bord.
+                      </>
+                    )}
+                  </p>
+                ) : null}
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -442,7 +671,30 @@ export function DevDaClient() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            {shopLoadBanner ? (
+              <div
+                role="alert"
+                className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-foreground"
+              >
+                <p>{shopLoadBanner.text}</p>
+                {shopLoadBanner.sqlUrl ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => {
+                      const url = shopLoadBanner.sqlUrl;
+                      if (url) window.open(url, "_blank", "noopener,noreferrer");
+                    }}
+                  >
+                    Ouvrir l’éditeur SQL
+                  </Button>
+                ) : null}
+              </div>
+            ) : null}
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {CATEGORY_THEME_KEYS.map((key) => {
                 const token = CATEGORY_THEME_TOKENS[key];
                 const preview = previewMode === "dark" ? token.dark : token.light;
@@ -501,7 +753,7 @@ export function DevDaClient() {
                 title="Aperçu Light"
                 levels={currentScale.light}
                 buttons={{
-                  ...defaultsByTheme[selectedThemeKey].buttons.light,
+                  ...CATEGORY_THEME_TOKENS[selectedThemeKey].buttons.light,
                   ...currentScale.buttons.light,
                 }}
                 titleClassName="text-foreground"
@@ -510,7 +762,7 @@ export function DevDaClient() {
                 title="Aperçu Dark"
                 levels={currentScale.dark}
                 buttons={{
-                  ...defaultsByTheme[selectedThemeKey].buttons.dark,
+                  ...CATEGORY_THEME_TOKENS[selectedThemeKey].buttons.dark,
                   ...currentScale.buttons.dark,
                 }}
                 titleClassName="text-foreground"
@@ -530,7 +782,7 @@ export function DevDaClient() {
 
         <Section
           title="Palette catégories (shared tokens)"
-          description="Prototype des 8 familles partagées pour les catégories, avec 3 niveaux par thème: background, surface, card."
+          description="Six familles partagées (Neutre, Bleu, Indigo, Emerald, Rose, Ambre), avec niveaux background, surface et carte par thème."
         >
           <div className="grid gap-4 md:grid-cols-2">
             {CATEGORY_THEME_KEYS.map((key) => (

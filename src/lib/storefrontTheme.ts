@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 
 import {
   CATEGORY_THEME_KEYS,
+  CATEGORY_THEME_LEGACY_KEY_MAP,
   CATEGORY_THEME_TOKENS,
   DEFAULT_CATEGORY_THEME_KEY,
   getCategoryThemeScale,
@@ -11,6 +12,16 @@ import {
 
 const STOREFRONT_THEME_KEY_SET = new Set<string>(CATEGORY_THEME_KEYS);
 const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/;
+
+/** Couleur du halo vitrine (mode clair / mode sombre). */
+const STOREFRONT_ORB_COLORS: Record<CategoryThemeKey, { light: string; dark: string }> = {
+  neutral: { light: "#c9e1f9", dark: "#6fa0ff" },
+  blue: { light: "#cae1f8", dark: "#00315e" },
+  indigo: { light: "#accfd6", dark: "#004c5a" },
+  emerald: { light: "#abd5ce", dark: "#124941" },
+  rose: { light: "#ceb0d8", dark: "#381e45" },
+  amber: { light: "#dfc4b5", dark: "#51250f" },
+};
 
 type StorefrontThemeButtons = {
   primaryBg: string;
@@ -44,7 +55,13 @@ export function isStorefrontThemeKey(value: unknown): value is CategoryThemeKey 
 }
 
 export function coerceStorefrontThemeKey(value: unknown): CategoryThemeKey {
-  return isStorefrontThemeKey(value) ? value : DEFAULT_CATEGORY_THEME_KEY;
+  if (typeof value !== "string") return DEFAULT_CATEGORY_THEME_KEY;
+  const k = value.trim();
+  if (k.length === 0) return DEFAULT_CATEGORY_THEME_KEY;
+  if (STOREFRONT_THEME_KEY_SET.has(k)) return k as CategoryThemeKey;
+  const mapped = CATEGORY_THEME_LEGACY_KEY_MAP[k];
+  if (mapped) return mapped;
+  return DEFAULT_CATEGORY_THEME_KEY;
 }
 
 export function getStorefrontThemePreviewStyle(
@@ -78,6 +95,7 @@ export function getStorefrontThemePreviewStyle(
     "--color-bento-accent": buttonScale.primaryBg,
     "--color-bento-accent-foreground": buttonScale.primaryText,
     "--color-bento-card-bg": lightestLevelColor,
+    "--storefront-orb-color": STOREFRONT_ORB_COLORS[themeKey][isDark ? "dark" : "light"],
   } as CSSProperties;
 }
 
@@ -119,30 +137,48 @@ export function getStorefrontThemeScaleWithOverrides(
   };
 }
 
+function parseThemeOverrideBlock(rawTheme: unknown): StorefrontThemeEditableScalePartial | null {
+  if (!rawTheme || typeof rawTheme !== "object" || Array.isArray(rawTheme)) return null;
+  const raw = rawTheme as Record<string, unknown>;
+  const light = readLevel(raw.light);
+  const dark = readLevel(raw.dark);
+  const lightButtons = readButtons((raw.buttons as Record<string, unknown> | undefined)?.light);
+  const darkButtons = readButtons((raw.buttons as Record<string, unknown> | undefined)?.dark);
+
+  const themeOverride: StorefrontThemeEditableScalePartial = {};
+  if (Object.keys(light).length > 0) themeOverride.light = light;
+  if (Object.keys(dark).length > 0) themeOverride.dark = dark;
+  if (lightButtons || darkButtons) {
+    themeOverride.buttons = {};
+    if (lightButtons) themeOverride.buttons.light = lightButtons;
+    if (darkButtons) themeOverride.buttons.dark = darkButtons;
+  }
+
+  return Object.keys(themeOverride).length > 0 ? themeOverride : null;
+}
+
 export function coerceStorefrontThemeOverrides(value: unknown): StorefrontThemeOverrides {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
 
+  const src = value as Record<string, unknown>;
   const result: StorefrontThemeOverrides = {};
+  const consumed = new Set<CategoryThemeKey>();
+
   for (const themeKey of CATEGORY_THEME_KEYS) {
-    const rawTheme = (value as Record<string, unknown>)[themeKey];
-    if (!rawTheme || typeof rawTheme !== "object" || Array.isArray(rawTheme)) continue;
+    const parsed = parseThemeOverrideBlock(src[themeKey]);
+    if (!parsed) continue;
+    result[themeKey] = parsed;
+    consumed.add(themeKey);
+  }
 
-    const raw = rawTheme as Record<string, unknown>;
-    const light = readLevel(raw.light);
-    const dark = readLevel(raw.dark);
-    const lightButtons = readButtons((raw.buttons as Record<string, unknown> | undefined)?.light);
-    const darkButtons = readButtons((raw.buttons as Record<string, unknown> | undefined)?.dark);
-
-    const themeOverride: StorefrontThemeEditableScalePartial = {};
-    if (Object.keys(light).length > 0) themeOverride.light = light;
-    if (Object.keys(dark).length > 0) themeOverride.dark = dark;
-    if (lightButtons || darkButtons) {
-      themeOverride.buttons = {};
-      if (lightButtons) themeOverride.buttons.light = lightButtons;
-      if (darkButtons) themeOverride.buttons.dark = darkButtons;
-    }
-
-    if (Object.keys(themeOverride).length > 0) result[themeKey] = themeOverride;
+  for (const rawKey of Object.keys(src)) {
+    if (STOREFRONT_THEME_KEY_SET.has(rawKey)) continue;
+    const themeKey = CATEGORY_THEME_LEGACY_KEY_MAP[rawKey];
+    if (!themeKey || consumed.has(themeKey)) continue;
+    const parsed = parseThemeOverrideBlock(src[rawKey]);
+    if (!parsed) continue;
+    result[themeKey] = parsed;
+    consumed.add(themeKey);
   }
 
   return result;

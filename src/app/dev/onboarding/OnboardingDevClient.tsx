@@ -15,6 +15,7 @@ import type { OnboardingPreviewDestination } from "@/lib/onboarding-flow";
 import { Button } from "@/components/ui/button";
 import { ONBOARDING_MAIN_STEP_ORDER } from "@/lib/onboarding-flow";
 import type { PublicShopPagePayload } from "@/lib/fetchPublicShopPagePayload";
+import { coerceStorefrontThemeOverrides } from "@/lib/storefrontTheme";
 
 const DEV_SHOP_ID = "00000000-0000-4000-8000-000000000001";
 
@@ -73,6 +74,8 @@ const MOCK_CATALOG_PAYLOAD: PublicShopPagePayload = {
   storefrontPhotos: [],
   savedStorefrontLayout: null,
   storefrontThemeKey: "indigo",
+  storefrontThemeOverrides: coerceStorefrontThemeOverrides(null),
+  shopLabels: [],
   stripeAccountId: null,
 };
 

@@ -14,6 +14,7 @@ import { BentoCard, type BentoSize } from "./BentoCard";
 import { ReviewsDisplay } from "./ReviewsDisplay";
 import { ShopOpenStatus } from "./ShopOpenStatus";
 import type { SocialLinks, ShopReviews } from "@/lib/types";
+import { SHOP_INFO_DESCRIPTION_MOBILE_MAX_CHARS } from "@/lib/constants";
 
 interface BentoCardInfoProps {
   cardSize?: BentoSize;
@@ -38,6 +39,11 @@ interface BentoCardInfoProps {
 
 function mapsDirectionsUrl(destination: string): string {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
+}
+
+function truncateDescriptionMobile(text: string, maxChars: number): string {
+  if (text.length <= maxChars) return text;
+  return `${text.slice(0, maxChars)}…`;
 }
 
 export function BentoCardInfo({
@@ -119,9 +125,14 @@ export function BentoCardInfo({
         </h2>
 
         {description && (
-          <p className="line-clamp-6 text-sm whitespace-pre-line text-muted-foreground">
-            {description}
-          </p>
+          <>
+            <p className="hidden text-sm whitespace-pre-line text-muted-foreground md:line-clamp-6 md:block">
+              {description}
+            </p>
+            <p className="text-sm whitespace-pre-line text-muted-foreground md:hidden">
+              {truncateDescriptionMobile(description, SHOP_INFO_DESCRIPTION_MOBILE_MAX_CHARS)}
+            </p>
+          </>
         )}
 
         {hasActions && (
@@ -196,7 +207,7 @@ export function BentoCardInfo({
                 href={`tel:${phone.replace(/\s/g, "")}`}
                 onClick={(e) => e.stopPropagation()}
                 className={cn(
-                  buttonVariants({ variant: "default", size: "default" }),
+                  buttonVariants({ variant: "outline", size: "default" }),
                   "inline-flex min-h-11 min-w-0 flex-1 justify-center gap-2 px-4"
                 )}
               >

@@ -31,7 +31,7 @@ export function BentoCardBackFloating({
           exit={{ opacity: 0, y: -8 }}
           transition={{ type: "spring", stiffness: 400, damping: 32 }}
           onClick={onBack}
-          className="fixed left-4 z-[35] max-w-[min(90vw,22rem)] cursor-pointer overflow-hidden rounded-[var(--bento-outer-r)] border border-border bg-card text-left shadow-lg backdrop-blur-md outline-none ring-offset-background transition-[transform,box-shadow] hover:shadow-xl focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.99]"
+          className="fixed left-4 z-[35] max-w-[min(90vw,22rem)] cursor-pointer overflow-hidden rounded-[var(--bento-outer-r)] bg-card text-left shadow-lg backdrop-blur-md outline-none ring-offset-background transition-[transform,box-shadow] duration-200 hover:shadow-[0_10px_40px_-8px_rgb(0_0_0_/_0.18)] dark:hover:shadow-[0_12px_44px_-8px_rgb(0_0_0_/_0.55)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.99]"
           style={{
             top: "max(5.5rem, calc(env(safe-area-inset-top, 0px) + 5rem))",
           }}

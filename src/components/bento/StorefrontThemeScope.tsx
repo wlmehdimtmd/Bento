@@ -5,6 +5,7 @@ import { useTheme } from "next-themes";
 
 import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
 import { getStorefrontThemePreviewStyle, type StorefrontThemeOverrides } from "@/lib/storefrontTheme";
+import { cn } from "@/lib/utils";
 
 interface StorefrontThemeScopeProps {
   themeKey: CategoryThemeKey;
@@ -41,8 +42,16 @@ export function StorefrontThemeScope({
   );
 
   return (
-    <div className={`bg-background ${className}`.trim()} style={style}>
-      {children}
+    <div className={cn("relative bg-background", className)} style={style}>
+      <div className="relative z-[1]">{children}</div>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute top-0 right-0 z-[2] h-[320px] w-[320px] rounded-full"
+        style={{
+          backgroundColor: "var(--storefront-orb-color)",
+          filter: "blur(320px)",
+        }}
+      />
     </div>
   );
 }

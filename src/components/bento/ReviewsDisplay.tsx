@@ -68,9 +68,9 @@ function RatingBadge({
   const content = (
     <div
       className={cn(
-        "flex items-center gap-2 rounded-[var(--inner-r,var(--radius-lg))] border border-border bg-card",
+        "flex items-center gap-2 rounded-[var(--inner-r,var(--radius-lg))] bg-card",
         actionRow &&
-          "min-h-11 w-full justify-between rounded-lg border-border bg-background px-3 py-2.5 hover:bg-muted",
+          "min-h-11 w-full justify-between rounded-lg bg-background px-3 py-2.5 hover:bg-muted",
         !actionRow && (compact ? "gap-1.5 px-2 py-1.5 text-xs" : "px-3 py-2 text-sm")
       )}
     >

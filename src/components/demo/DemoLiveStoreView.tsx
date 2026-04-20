@@ -11,6 +11,7 @@ import { PublicShopProvider } from "@/components/shop/PublicShopContext";
 import { DemoUnifiedTopBar } from "@/components/demo/DemoUnifiedTopBar";
 import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
 import { StorefrontThemeScope } from "@/components/bento/StorefrontThemeScope";
+import { DEMO_PUBLIC_HEADER_BACKGROUND } from "@/lib/constants";
 
 export interface DemoLiveStoreViewProps {
   shop: ShopInfo;
@@ -52,10 +53,11 @@ export function DemoLiveStoreView({
         <CartDrawerProvider>
           <StorefrontThemeScope themeKey={storefrontThemeKey} className="min-h-screen">
             <div className="min-h-screen bg-background flex flex-col">
-              <div className="sticky top-0 z-50 border-b border-border/60 bg-card/95 shadow-sm backdrop-blur-md">
-                <DemoUnifiedTopBar
-                  demoDetailMd={`${shop.name} · aucune commande réelle.`}
-                />
+              <div
+                className="sticky top-0 z-50 border-b border-white/10 text-white shadow-sm backdrop-blur-md"
+                style={{ backgroundColor: DEMO_PUBLIC_HEADER_BACKGROUND }}
+              >
+                <DemoUnifiedTopBar />
               </div>
 
               <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-8 pb-32 sm:pb-8">
