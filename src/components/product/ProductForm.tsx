@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ChevronLeft, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -66,6 +66,9 @@ interface ProductFormProps {
   onSuccess: (product: ProductRow) => void;
   onCancel: () => void;
   onSave?: (payload: ProductSavePayload, isEdit: boolean, existingId?: string) => Promise<ProductRow>;
+  sheetCtasFullWidth?: boolean;
+  subViewOverride?: "main" | "photo" | "tags";
+  onSubViewChange?: (subView: "main" | "photo" | "tags") => void;
 }
 
 // ─── Schema ───────────────────────────────────────────────────
@@ -92,6 +95,9 @@ export function ProductForm({
   onSuccess,
   onCancel,
   onSave,
+  sheetCtasFullWidth = false,
+  subViewOverride,
+  onSubViewChange,
 }: ProductFormProps) {
   const isEdit = !!initialData;
 
@@ -100,6 +106,18 @@ export function ProductForm({
   );
   const [tags, setTags] = useState<string[]>(initialData?.tags ?? []);
   const [subView, setSubView] = useState<"main" | "photo" | "tags">("main");
+
+  useEffect(() => {
+    if (subViewOverride && subViewOverride !== subView) {
+      setSubView(subViewOverride);
+    }
+  }, [subView, subViewOverride]);
+
+  function changeSubView(next: "main" | "photo" | "tags") {
+    if (next === subView) return;
+    setSubView(next);
+    onSubViewChange?.(next);
+  }
 
   const {
     register,
@@ -181,41 +199,54 @@ export function ProductForm({
 
   if (subView === "photo") {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Button type="button" size="icon-sm" variant="ghost" onClick={() => setSubView("main")}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <h3 className="text-sm font-medium">Photo du produit</h3>
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="flex-1 pb-4">
+          <ImageUploader
+            bucket="product-images"
+            label="Photo du produit"
+            currentUrl={imageUrl}
+            onUpload={setImageUrl}
+            onRemove={() => setImageUrl(null)}
+            square
+          />
         </div>
-        <ImageUploader
-          bucket="product-images"
-          label="Photo du produit"
-          currentUrl={imageUrl}
-          onUpload={setImageUrl}
-          onRemove={() => setImageUrl(null)}
-        />
+        <div className="mt-auto border-t border-border bg-background py-3">
+          <Button
+            type="button"
+            onClick={() => changeSubView("main")}
+            style={{ backgroundColor: "var(--color-bento-accent)" }}
+            className="w-full text-white hover:opacity-90"
+          >
+            Valider
+          </Button>
+        </div>
       </div>
     );
   }
 
   if (subView === "tags") {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Button type="button" size="icon-sm" variant="ghost" onClick={() => setSubView("main")}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <h3 className="text-sm font-medium">Allergènes et labels</h3>
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="flex-1 pb-3">
+          <TagSelector selected={tags} onChange={setTags} disabled={isSubmitting} />
         </div>
-        <TagSelector selected={tags} onChange={setTags} disabled={isSubmitting} />
+        <div className="mt-auto border-t border-border bg-background py-3">
+          <Button
+            type="button"
+            onClick={() => changeSubView("main")}
+            style={{ backgroundColor: "var(--color-bento-accent)" }}
+            className="w-full text-white hover:opacity-90"
+          >
+            Valider
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
-      <div className="space-y-5 pb-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 space-y-5 pb-4">
       {/* Category */}
       <div className="space-y-1.5">
         <Label>Catégorie *</Label>
@@ -289,14 +320,14 @@ export function ProductForm({
 
       <div className="space-y-1.5">
         <Label>Photo du produit</Label>
-        <Button type="button" variant="outline" className="w-full justify-start" onClick={() => setSubView("photo")}>
+        <Button type="button" variant="outline" className="w-full justify-start" onClick={() => changeSubView("photo")}>
           {imageUrl ? "Modifier la photo du produit" : "Ajouter une photo du produit"}
         </Button>
       </div>
 
       <div className="space-y-1.5">
         <Label>Allergènes et labels</Label>
-        <Button type="button" variant="outline" className="w-full justify-between" onClick={() => setSubView("tags")}>
+        <Button type="button" variant="outline" className="w-full justify-between" onClick={() => changeSubView("tags")}>
           <span>Sélectionner</span>
           <Badge variant="secondary">{tags.length}</Badge>
         </Button>
@@ -351,13 +382,17 @@ export function ProductForm({
       </div>
 
       {/* Actions */}
-      <div className="sticky bottom-0 z-20 mt-auto flex w-full gap-2 border-t border-border bg-background py-3 md:justify-end">
+      <div
+        className={`mt-auto flex w-full gap-2 border-t border-border bg-background py-3 ${
+          sheetCtasFullWidth ? "" : "md:justify-end"
+        }`}
+      >
         <Button
           type="button"
           variant="outline"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="flex-1 md:flex-none"
+          className={sheetCtasFullWidth ? "flex-1" : "flex-1 md:flex-none"}
         >
           Annuler
         </Button>
@@ -365,7 +400,7 @@ export function ProductForm({
           type="submit"
           disabled={isSubmitting}
           style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="flex-1 text-white hover:opacity-90 md:flex-none"
+          className={sheetCtasFullWidth ? "flex-1 text-white hover:opacity-90" : "flex-1 text-white hover:opacity-90 md:flex-none"}
         >
           {isSubmitting ? (
             <>

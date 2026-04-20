@@ -40,6 +40,7 @@ import {
 import { BundleForm, type BundleRow, type BundleSavePayload } from "./BundleForm";
 import { ImportMenuDropdown } from "./ImportMenuDropdown";
 import { TemplatePickerDialog, importTemplatesIntoShop, type ImportData } from "@/components/templates/TemplatePickerDialog";
+import { PasteJsonImportDialog } from "@/components/import/PasteJsonImportDialog";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
@@ -84,13 +85,14 @@ export function BundlesClient({
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingBundle, setEditingBundle] = useState<BundleRow | null>(null);
-  const [formSubView, setFormSubView] = useState<"main" | "composition">("main");
+  const [formSubView, setFormSubView] = useState<"main" | "photo" | "composition">("main");
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [templateOpen, setTemplateOpen] = useState(false);
+  const [jsonImportOpen, setJsonImportOpen] = useState(false);
   const [search, setSearch] = useState("");
   const isMobile = useIsMobile(768);
 
@@ -296,7 +298,10 @@ export function BundlesClient({
           </p>
           <div className="flex gap-2 shrink-0">
             {!adminActions && (
-              <ImportMenuDropdown onImportTemplate={() => setTemplateOpen(true)} />
+              <ImportMenuDropdown
+                onImportTemplate={() => setTemplateOpen(true)}
+                onImportJson={() => setJsonImportOpen(true)}
+              />
             )}
             <Button
               onClick={openCreate}
@@ -435,6 +440,14 @@ export function BundlesClient({
         onOpenChange={setTemplateOpen}
         onImport={handleTemplateImport}
       />
+      <PasteJsonImportDialog
+        open={jsonImportOpen}
+        onOpenChange={setJsonImportOpen}
+        shopId={shopId}
+        onImported={() => {
+          router.refresh();
+        }}
+      />
 
       {/* Create / Edit panel */}
       {isMobile ? (
@@ -447,12 +460,12 @@ export function BundlesClient({
         >
           <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden">
             <DrawerHeader>
-              {formSubView === "composition" ? (
+              {formSubView !== "main" ? (
                 <DrawerTitle className="flex items-center gap-2">
                   <Button type="button" size="icon-sm" variant="ghost" onClick={() => setFormSubView("main")}>
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <span>Composition du menu</span>
+                  <span>{formSubView === "photo" ? "Photo de la formule" : "Composition du menu"}</span>
                 </DrawerTitle>
               ) : (
                 <DrawerTitle>
@@ -484,12 +497,12 @@ export function BundlesClient({
         >
           <SheetContent side="right" className="w-full sm:max-w-2xl h-full overflow-hidden">
             <SheetHeader>
-              {formSubView === "composition" ? (
+              {formSubView !== "main" ? (
                 <SheetTitle className="flex items-center gap-2">
                   <Button type="button" size="icon-sm" variant="ghost" onClick={() => setFormSubView("main")}>
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <span>Composition du menu</span>
+                  <span>{formSubView === "photo" ? "Photo de la formule" : "Composition du menu"}</span>
                 </SheetTitle>
               ) : (
                 <SheetTitle>
@@ -497,7 +510,7 @@ export function BundlesClient({
                 </SheetTitle>
               )}
             </SheetHeader>
-            <div className="h-full min-h-0 overflow-y-auto px-4 pb-24">
+            <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
               <BundleForm
                 shopId={shopId}
                 categories={categories}
@@ -507,6 +520,7 @@ export function BundlesClient({
                 onSave={adminActions?.onSave}
                 subViewOverride={formSubView}
                 onSubViewChange={setFormSubView}
+                sheetCtasFullWidth
               />
             </div>
           </SheetContent>

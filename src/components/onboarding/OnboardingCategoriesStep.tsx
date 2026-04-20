@@ -144,9 +144,22 @@ export function OnboardingCategoriesStep({
       notify();
       return;
     }
+    const { error: slotsError } = await supabase
+      .from("bundle_slots")
+      .delete()
+      .eq("category_id", id);
+    if (slotsError) {
+      toast.error("Impossible de supprimer les formules liées à cette catégorie.");
+      return;
+    }
+
     const { error } = await supabase.from("categories").delete().eq("id", id);
     if (error) {
-      toast.error(error.message);
+      if (error.code === "23503") {
+        toast.error("Cette catégorie est encore utilisée ailleurs (formules, produits ou commandes).");
+      } else {
+        toast.error(error.message);
+      }
       return;
     }
     setCategories((prev) => prev.filter((c) => c.id !== id));

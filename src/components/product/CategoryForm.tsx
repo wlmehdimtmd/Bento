@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ChevronLeft, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,9 @@ interface CategoryFormProps {
   onSuccess: (category: CategoryRow) => void;
   onCancel: () => void;
   onSave?: (payload: CategorySavePayload, isEdit: boolean, existingId?: string) => Promise<CategoryRow>;
+  sheetCtasFullWidth?: boolean;
+  subViewOverride?: "main" | "icon" | "cover";
+  onSubViewChange?: (subView: "main" | "icon" | "cover") => void;
 }
 
 const CATEGORY_ICONS = ["🥗","🍽️","🍰","🥤","🍕","🍔","🍜","🥩","🐟","🌮","🍣","🧁","🍷","🍺","☕","🌿","🔥","⭐"];
@@ -67,6 +70,9 @@ export function CategoryForm({
   onSuccess,
   onCancel,
   onSave,
+  sheetCtasFullWidth = false,
+  subViewOverride,
+  onSubViewChange,
 }: CategoryFormProps) {
   const isEdit = !!initialData;
   const [coverUrl, setCoverUrl] = useState<string | null>(
@@ -92,6 +98,18 @@ export function CategoryForm({
   const iconEmoji = watch("icon_emoji") || "📦";
   const isActive = watch("is_active");
   const [subView, setSubView] = useState<"main" | "icon" | "cover">("main");
+
+  useEffect(() => {
+    if (subViewOverride && subViewOverride !== subView) {
+      setSubView(subViewOverride);
+    }
+  }, [subView, subViewOverride]);
+
+  function changeSubView(next: "main" | "icon" | "cover") {
+    if (next === subView) return;
+    setSubView(next);
+    onSubViewChange?.(next);
+  }
 
   async function onSubmit(values: CategoryFormValues) {
     const payload: CategorySavePayload = {
@@ -143,28 +161,31 @@ export function CategoryForm({
 
   if (subView === "icon") {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Button type="button" size="icon-sm" variant="ghost" onClick={() => setSubView("main")}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <h3 className="text-sm font-medium">Icône</h3>
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="flex-1 pb-4">
+          <div className="grid grid-cols-9 gap-1">
+            {CATEGORY_ICONS.map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => setValue("icon_emoji", emoji, { shouldValidate: true })}
+                disabled={isSubmitting}
+                className={`flex items-center justify-center h-9 w-full rounded-lg border text-xl transition-colors ${iconEmoji === emoji ? "border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/10" : "border-border hover:border-muted-foreground"}`}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-9 gap-1">
-          {CATEGORY_ICONS.map((emoji) => (
-            <button
-              key={emoji}
-              type="button"
-              onClick={() => {
-                setValue("icon_emoji", emoji, { shouldValidate: true });
-                setSubView("main");
-              }}
-              disabled={isSubmitting}
-              className={`flex items-center justify-center h-9 w-full rounded-lg border text-xl transition-colors ${iconEmoji === emoji ? "border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/10" : "border-border hover:border-muted-foreground"}`}
-            >
-              {emoji}
-            </button>
-          ))}
+        <div className="mt-auto border-t border-border bg-background py-3">
+          <Button
+            type="button"
+            onClick={() => changeSubView("main")}
+            style={{ backgroundColor: "var(--color-bento-accent)" }}
+            className="w-full text-white hover:opacity-90"
+          >
+            Valider
+          </Button>
         </div>
       </div>
     );
@@ -172,27 +193,34 @@ export function CategoryForm({
 
   if (subView === "cover") {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Button type="button" size="icon-sm" variant="ghost" onClick={() => setSubView("main")}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <h3 className="text-sm font-medium">Image de couverture</h3>
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="flex-1 pb-4">
+          <ImageUploader
+            bucket="shop-assets"
+            label="Image de couverture"
+            currentUrl={coverUrl}
+            onUpload={setCoverUrl}
+            onRemove={() => setCoverUrl(null)}
+            square
+          />
         </div>
-        <ImageUploader
-          bucket="shop-assets"
-          label="Image de couverture"
-          currentUrl={coverUrl}
-          onUpload={setCoverUrl}
-          onRemove={() => setCoverUrl(null)}
-        />
+        <div className="mt-auto border-t border-border bg-background py-3">
+          <Button
+            type="button"
+            onClick={() => changeSubView("main")}
+            style={{ backgroundColor: "var(--color-bento-accent)" }}
+            className="w-full text-white hover:opacity-90"
+          >
+            Valider
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
-      <div className="space-y-5 pb-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 space-y-5 pb-4">
         {/* Name */}
         <div className="space-y-1.5">
         <Label htmlFor="name">Nom *</Label>
@@ -210,7 +238,7 @@ export function CategoryForm({
 
         <div className="space-y-1.5">
           <Label>Icône</Label>
-          <Button type="button" variant="outline" className="w-full justify-start gap-2" onClick={() => setSubView("icon")}>
+          <Button type="button" variant="outline" className="w-full justify-start gap-2" onClick={() => changeSubView("icon")}>
             <span className="text-lg leading-none">{iconEmoji}</span>
             <span>Choisir une icône</span>
           </Button>
@@ -237,7 +265,7 @@ export function CategoryForm({
 
         <div className="space-y-1.5">
           <Label>Image de couverture</Label>
-          <Button type="button" variant="outline" className="w-full justify-start" onClick={() => setSubView("cover")}>
+          <Button type="button" variant="outline" className="w-full justify-start" onClick={() => changeSubView("cover")}>
             {coverUrl ? "Modifier l’image de couverture" : "Ajouter une image de couverture"}
           </Button>
         </div>
@@ -261,13 +289,17 @@ export function CategoryForm({
       </div>
 
       {/* Actions */}
-      <div className="sticky bottom-0 z-20 mt-auto flex w-full gap-2 border-t border-border bg-background py-3 md:justify-end">
+      <div
+        className={`mt-auto flex w-full gap-2 border-t border-border bg-background py-3 ${
+          sheetCtasFullWidth ? "" : "md:justify-end"
+        }`}
+      >
         <Button
           type="button"
           variant="outline"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="flex-1 md:flex-none"
+          className={sheetCtasFullWidth ? "flex-1" : "flex-1 md:flex-none"}
         >
           Annuler
         </Button>
@@ -275,7 +307,7 @@ export function CategoryForm({
           type="submit"
           disabled={isSubmitting}
           style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="flex-1 text-white hover:opacity-90 md:flex-none"
+          className={sheetCtasFullWidth ? "flex-1 text-white hover:opacity-90" : "flex-1 text-white hover:opacity-90 md:flex-none"}
         >
           {isSubmitting ? (
             <>

@@ -17,6 +17,7 @@ interface ImageUploaderProps {
   hint?: string;
   hideLabel?: boolean;
   className?: string;
+  square?: boolean;
   /** Désactive l’upload (ex. playground onboarding sans Supabase). */
   simulationDisabled?: boolean;
 }
@@ -33,6 +34,7 @@ export function ImageUploader({
   hint,
   hideLabel = false,
   className,
+  square = false,
   simulationDisabled = false,
 }: ImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -134,7 +136,12 @@ export function ImageUploader({
       )}
 
       {currentUrl ? (
-        <div className="relative w-full h-36 rounded-lg overflow-hidden border border-border bg-muted group">
+        <div
+          className={cn(
+            "relative w-full rounded-lg overflow-hidden border border-border bg-muted group",
+            square ? "aspect-square" : "h-36"
+          )}
+        >
           <Image
             src={currentUrl}
             alt={label}
@@ -179,7 +186,8 @@ export function ImageUploader({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           className={cn(
-            "flex h-36 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition-colors cursor-pointer",
+            "flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition-colors cursor-pointer",
+            square ? "aspect-square" : "h-36",
             dragging
               ? "border-[var(--color-bento-accent)] bg-orange-50/40 dark:bg-orange-950/20"
               : "border-border bg-muted/40 hover:border-muted-foreground/40",

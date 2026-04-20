@@ -2,6 +2,8 @@ import type { ShopType, OrderStatus, FulfillmentMode } from "./types";
 
 /** Lignes max pour la description boutique (aligné sur `line-clamp-6` vitrine). */
 export const SHOP_DESCRIPTION_MAX_LINES = 6;
+/** Longueur max de description boutique dans les formulaires de config. */
+export const SHOP_DESCRIPTION_MAX_CHARS = 240;
 
 export const ALLERGENS: { value: string; label: string; emoji: string }[] = [
   { value: "gluten",      label: "Gluten",         emoji: "🌾" },

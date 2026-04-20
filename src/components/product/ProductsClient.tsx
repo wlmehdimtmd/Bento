@@ -7,6 +7,7 @@ import {
   Plus,
   Pencil,
   Trash2,
+  ChevronLeft,
   Search,
   Package,
 } from "lucide-react";
@@ -54,6 +55,7 @@ import { ProductForm, type ProductRow, type ProductSavePayload } from "./Product
 import { TagBadge } from "./TagBadge";
 import { ImportMenuDropdown } from "./ImportMenuDropdown";
 import { TemplatePickerDialog, importTemplatesIntoShop, type ImportData } from "@/components/templates/TemplatePickerDialog";
+import { PasteJsonImportDialog } from "@/components/import/PasteJsonImportDialog";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
@@ -96,6 +98,7 @@ export function ProductsClient({
   const [formOpen, setFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] =
     useState<ProductWithCategory | null>(null);
+  const [formSubView, setFormSubView] = useState<"main" | "photo" | "tags">("main");
   const [defaultCatId, setDefaultCatId] = useState<string | undefined>();
 
   // Delete state
@@ -105,6 +108,7 @@ export function ProductsClient({
 
   // Template picker
   const [templateOpen, setTemplateOpen] = useState(false);
+  const [jsonImportOpen, setJsonImportOpen] = useState(false);
   const isMobile = useIsMobile(768);
 
   async function handleTemplateImport(data: ImportData) {
@@ -186,11 +190,13 @@ export function ProductsClient({
   function openCreate() {
     setEditingProduct(null);
     setDefaultCatId(categoryFilter !== "all" ? categoryFilter : undefined);
+    setFormSubView("main");
     setFormOpen(true);
   }
 
   function openEdit(p: ProductWithCategory) {
     setEditingProduct(p);
+    setFormSubView("main");
     setFormOpen(true);
   }
 
@@ -201,6 +207,7 @@ export function ProductsClient({
 
   function handleFormSuccess(updated: ProductRow) {
     setFormOpen(false);
+    setFormSubView("main");
     const catName =
       categories.find((c) => c.id === updated.category_id)?.name ?? "";
 
@@ -323,7 +330,10 @@ export function ProductsClient({
           </p>
           <div className="flex gap-2 shrink-0">
             {!adminActions && (
-              <ImportMenuDropdown onImportTemplate={() => setTemplateOpen(true)} />
+              <ImportMenuDropdown
+                onImportTemplate={() => setTemplateOpen(true)}
+                onImportJson={() => setJsonImportOpen(true)}
+              />
             )}
             <Button
               onClick={openCreate}
@@ -480,14 +490,39 @@ export function ProductsClient({
         onOpenChange={setTemplateOpen}
         onImport={handleTemplateImport}
       />
+      <PasteJsonImportDialog
+        open={jsonImportOpen}
+        onOpenChange={setJsonImportOpen}
+        shopId={shopId}
+        onImported={() => {
+          router.refresh();
+        }}
+      />
 
       {/* Create / Edit panel */}
       {isMobile ? (
-        <Drawer open={formOpen} onOpenChange={setFormOpen}>
+        <Drawer
+          open={formOpen}
+          onOpenChange={(open) => {
+            setFormOpen(open);
+            if (!open) setFormSubView("main");
+          }}
+        >
           <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden">
-            <DrawerHeader>
+            <DrawerHeader className={formSubView !== "main" ? "flex-row items-center gap-2" : undefined}>
+              {formSubView !== "main" ? (
+                <Button type="button" variant="ghost" size="icon-sm" onClick={() => setFormSubView("main")} aria-label="Retour">
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              ) : null}
               <DrawerTitle>
-                {editingProduct ? "Modifier le produit" : "Nouveau produit"}
+                {formSubView === "photo"
+                  ? "Photo du produit"
+                  : formSubView === "tags"
+                    ? "Allergènes et labels"
+                    : editingProduct
+                      ? "Modifier le produit"
+                      : "Nouveau produit"}
               </DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
@@ -499,6 +534,8 @@ export function ProductsClient({
                 onSuccess={handleFormSuccess}
                 onCancel={() => setFormOpen(false)}
                 onSave={adminActions?.onSave}
+                subViewOverride={formSubView}
+                onSubViewChange={setFormSubView}
               />
             </div>
           </DrawerContent>
@@ -511,7 +548,7 @@ export function ProductsClient({
                 {editingProduct ? "Modifier le produit" : "Nouveau produit"}
               </SheetTitle>
             </SheetHeader>
-            <div className="h-full min-h-0 overflow-y-auto px-4 pb-24">
+            <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
               <ProductForm
                 categories={categories}
                 nextOrder={nextOrder}
@@ -520,6 +557,7 @@ export function ProductsClient({
                 onSuccess={handleFormSuccess}
                 onCancel={() => setFormOpen(false)}
                 onSave={adminActions?.onSave}
+                sheetCtasFullWidth
               />
             </div>
           </SheetContent>

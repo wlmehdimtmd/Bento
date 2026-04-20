@@ -59,8 +59,9 @@ interface BundleFormProps {
   onSuccess: (bundle: BundleRow) => void;
   onCancel: () => void;
   onSave?: (payload: BundleSavePayload, isEdit: boolean, existingId?: string) => Promise<BundleRow>;
-  subViewOverride?: "main" | "composition";
-  onSubViewChange?: (subView: "main" | "composition") => void;
+  subViewOverride?: "main" | "photo" | "composition";
+  onSubViewChange?: (subView: "main" | "photo" | "composition") => void;
+  sheetCtasFullWidth?: boolean;
 }
 
 // ─── Schema ───────────────────────────────────────────────────
@@ -101,6 +102,7 @@ export function BundleForm({
   onSave,
   subViewOverride,
   onSubViewChange,
+  sheetCtasFullWidth = false,
 }: BundleFormProps) {
   const isEdit = !!initialData;
   const [imageUrl, setImageUrl] = useState<string | null>(
@@ -110,7 +112,7 @@ export function BundleForm({
   const [slotCategoryValues, setSlotCategoryValues] = useState<string[]>(
     initialData?.slots.map((s) => s.category_id) ?? [""]
   );
-  const [subView, setSubView] = useState<"main" | "composition">("main");
+  const [subView, setSubView] = useState<"main" | "photo" | "composition">("main");
 
   useEffect(() => {
     if (subViewOverride && subViewOverride !== subView) {
@@ -118,11 +120,8 @@ export function BundleForm({
     }
   }, [subView, subViewOverride]);
 
-  useEffect(() => {
-    onSubViewChange?.(subView);
-  }, [onSubViewChange, subView]);
-
-  function changeSubView(next: "main" | "composition") {
+  function changeSubView(next: "main" | "photo" | "composition") {
+    if (next === subView) return;
     setSubView(next);
     onSubViewChange?.(next);
   }
@@ -392,11 +391,38 @@ export function BundleForm({
     </div>
   );
 
+  if (subView === "photo") {
+    return (
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="flex-1 pb-4">
+          <ImageUploader
+            bucket="product-images"
+            label="Image de la formule"
+            currentUrl={imageUrl}
+            onUpload={setImageUrl}
+            onRemove={() => setImageUrl(null)}
+            square
+          />
+        </div>
+        <div className="mt-auto border-t border-border bg-background py-3">
+          <Button
+            type="button"
+            onClick={() => changeSubView("main")}
+            style={{ backgroundColor: "var(--color-bento-accent)" }}
+            className="w-full text-white hover:opacity-90"
+          >
+            Valider
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (subView === "composition") {
     return (
-      <div className="flex min-h-full flex-col">
-        <div className="pb-4">{compositionContent}</div>
-        <div className="sticky bottom-0 z-20 mt-auto border-t border-border bg-background py-3">
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="flex-1 space-y-4 pb-4">{compositionContent}</div>
+        <div className="mt-auto border-t border-border bg-background py-3">
           <Button
             type="button"
             onClick={() => changeSubView("main")}
@@ -411,8 +437,8 @@ export function BundleForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
-      <div className="space-y-6 pb-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 space-y-6 pb-4">
       {/* Name */}
       <div className="space-y-1.5">
         <Label htmlFor="name">Nom de la formule *</Label>
@@ -457,14 +483,12 @@ export function BundleForm({
         )}
       </div>
 
-      {/* Image */}
-      <ImageUploader
-        bucket="product-images"
-        label="Image de la formule"
-        currentUrl={imageUrl}
-        onUpload={setImageUrl}
-        onRemove={() => setImageUrl(null)}
-      />
+      <div className="space-y-1.5">
+        <Label>Photo de la formule</Label>
+        <Button type="button" variant="outline" className="w-full justify-start" onClick={() => changeSubView("photo")}>
+          {imageUrl ? "Modifier la photo de la formule" : "Ajouter une photo de la formule"}
+        </Button>
+      </div>
 
       {/* Active */}
       <div className="flex items-center justify-between rounded-lg border border-border p-3">
@@ -490,13 +514,17 @@ export function BundleForm({
       </div>
 
       {/* Actions */}
-      <div className="sticky bottom-0 z-20 mt-auto flex w-full gap-2 border-t border-border bg-background py-3 md:justify-end">
+      <div
+        className={`mt-auto flex w-full gap-2 border-t border-border bg-background py-3 ${
+          sheetCtasFullWidth ? "" : "md:justify-end"
+        }`}
+      >
         <Button
           type="button"
           variant="outline"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="flex-1 md:flex-none"
+          className={sheetCtasFullWidth ? "flex-1" : "flex-1 md:flex-none"}
         >
           Annuler
         </Button>
@@ -504,7 +532,7 @@ export function BundleForm({
           type="submit"
           disabled={isSubmitting}
           style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="flex-1 text-white hover:opacity-90 md:flex-none"
+          className={sheetCtasFullWidth ? "flex-1 text-white hover:opacity-90" : "flex-1 text-white hover:opacity-90 md:flex-none"}
         >
           {isSubmitting ? (
             <>

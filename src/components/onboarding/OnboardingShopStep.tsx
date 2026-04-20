@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,6 +17,7 @@ import { ImageUploader } from "@/components/product/ImageUploader";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { OnboardingStepTitle } from "@/components/onboarding/OnboardingStepTitle";
 import { createClient } from "@/lib/supabase/client";
+import { SHOP_DESCRIPTION_MAX_CHARS } from "@/lib/constants";
 import { cn, slugify } from "@/lib/utils";
 import { mainStepIndex } from "@/lib/onboarding-flow";
 import {
@@ -31,7 +33,13 @@ const schema = z.object({
     .string()
     .min(2, "Le slug doit contenir au moins 2 caractères")
     .regex(/^[a-z0-9-]+$/, "Slug invalide (lettres minuscules, chiffres, tirets)"),
-  description: z.string().optional(),
+  description: z
+    .string()
+    .max(
+      SHOP_DESCRIPTION_MAX_CHARS,
+      `Maximum ${SHOP_DESCRIPTION_MAX_CHARS} caractères dans la description.`
+    )
+    .optional(),
   address: z.string(),
   phone: z.string(),
   email_contact: z
@@ -241,16 +249,16 @@ export function OnboardingShopStep({
           <div className="flex items-center justify-between">
             <Label htmlFor="description">Description</Label>
             <span className="text-xs text-muted-foreground">
-              {descriptionValue.split("\n").length} / 8 lignes
+              {descriptionValue.length} / {SHOP_DESCRIPTION_MAX_CHARS}
             </span>
           </div>
           <Textarea
             id="description"
             {...register("description", {
               onChange: (e) => {
-                const lines = e.target.value.split("\n");
-                if (lines.length > 8) {
-                  const clamped = lines.slice(0, 8).join("\n");
+                const value = e.target.value;
+                if (value.length > SHOP_DESCRIPTION_MAX_CHARS) {
+                  const clamped = value.slice(0, SHOP_DESCRIPTION_MAX_CHARS);
                   e.target.value = clamped;
                   setValue("description", clamped);
                 }
@@ -260,18 +268,41 @@ export function OnboardingShopStep({
             rows={4}
             disabled={isSubmitting}
           />
-          <p className="text-xs text-muted-foreground">Maximum 8 lignes affichées dans la carte.</p>
+          <p className="text-xs text-muted-foreground">
+            Maximum {SHOP_DESCRIPTION_MAX_CHARS} caractères affichés dans la carte.
+          </p>
+          {errors.description && (
+            <p className="text-xs text-destructive">{errors.description.message}</p>
+          )}
         </div>
 
-        <ImageUploader
-          bucket="shop-assets"
-          label="Logo"
-          hint="Carré de préférence"
-          currentUrl={logoUrl}
-          onUpload={setLogoUrl}
-          onRemove={() => setLogoUrl(null)}
-          simulationDisabled={isPreview}
-        />
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px] md:items-end">
+          <ImageUploader
+            bucket="shop-assets"
+            label="Logo"
+            hint="Format carré recommandé"
+            currentUrl={logoUrl}
+            onUpload={setLogoUrl}
+            onRemove={() => setLogoUrl(null)}
+            simulationDisabled={isPreview}
+          />
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">Prévisualisation avatar</p>
+            <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
+              {logoUrl ? (
+                <Image
+                  src={logoUrl}
+                  alt="Aperçu avatar de la vitrine"
+                  width={36}
+                  height={36}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-2xl">🍱</span>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

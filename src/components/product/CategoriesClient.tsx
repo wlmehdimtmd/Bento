@@ -6,6 +6,7 @@ import {
   Plus,
   Pencil,
   Trash2,
+  ChevronLeft,
   ChevronUp,
   ChevronDown,
   Package,
@@ -46,6 +47,7 @@ import {
 import { CategoryForm, type CategoryRow, type CategorySavePayload } from "./CategoryForm";
 import { ImportMenuDropdown } from "./ImportMenuDropdown";
 import { TemplatePickerDialog, importTemplatesIntoShop, type ImportData } from "@/components/templates/TemplatePickerDialog";
+import { PasteJsonImportDialog } from "@/components/import/PasteJsonImportDialog";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 
@@ -75,6 +77,7 @@ export function CategoriesClient({
   const [formOpen, setFormOpen] = useState(false);
   const [editingCategory, setEditingCategory] =
     useState<CategoryWithCount | null>(null);
+  const [formSubView, setFormSubView] = useState<"main" | "icon" | "cover">("main");
 
   // Delete confirmation state
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -83,6 +86,7 @@ export function CategoriesClient({
 
   // Template picker
   const [templateOpen, setTemplateOpen] = useState(false);
+  const [jsonImportOpen, setJsonImportOpen] = useState(false);
   const [search, setSearch] = useState("");
   const isMobile = useIsMobile(768);
 
@@ -138,11 +142,13 @@ export function CategoriesClient({
 
   function openCreate() {
     setEditingCategory(null);
+    setFormSubView("main");
     setFormOpen(true);
   }
 
   function openEdit(cat: CategoryWithCount) {
     setEditingCategory(cat);
+    setFormSubView("main");
     setFormOpen(true);
   }
 
@@ -153,6 +159,7 @@ export function CategoriesClient({
 
   function handleFormSuccess(updated: CategoryRow) {
     setFormOpen(false);
+    setFormSubView("main");
     setCategories((prev) => {
       const exists = prev.find((c) => c.id === updated.id);
       if (exists) {
@@ -254,6 +261,17 @@ export function CategoriesClient({
     }
 
     const supabase = createClient();
+    const { error: slotsError } = await supabase
+      .from("bundle_slots")
+      .delete()
+      .eq("category_id", deletingId);
+
+    if (slotsError) {
+      setIsDeleting(false);
+      toast.error("Impossible de supprimer les formules liées à cette catégorie.");
+      return;
+    }
+
     const { error } = await supabase
       .from("categories")
       .delete()
@@ -263,7 +281,11 @@ export function CategoriesClient({
     setDeleteOpen(false);
 
     if (error) {
-      toast.error(error.message);
+      if (error.code === "23503") {
+        toast.error("Cette catégorie est encore utilisée ailleurs (formules, produits ou commandes).");
+      } else {
+        toast.error(error.message);
+      }
     } else {
       setCategories((prev) => prev.filter((c) => c.id !== deletingId));
       toast.success("Catégorie supprimée.");
@@ -299,7 +321,10 @@ export function CategoriesClient({
           </p>
           <div className="flex gap-2 shrink-0">
             {!adminActions && (
-              <ImportMenuDropdown onImportTemplate={() => setTemplateOpen(true)} />
+              <ImportMenuDropdown
+                onImportTemplate={() => setTemplateOpen(true)}
+                onImportJson={() => setJsonImportOpen(true)}
+              />
             )}
             <Button
               onClick={openCreate}
@@ -451,14 +476,39 @@ export function CategoriesClient({
         onOpenChange={setTemplateOpen}
         onImport={handleTemplateImport}
       />
+      <PasteJsonImportDialog
+        open={jsonImportOpen}
+        onOpenChange={setJsonImportOpen}
+        shopId={shopId}
+        onImported={() => {
+          router.refresh();
+        }}
+      />
 
       {/* Create / Edit panel */}
       {isMobile ? (
-        <Drawer open={formOpen} onOpenChange={setFormOpen}>
+        <Drawer
+          open={formOpen}
+          onOpenChange={(open) => {
+            setFormOpen(open);
+            if (!open) setFormSubView("main");
+          }}
+        >
           <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden">
-            <DrawerHeader>
+            <DrawerHeader className={formSubView !== "main" ? "flex-row items-center gap-2" : undefined}>
+              {formSubView !== "main" ? (
+                <Button type="button" variant="ghost" size="icon-sm" onClick={() => setFormSubView("main")} aria-label="Retour">
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              ) : null}
               <DrawerTitle>
-                {editingCategory ? "Modifier la catégorie" : "Nouvelle catégorie"}
+                {formSubView === "icon"
+                  ? "Icône de la catégorie"
+                  : formSubView === "cover"
+                    ? "Image de couverture"
+                    : editingCategory
+                      ? "Modifier la catégorie"
+                      : "Nouvelle catégorie"}
               </DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
@@ -469,6 +519,8 @@ export function CategoriesClient({
                 onSuccess={handleFormSuccess}
                 onCancel={() => setFormOpen(false)}
                 onSave={adminActions?.onSave}
+                subViewOverride={formSubView}
+                onSubViewChange={setFormSubView}
               />
             </div>
           </DrawerContent>
@@ -481,7 +533,7 @@ export function CategoriesClient({
                 {editingCategory ? "Modifier la catégorie" : "Nouvelle catégorie"}
               </SheetTitle>
             </SheetHeader>
-            <div className="h-full min-h-0 overflow-y-auto px-4 pb-24">
+            <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
               <CategoryForm
                 shopId={shopId}
                 nextOrder={nextOrder}
@@ -489,6 +541,7 @@ export function CategoriesClient({
                 onSuccess={handleFormSuccess}
                 onCancel={() => setFormOpen(false)}
                 onSave={adminActions?.onSave}
+                sheetCtasFullWidth
               />
             </div>
           </SheetContent>

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Layers, Sparkles } from "lucide-react";
+import { Braces, ChevronDown, Layers, Sparkles } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -16,6 +16,7 @@ export const AI_MENU_IMPORT_ENABLED = false;
 
 interface ImportMenuDropdownProps {
   onImportTemplate: () => void;
+  onImportJson?: () => void;
   /** Si true, l’entrée IA devient active (utiliser avec `onImportAi`). */
   aiEnabled?: boolean;
   onImportAi?: () => void;
@@ -23,6 +24,7 @@ interface ImportMenuDropdownProps {
 
 export function ImportMenuDropdown({
   onImportTemplate,
+  onImportJson,
   aiEnabled = AI_MENU_IMPORT_ENABLED,
   onImportAi,
 }: ImportMenuDropdownProps) {
@@ -46,6 +48,15 @@ export function ImportMenuDropdown({
         >
           <Layers />
           Importer depuis un modèle
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="whitespace-nowrap"
+          onClick={() => {
+            onImportJson?.();
+          }}
+        >
+          <Braces />
+          Coller du JSON
         </DropdownMenuItem>
         <DropdownMenuItem
           className="whitespace-nowrap"
