@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Trash2, Loader2, GripVertical } from "lucide-react";
+import { ChevronLeft, Plus, Trash2, Loader2, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -114,6 +114,7 @@ export function BundleForm({
   const [slotCategoryValues, setSlotCategoryValues] = useState<string[]>(
     initialData?.slots.map((s) => s.category_id) ?? [""]
   );
+  const [subView, setSubView] = useState<"main" | "composition">("main");
 
   const {
     register,
@@ -268,6 +269,129 @@ export function BundleForm({
     });
   }
 
+  const compositionContent = (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-base font-semibold">Composition *</h3>
+          <p className="text-xs text-muted-foreground">
+            Pour chaque étape, choisissez la catégorie : l’intitulé affiché au client sera son nom.
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={addSlot}
+          disabled={isSubmitting}
+        >
+          <Plus className="mr-1.5 h-4 w-4" />
+          Ajouter un choix
+        </Button>
+      </div>
+
+      {errors.slots?.root && (
+        <p className="text-xs text-destructive">{errors.slots.root.message}</p>
+      )}
+      {typeof errors.slots?.message === "string" && (
+        <p className="text-xs text-destructive">{errors.slots.message}</p>
+      )}
+
+      <div className="space-y-3">
+        {fields.map((field, idx) => (
+          <div
+            key={field.id}
+            className="rounded-lg border border-border bg-muted/30 p-4 space-y-3"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <GripVertical className="h-4 w-4" />
+                Choix {idx + 1}
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => removeSlot(idx)}
+                disabled={isSubmitting || fields.length === 1}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Catégorie de produits *</Label>
+              <Select
+                value={slotCategoryValues[idx] ?? ""}
+                onValueChange={(val) => {
+                  if (val) setSlotCategory(idx, val);
+                }}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger>
+                  {slotCategoryValues[idx] ? (
+                    <span>
+                      {(() => {
+                        const cat = categories.find((c) => c.id === slotCategoryValues[idx]);
+                        return cat ? `${cat.icon_emoji} ${cat.name}` : "Choisir une catégorie…";
+                      })()}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">Choisir une catégorie…</span>
+                  )}
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.icon_emoji} {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.slots?.[idx]?.category_id && (
+                <p className="text-xs text-destructive">
+                  {errors.slots[idx].category_id?.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-1.5 w-32">
+              <Label htmlFor={`slot-qty-${idx}`}>Quantité *</Label>
+              <Input
+                id={`slot-qty-${idx}`}
+                type="number"
+                min="1"
+                step="1"
+                disabled={isSubmitting}
+                {...register(`slots.${idx}.quantity`, { valueAsNumber: true })}
+              />
+              {errors.slots?.[idx]?.quantity && (
+                <p className="text-xs text-destructive">
+                  {errors.slots[idx].quantity?.message}
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  if (subView === "composition") {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Button type="button" size="icon-sm" variant="ghost" onClick={() => setSubView("main")}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <h3 className="text-sm font-medium">Composition du menu</h3>
+        </div>
+        {compositionContent}
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Name */}
@@ -338,115 +462,11 @@ export function BundleForm({
         />
       </div>
 
-      <Separator />
-
-      {/* Slots */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-base font-semibold">Composition *</h3>
-            <p className="text-xs text-muted-foreground">
-              Pour chaque étape, choisissez la catégorie : l’intitulé affiché au client sera son nom.
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={addSlot}
-            disabled={isSubmitting}
-          >
-            <Plus className="mr-1.5 h-4 w-4" />
-            Ajouter un choix
-          </Button>
-        </div>
-
-        {errors.slots?.root && (
-          <p className="text-xs text-destructive">{errors.slots.root.message}</p>
-        )}
-        {typeof errors.slots?.message === "string" && (
-          <p className="text-xs text-destructive">{errors.slots.message}</p>
-        )}
-
-        <div className="space-y-3">
-          {fields.map((field, idx) => (
-            <div
-              key={field.id}
-              className="rounded-lg border border-border bg-muted/30 p-4 space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <GripVertical className="h-4 w-4" />
-                  Choix {idx + 1}
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => removeSlot(idx)}
-                  disabled={isSubmitting || fields.length === 1}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Catégorie de produits *</Label>
-                <Select
-                  value={slotCategoryValues[idx] ?? ""}
-                  onValueChange={(val) => {
-                    if (val) setSlotCategory(idx, val);
-                  }}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger>
-                    {slotCategoryValues[idx] ? (
-                      <span>
-                        {(() => {
-                          const cat = categories.find((c) => c.id === slotCategoryValues[idx]);
-                          return cat ? `${cat.icon_emoji} ${cat.name}` : "Choisir une catégorie…";
-                        })()}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">Choisir une catégorie…</span>
-                    )}
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.icon_emoji} {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.slots?.[idx]?.category_id && (
-                  <p className="text-xs text-destructive">
-                    {errors.slots[idx].category_id?.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Quantity */}
-              <div className="space-y-1.5 w-32">
-                <Label htmlFor={`slot-qty-${idx}`}>Quantité *</Label>
-                <Input
-                  id={`slot-qty-${idx}`}
-                  type="number"
-                  min="1"
-                  step="1"
-                  disabled={isSubmitting}
-                  {...register(`slots.${idx}.quantity`, { valueAsNumber: true })}
-                />
-                {errors.slots?.[idx]?.quantity && (
-                  <p className="text-xs text-destructive">
-                    {errors.slots[idx].quantity?.message}
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+        <Label>Composition du menu</Label>
+        <Button type="button" variant="outline" className="w-full justify-start" onClick={() => setSubView("composition")}>
+          Gérer la composition
+        </Button>
       </div>
 
       {/* Actions */}

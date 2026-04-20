@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -98,6 +99,7 @@ export function ProductForm({
     initialData?.image_url ?? null
   );
   const [tags, setTags] = useState<string[]>(initialData?.tags ?? []);
+  const [subView, setSubView] = useState<"main" | "photo" | "tags">("main");
 
   const {
     register,
@@ -177,6 +179,40 @@ export function ProductForm({
     }
   }
 
+  if (subView === "photo") {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Button type="button" size="icon-sm" variant="ghost" onClick={() => setSubView("main")}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <h3 className="text-sm font-medium">Photo du produit</h3>
+        </div>
+        <ImageUploader
+          bucket="product-images"
+          label="Photo du produit"
+          currentUrl={imageUrl}
+          onUpload={setImageUrl}
+          onRemove={() => setImageUrl(null)}
+        />
+      </div>
+    );
+  }
+
+  if (subView === "tags") {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Button type="button" size="icon-sm" variant="ghost" onClick={() => setSubView("main")}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <h3 className="text-sm font-medium">Allergènes et labels</h3>
+        </div>
+        <TagSelector selected={tags} onChange={setTags} disabled={isSubmitting} />
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Category */}
@@ -250,25 +286,19 @@ export function ProductForm({
         )}
       </div>
 
-      {/* Image */}
-      <ImageUploader
-        bucket="product-images"
-        label="Photo du produit"
-        currentUrl={imageUrl}
-        onUpload={setImageUrl}
-        onRemove={() => setImageUrl(null)}
-      />
+      <div className="space-y-1.5">
+        <Label>Photo du produit</Label>
+        <Button type="button" variant="outline" className="w-full justify-start" onClick={() => setSubView("photo")}>
+          {imageUrl ? "Modifier la photo du produit" : "Ajouter une photo du produit"}
+        </Button>
+      </div>
 
-      {/* Tags */}
-      <div className="space-y-2">
-        <Label>Allergènes & Labels</Label>
-        <div className="rounded-lg border border-border p-3">
-          <TagSelector
-            selected={tags}
-            onChange={setTags}
-            disabled={isSubmitting}
-          />
-        </div>
+      <div className="space-y-1.5">
+        <Label>Allergènes et labels</Label>
+        <Button type="button" variant="outline" className="w-full justify-between" onClick={() => setSubView("tags")}>
+          <span>Sélectionner</span>
+          <Badge variant="secondary">{tags.length}</Badge>
+        </Button>
       </div>
 
       {/* Option label */}

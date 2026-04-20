@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,8 @@ interface CategoryFormProps {
   onSave?: (payload: CategorySavePayload, isEdit: boolean, existingId?: string) => Promise<CategoryRow>;
 }
 
+const CATEGORY_ICONS = ["🥗","🍽️","🍰","🥤","🍕","🍔","🍜","🥩","🐟","🌮","🍣","🧁","🍷","🍺","☕","🌿","🔥","⭐"];
+
 // ─── Component ───────────────────────────────────────────────
 export function CategoryForm({
   shopId,
@@ -89,6 +91,7 @@ export function CategoryForm({
 
   const iconEmoji = watch("icon_emoji") || "📦";
   const isActive = watch("is_active");
+  const [subView, setSubView] = useState<"main" | "icon" | "cover">("main");
 
   async function onSubmit(values: CategoryFormValues) {
     const payload: CategorySavePayload = {
@@ -138,6 +141,55 @@ export function CategoryForm({
     }
   }
 
+  if (subView === "icon") {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Button type="button" size="icon-sm" variant="ghost" onClick={() => setSubView("main")}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <h3 className="text-sm font-medium">Icône</h3>
+        </div>
+        <div className="grid grid-cols-9 gap-1">
+          {CATEGORY_ICONS.map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              onClick={() => {
+                setValue("icon_emoji", emoji, { shouldValidate: true });
+                setSubView("main");
+              }}
+              disabled={isSubmitting}
+              className={`flex items-center justify-center h-9 w-full rounded-lg border text-xl transition-colors ${iconEmoji === emoji ? "border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/10" : "border-border hover:border-muted-foreground"}`}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (subView === "cover") {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Button type="button" size="icon-sm" variant="ghost" onClick={() => setSubView("main")}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <h3 className="text-sm font-medium">Image de couverture</h3>
+        </div>
+        <ImageUploader
+          bucket="shop-assets"
+          label="Image de couverture"
+          currentUrl={coverUrl}
+          onUpload={setCoverUrl}
+          onRemove={() => setCoverUrl(null)}
+        />
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Name */}
@@ -155,22 +207,12 @@ export function CategoryForm({
         )}
       </div>
 
-      {/* Emoji picker */}
       <div className="space-y-1.5">
         <Label>Icône</Label>
-        <div className="grid grid-cols-9 gap-1">
-          {["🥗","🍽️","🍰","🥤","🍕","🍔","🍜","🥩","🐟","🌮","🍣","🧁","🍷","🍺","☕","🌿","🔥","⭐"].map((emoji) => (
-            <button
-              key={emoji}
-              type="button"
-              onClick={() => setValue("icon_emoji", emoji)}
-              disabled={isSubmitting}
-              className={`flex items-center justify-center h-9 w-full rounded-lg border text-xl transition-colors ${iconEmoji === emoji ? "border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/10" : "border-border hover:border-muted-foreground"}`}
-            >
-              {emoji}
-            </button>
-          ))}
-        </div>
+        <Button type="button" variant="outline" className="w-full justify-start gap-2" onClick={() => setSubView("icon")}>
+          <span className="text-lg leading-none">{iconEmoji}</span>
+          <span>Choisir une icône</span>
+        </Button>
       </div>
 
       {/* Description */}
@@ -185,14 +227,12 @@ export function CategoryForm({
         />
       </div>
 
-      {/* Cover image */}
-      <ImageUploader
-        bucket="shop-assets"
-        label="Image de couverture"
-        currentUrl={coverUrl}
-        onUpload={setCoverUrl}
-        onRemove={() => setCoverUrl(null)}
-      />
+      <div className="space-y-1.5">
+        <Label>Image de couverture</Label>
+        <Button type="button" variant="outline" className="w-full justify-start" onClick={() => setSubView("cover")}>
+          {coverUrl ? "Modifier l’image de couverture" : "Ajouter une image de couverture"}
+        </Button>
+      </div>
 
       {/* Active toggle */}
       <div className="flex items-center justify-between rounded-lg border border-border p-3">
