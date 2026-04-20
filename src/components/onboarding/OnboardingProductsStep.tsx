@@ -259,7 +259,7 @@ export function OnboardingProductsStep({
   }
 
   const formFooter = (
-    <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-3">
+    <div className="sticky bottom-0 mt-auto border-t border-border py-3">
       <div className="flex items-center justify-between gap-3">
         <Button variant="outline" type="button" onClick={closeForm} className="flex-1">
           Annuler
@@ -288,7 +288,7 @@ export function OnboardingProductsStep({
       <div className="flex-1 pb-3">
         <TagSelector selected={form.tags} onChange={(tags) => setForm((f) => ({ ...f, tags }))} />
       </div>
-      <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-3">
+      <div className="sticky bottom-0 mt-auto border-t border-border py-3">
         <Button
           type="button"
           onClick={() => setSubView("main")}
@@ -313,7 +313,7 @@ export function OnboardingProductsStep({
           simulationDisabled={isPreview}
         />
       </div>
-      <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-3">
+      <div className="sticky bottom-0 mt-auto border-t border-border py-3">
         <Button
           type="button"
           onClick={() => setSubView("main")}

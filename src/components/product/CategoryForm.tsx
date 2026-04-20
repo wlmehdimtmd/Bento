@@ -177,7 +177,7 @@ export function CategoryForm({
             ))}
           </div>
         </div>
-        <div className="mt-auto border-t border-border bg-background py-3">
+        <div className="mt-auto border-t border-border py-3">
           <Button
             type="button"
             onClick={() => changeSubView("main")}
@@ -204,7 +204,7 @@ export function CategoryForm({
             square
           />
         </div>
-        <div className="mt-auto border-t border-border bg-background py-3">
+        <div className="mt-auto border-t border-border py-3">
           <Button
             type="button"
             onClick={() => changeSubView("main")}
@@ -290,7 +290,7 @@ export function CategoryForm({
 
       {/* Actions */}
       <div
-        className={`mt-auto flex w-full gap-2 border-t border-border bg-background py-3 ${
+        className={`mt-auto flex w-full gap-2 border-t border-border py-3 ${
           sheetCtasFullWidth ? "" : "md:justify-end"
         }`}
       >

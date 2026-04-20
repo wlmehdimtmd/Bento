@@ -212,7 +212,7 @@ export function OnboardingBundlesStep({
   }
 
   const formFooter = (
-    <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-3">
+    <div className="sticky bottom-0 mt-auto border-t border-border py-3">
       <div className="flex items-center justify-between gap-3">
       <Button
         variant="outline"
@@ -302,7 +302,7 @@ export function OnboardingBundlesStep({
           </div>
         ))}
       </div>
-      <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-3">
+      <div className="sticky bottom-0 mt-auto border-t border-border py-3">
         <Button
           type="button"
           onClick={() => setSubView("main")}

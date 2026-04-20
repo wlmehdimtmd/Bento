@@ -646,7 +646,6 @@ export function DevUiClient() {
                 socialLinks={{
                   instagram: "https://instagram.com",
                   website: "https://example.com",
-                  chef_name: "Marie Dupont",
                 }}
                 fulfillmentModes={["takeaway"]}
                 reviews={demoGoogleReviews}

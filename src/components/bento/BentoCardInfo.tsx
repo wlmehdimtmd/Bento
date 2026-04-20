@@ -25,7 +25,6 @@ interface BentoCardInfoProps {
   description?: string | null;
   coverUrl?: string | null;
   logoUrl?: string | null;
-  ownerPhotoUrl?: string | null;
   address?: string | null;
   phone?: string | null;
   emailContact?: string | null;
@@ -50,7 +49,6 @@ export function BentoCardInfo({
   description,
   coverUrl,
   logoUrl: _logoUrl,
-  ownerPhotoUrl: _ownerPhotoUrl,
   address,
   phone,
   emailContact,

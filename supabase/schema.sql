@@ -34,7 +34,6 @@ create table if not exists public.shops (
   description         text,
   logo_url            text,
   cover_image_url     text,
-  owner_photo_url     text,
   address             text,
   phone               text,
   email_contact       text,

@@ -9,6 +9,7 @@ import { CartButton } from "@/components/cart/CartButton";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { PublicShopProvider } from "@/components/shop/PublicShopContext";
 import { DemoUnifiedTopBar } from "@/components/demo/DemoUnifiedTopBar";
+import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
 
 export interface DemoLiveStoreViewProps {
   shop: ShopInfo;
@@ -17,6 +18,7 @@ export interface DemoLiveStoreViewProps {
   bundlesMenuGrouped?: boolean;
   reviews: ShopReviews | null;
   savedStorefrontLayout: unknown | null;
+  storefrontThemeKey: CategoryThemeKey;
   stripeAccountId: string | null;
 }
 
@@ -27,6 +29,7 @@ export function DemoLiveStoreView({
   bundlesMenuGrouped = false,
   reviews,
   savedStorefrontLayout,
+  storefrontThemeKey,
   stripeAccountId,
 }: DemoLiveStoreViewProps) {
   const fulfillmentModes = Array.isArray(shop.fulfillment_modes)
@@ -61,6 +64,7 @@ export function DemoLiveStoreView({
                 bundlesMenuGrouped={bundlesMenuGrouped}
                 reviews={reviews}
                 savedStorefrontLayout={savedStorefrontLayout}
+                storefrontThemeKey={storefrontThemeKey}
               />
 
               {categories.length === 0 && bundles.length === 0 && (

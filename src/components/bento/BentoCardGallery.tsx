@@ -12,7 +12,6 @@ interface BentoCardGalleryProps {
   size?: BentoSize;
   omitSizeClasses?: boolean;
   className?: string;
-  onClick?: () => void;
 }
 
 export function BentoCardGallery({
@@ -20,7 +19,6 @@ export function BentoCardGallery({
   size = "2x1",
   omitSizeClasses = false,
   className,
-  onClick,
 }: BentoCardGalleryProps) {
   const coverPhoto = photos[0] ?? null;
 
@@ -28,7 +26,6 @@ export function BentoCardGallery({
     <BentoCard
       size={size}
       omitSizeClasses={omitSizeClasses}
-      onClick={onClick}
       className={cn("relative flex h-full min-h-0 flex-col overflow-hidden", className)}
     >
       {coverPhoto ? (

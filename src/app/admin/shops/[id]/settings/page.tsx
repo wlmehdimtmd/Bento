@@ -70,7 +70,6 @@ export default async function AdminShopSettingsPage({ params }: { params: Params
             email_contact: shop.email_contact,
             logo_url: shop.logo_url,
             cover_image_url: shop.cover_image_url,
-            owner_photo_url: shop.owner_photo_url,
             social_links: socialLinks,
             fulfillment_modes: fulfillmentModes,
             opening_hours: shop.opening_hours,

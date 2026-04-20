@@ -233,11 +233,17 @@ function ProductDetailContent({
     <div
       className={
         stickyActionBar
-          ? "flex items-center gap-3 border-t border-border bg-popover px-5 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]"
+          ? "flex flex-col items-stretch gap-3 border-t border-border bg-popover px-5 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]"
           : "flex items-center gap-3 px-5 pb-5 pt-1"
       }
     >
-      <div className="flex items-center gap-1 rounded-lg border border-border px-1 py-0.5">
+      <div
+        className={
+          stickyActionBar
+            ? "flex w-fit items-center gap-1 self-start rounded-lg border border-border px-1 py-0.5"
+            : "flex items-center gap-1 rounded-lg border border-border px-1 py-0.5"
+        }
+      >
         <Button
           type="button"
           variant="ghost"
@@ -264,7 +270,7 @@ function ProductDetailContent({
       </div>
 
       <Button
-        className="min-h-11 flex-1 gap-2 text-white font-semibold hover:opacity-90"
+        className={stickyActionBar ? "min-h-11 w-full gap-2 text-white font-semibold hover:opacity-90" : "min-h-11 flex-1 gap-2 text-white font-semibold hover:opacity-90"}
         style={{ backgroundColor: "var(--color-bento-accent)" }}
         onClick={handleAdd}
         disabled={!product.is_available}

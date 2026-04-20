@@ -27,8 +27,6 @@ const MOCK_SHOP_INITIAL = {
   email_contact: "",
   logo_url: null as string | null,
   cover_image_url: null as string | null,
-  owner_photo_url: null as string | null,
-  chef_name: "",
   google_maps_url: "",
   social_links: {} as Record<string, unknown>,
   fulfillment_modes: ["takeaway"] as string[],
@@ -42,7 +40,6 @@ const MOCK_CATALOG_PAYLOAD: PublicShopPagePayload = {
     description: "Vitrine de test pour le playground.",
     logo_url: null,
     cover_image_url: null,
-    owner_photo_url: null,
     address: null,
     phone: null,
     email_contact: null,
@@ -75,6 +72,7 @@ const MOCK_CATALOG_PAYLOAD: PublicShopPagePayload = {
   reviews: null,
   storefrontPhotos: [],
   savedStorefrontLayout: null,
+  storefrontThemeKey: "indigo",
   stripeAccountId: null,
 };
 

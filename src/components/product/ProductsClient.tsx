@@ -541,11 +541,34 @@ export function ProductsClient({
           </DrawerContent>
         </Drawer>
       ) : (
-        <Sheet open={formOpen} onOpenChange={setFormOpen}>
+        <Sheet
+          open={formOpen}
+          onOpenChange={(open) => {
+            setFormOpen(open);
+            if (!open) setFormSubView("main");
+          }}
+        >
           <SheetContent side="right" className="w-full sm:max-w-2xl h-full overflow-hidden">
-            <SheetHeader>
+            <SheetHeader className={formSubView !== "main" ? "flex-row items-center gap-2" : undefined}>
+              {formSubView !== "main" ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setFormSubView("main")}
+                  aria-label="Retour"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              ) : null}
               <SheetTitle>
-                {editingProduct ? "Modifier le produit" : "Nouveau produit"}
+                {formSubView === "photo"
+                  ? "Photo du produit"
+                  : formSubView === "tags"
+                    ? "Allergènes et labels"
+                    : editingProduct
+                      ? "Modifier le produit"
+                      : "Nouveau produit"}
               </SheetTitle>
             </SheetHeader>
             <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
@@ -558,6 +581,8 @@ export function ProductsClient({
                 onCancel={() => setFormOpen(false)}
                 onSave={adminActions?.onSave}
                 sheetCtasFullWidth
+                subViewOverride={formSubView}
+                onSubViewChange={setFormSubView}
               />
             </div>
           </SheetContent>

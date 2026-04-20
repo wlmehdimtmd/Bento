@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import ReactGridLayout, { WidthProvider, type Layout } from "react-grid-layout/legacy";
 import "react-grid-layout/css/styles.css";
+import { useTheme } from "next-themes";
 
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -30,6 +31,12 @@ import {
 import { BENTO_STAGGER_CONTAINER_VARIANTS } from "@/components/bento/BentoGrid";
 import { saveStorefrontBentoLayoutAdmin } from "@/app/admin/actions";
 import type { Json } from "@/lib/supabase/database.types";
+import {
+  CATEGORY_THEME_KEYS,
+  CATEGORY_THEME_TOKENS,
+  type CategoryThemeKey,
+} from "@/lib/categoryThemeTokens";
+import { getStorefrontThemePreviewStyle } from "@/lib/storefrontTheme";
 
 const GridLayoutWithWidth = WidthProvider(ReactGridLayout);
 
@@ -45,12 +52,12 @@ function whToBentoSize(w: number, h: number): BentoSize {
 }
 
 function isMissingStorefrontLayoutColumn(message: string) {
-  return /storefront_bento_layout|schema cache/i.test(message);
+  return /storefront_bento_layout|storefront_theme_key|schema cache/i.test(message);
 }
 
 function formatLayoutSaveError(message: string): string {
   if (isMissingStorefrontLayoutColumn(message)) {
-    return "La colonne « storefront_bento_layout » n’existe pas encore sur la table « shops ». Exécutez le SQL du fichier scripts/apply-storefront-layout-column.sql dans l’éditeur SQL Supabase, attendez ~1 minute (cache schéma), puis réessayez.";
+    return "La colonne « storefront_bento_layout » ou « storefront_theme_key » n’existe pas encore sur la table « shops ». Exécutez les migrations SQL de vitrine (layout + thème), attendez ~1 minute (cache schéma), puis réessayez.";
   }
   return message;
 }
@@ -96,9 +103,22 @@ export interface StorefrontBentoEditorProps {
   reviews?: ShopReviews | null;
   storefrontPhotos?: StorefrontPhoto[];
   initialLayout: unknown;
+  initialStorefrontThemeKey: CategoryThemeKey;
   backHref?: string;
   /** `admin` : enregistrement via server action (requireAdmin). */
   layoutSaveMode?: "owner" | "admin";
+}
+
+function subscribe() {
+  return () => {};
+}
+
+function getClientSnapshot() {
+  return true;
+}
+
+function getServerSnapshot() {
+  return false;
 }
 
 export function StorefrontBentoEditor({
@@ -111,10 +131,14 @@ export function StorefrontBentoEditor({
   reviews,
   storefrontPhotos = [],
   initialLayout,
+  initialStorefrontThemeKey,
   backHref,
   layoutSaveMode = "owner",
 }: StorefrontBentoEditorProps) {
   const isMobile = useIsMobile();
+  const { resolvedTheme } = useTheme();
+  const mounted = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
+  const isDark = mounted ? resolvedTheme === "dark" : false;
 
   const defaults = useMemo(
     () =>
@@ -132,6 +156,9 @@ export function StorefrontBentoEditor({
   }, [initialLayout, defaults]);
 
   const [layout, setLayout] = useState<Layout>(() => initialMerged as unknown as Layout);
+  const [storefrontThemeKey, setStorefrontThemeKey] = useState<CategoryThemeKey>(
+    initialStorefrontThemeKey
+  );
 
   const [saving, setSaving] = useState(false);
 
@@ -139,10 +166,18 @@ export function StorefrontBentoEditor({
     setLayout(initialMerged as unknown as Layout);
   }, [initialMerged]);
 
+  useEffect(() => {
+    setStorefrontThemeKey(initialStorefrontThemeKey);
+  }, [initialStorefrontThemeKey]);
+
   const catById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const bundleById = useMemo(() => new Map(bundles.map((b) => [b.id, b])), [bundles]);
 
   const layoutMap = useMemo(() => new Map(layout.map((l) => [l.i, l])), [layout]);
+  const storefrontThemeStyle = useMemo(
+    () => getStorefrontThemePreviewStyle(storefrontThemeKey, isDark),
+    [storefrontThemeKey, isDark]
+  );
 
   function renderPreview(i: string) {
     const item = layoutMap.get(i);
@@ -158,7 +193,6 @@ export function StorefrontBentoEditor({
           description={shop.description}
           coverUrl={shop.cover_image_url}
           logoUrl={shop.logo_url}
-          ownerPhotoUrl={shop.owner_photo_url}
           address={shop.address}
           phone={shop.phone}
           socialLinks={shop.social_links}
@@ -244,7 +278,7 @@ export function StorefrontBentoEditor({
 
     if (layoutSaveMode === "admin") {
       try {
-        await saveStorefrontBentoLayoutAdmin(shopId, payload as Json);
+        await saveStorefrontBentoLayoutAdmin(shopId, payload as Json, storefrontThemeKey);
         toast.success("Mise en page enregistrée");
       } catch (e) {
         const raw = e instanceof Error ? e.message : "Enregistrement impossible";
@@ -270,7 +304,7 @@ export function StorefrontBentoEditor({
     const supabase = createClient();
     const { error } = await supabase
       .from("shops")
-      .update({ storefront_bento_layout: payload })
+      .update({ storefront_bento_layout: payload, storefront_theme_key: storefrontThemeKey })
       .eq("id", shopId);
 
     setSaving(false);
@@ -367,8 +401,53 @@ export function StorefrontBentoEditor({
           </div>
         </div>
       ) : (
-        <div className="mx-auto w-full max-w-5xl">
-          <div className="rounded-xl border border-border bg-card/50 p-3 sm:p-4">
+        <div className="mx-auto w-full max-w-5xl space-y-4">
+          <section className="rounded-xl border border-border bg-card/50 p-4">
+            <h2 className="text-sm font-semibold">Palette de couleurs (vitrine uniquement)</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              L’aperçu est appliqué uniquement au bento ci-dessous, puis à la vitrine publique après
+              enregistrement.
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+              {CATEGORY_THEME_KEYS.map((themeKey) => {
+                const token = CATEGORY_THEME_TOKENS[themeKey];
+                const preview = isDark ? token.dark : token.light;
+                const selected = storefrontThemeKey === themeKey;
+                return (
+                  <button
+                    key={themeKey}
+                    type="button"
+                    className={cn(
+                      "rounded-xl border p-2 text-left transition-colors",
+                      selected
+                        ? "border-[var(--color-bento-accent)] bg-accent/30"
+                        : "border-border hover:bg-muted/40"
+                    )}
+                    onClick={() => setStorefrontThemeKey(themeKey)}
+                    aria-pressed={selected}
+                  >
+                    <span className="mb-2 block text-xs font-medium">{token.label}</span>
+                    <span className="flex items-center gap-1.5">
+                      <span
+                        className="h-4 w-4 rounded-full border border-black/10"
+                        style={{ backgroundColor: preview.background }}
+                      />
+                      <span
+                        className="h-4 w-4 rounded-full border border-black/10"
+                        style={{ backgroundColor: preview.surface }}
+                      />
+                      <span
+                        className="h-4 w-4 rounded-full border border-black/10"
+                        style={{ backgroundColor: preview.card }}
+                      />
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <div className="rounded-xl border border-border bg-card/50 p-3 sm:p-4" style={storefrontThemeStyle}>
             <GridLayoutWithWidth
               className="layout"
               cols={4}

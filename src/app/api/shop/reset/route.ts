@@ -47,7 +47,6 @@ export async function POST() {
         email_contact: null,
         logo_url: null,
         cover_image_url: null,
-        owner_photo_url: null,
         social_links: {},
         fulfillment_modes: [],
         opening_hours: null,

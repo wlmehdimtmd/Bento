@@ -291,7 +291,7 @@ export function OnboardingCategoriesStep({
           ))}
         </div>
       </div>
-      <div className="sticky bottom-0 mt-auto border-t border-border bg-background px-1 py-3">
+      <div className="sticky bottom-0 mt-auto border-t border-border px-1 py-3">
         <Button
           type="button"
           onClick={() => setSubView("main")}
@@ -316,7 +316,7 @@ export function OnboardingCategoriesStep({
           simulationDisabled={isPreview}
         />
       </div>
-      <div className="sticky bottom-0 mt-auto border-t border-border bg-background px-1 py-3">
+      <div className="sticky bottom-0 mt-auto border-t border-border px-1 py-3">
         <Button
           type="button"
           onClick={() => setSubView("main")}
@@ -395,7 +395,7 @@ export function OnboardingCategoriesStep({
         </div>
       </div>
 
-      <div className="sticky bottom-0 mt-auto border-t border-border bg-background px-1 py-3">
+      <div className="sticky bottom-0 mt-auto border-t border-border px-1 py-3">
         <div className="flex items-center gap-2">
           <Button type="button" variant="outline" onClick={closeCreatePanel} className="flex-1">
             Annuler

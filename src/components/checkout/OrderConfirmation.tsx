@@ -53,13 +53,7 @@ export function OrderConfirmation({ order, shopSlug }: OrderConfirmationProps) {
         className="w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl overflow-hidden"
       >
         {/* Header */}
-        <div
-          className="flex flex-col items-center gap-3 px-6 py-8"
-          style={{
-            background:
-              "linear-gradient(135deg, var(--color-bento-accent)/10 0%, var(--color-bento-accent)/5 100%)",
-          }}
-        >
+        <div className="flex flex-col items-center gap-3 px-6 py-8 bg-muted/40">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -136,7 +130,7 @@ export function OrderConfirmation({ order, shopSlug }: OrderConfirmationProps) {
           {/* Total */}
           <div className="flex justify-between font-bold text-base">
             <span>Total payé</span>
-            <span style={{ color: "var(--color-bento-accent)" }}>
+            <span className="text-foreground">
               {formatPrice(order.total_amount)}
             </span>
           </div>

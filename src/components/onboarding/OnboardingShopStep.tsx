@@ -48,7 +48,6 @@ const schema = z.object({
     .refine((v) => !v || z.string().email().safeParse(v).success, {
       message: "Email invalide",
     }),
-  chef_name: z.string().optional(),
   google_maps_url: z.string().optional(),
   fulfillment_modes: z
     .array(z.string())
@@ -66,8 +65,6 @@ interface InitialData {
   email_contact?: string | null;
   logo_url?: string | null;
   cover_image_url?: string | null;
-  owner_photo_url?: string | null;
-  chef_name?: string;
   google_maps_url?: string;
   social_links?: Record<string, unknown>;
   fulfillment_modes?: string[];
@@ -102,7 +99,6 @@ export function OnboardingShopStep({
   const [subStep, setSubStep] = useState(initialSubStep);
   const [logoUrl, setLogoUrl] = useState<string | null>(initialData.logo_url ?? null);
   const [coverUrl, setCoverUrl] = useState<string | null>(initialData.cover_image_url ?? null);
-  const [chefPhotoUrl, setChefPhotoUrl] = useState<string | null>(initialData.owner_photo_url ?? null);
   const [slugEdited, setSlugEdited] = useState(false);
 
   const {
@@ -121,7 +117,6 @@ export function OnboardingShopStep({
       address: initialData.address ?? "",
       phone: initialData.phone ?? "",
       email_contact: initialData.email_contact ?? "",
-      chef_name: initialData.chef_name ?? "",
       google_maps_url: initialData.google_maps_url ?? "",
       fulfillment_modes: initialData.fulfillment_modes?.length
         ? initialData.fulfillment_modes
@@ -167,7 +162,6 @@ export function OnboardingShopStep({
     const existingLinks = initialData.social_links ?? {};
     const newLinks = {
       ...existingLinks,
-      chef_name: values.chef_name || undefined,
       google_maps_url: values.google_maps_url || undefined,
       _ob_vitrine: 1,
     };
@@ -183,7 +177,6 @@ export function OnboardingShopStep({
         email_contact: values.email_contact || null,
         logo_url: logoUrl,
         cover_image_url: coverUrl,
-        owner_photo_url: chefPhotoUrl,
         social_links: newLinks,
         fulfillment_modes: values.fulfillment_modes,
       })
@@ -280,21 +273,22 @@ export function OnboardingShopStep({
           <ImageUploader
             bucket="shop-assets"
             label="Logo"
-            hint="Format carré recommandé"
+            hint="Format carré"
             currentUrl={logoUrl}
+            square
             onUpload={setLogoUrl}
             onRemove={() => setLogoUrl(null)}
             simulationDisabled={isPreview}
           />
           <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Prévisualisation avatar</p>
-            <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
+            <p className="text-xs font-medium text-muted-foreground">Prévisualisation logo</p>
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
               {logoUrl ? (
                 <Image
                   src={logoUrl}
-                  alt="Aperçu avatar de la vitrine"
-                  width={36}
-                  height={36}
+                  alt="Aperçu logo de la vitrine"
+                  width={48}
+                  height={48}
                   className="h-full w-full object-cover"
                 />
               ) : (
@@ -322,26 +316,6 @@ export function OnboardingShopStep({
           currentUrl={coverUrl}
           onUpload={setCoverUrl}
           onRemove={() => setCoverUrl(null)}
-          simulationDisabled={isPreview}
-        />
-
-        <div className="space-y-1.5">
-          <Label htmlFor="chef_name">Nom prénom du chef / propriétaire</Label>
-          <Input
-            id="chef_name"
-            {...register("chef_name")}
-            placeholder="Hiroshi Dupont"
-            disabled={isSubmitting}
-          />
-          <p className="text-xs text-muted-foreground">Affiché sous la photo du chef sur votre vitrine.</p>
-        </div>
-
-        <ImageUploader
-          bucket="shop-assets"
-          label="Photo du chef / propriétaire"
-          currentUrl={chefPhotoUrl}
-          onUpload={setChefPhotoUrl}
-          onRemove={() => setChefPhotoUrl(null)}
           simulationDisabled={isPreview}
         />
       </div>

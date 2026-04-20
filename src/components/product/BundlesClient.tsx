@@ -459,19 +459,27 @@ export function BundlesClient({
           }}
         >
           <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden">
-            <DrawerHeader>
+            <DrawerHeader className={formSubView !== "main" ? "flex-row items-center gap-2" : undefined}>
               {formSubView !== "main" ? (
-                <DrawerTitle className="flex items-center gap-2">
-                  <Button type="button" size="icon-sm" variant="ghost" onClick={() => setFormSubView("main")}>
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span>{formSubView === "photo" ? "Photo de la formule" : "Composition du menu"}</span>
-                </DrawerTitle>
-              ) : (
-                <DrawerTitle>
-                  {editingBundle ? "Modifier la formule" : "Nouvelle formule"}
-                </DrawerTitle>
-              )}
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="ghost"
+                  onClick={() => setFormSubView("main")}
+                  aria-label="Retour"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              ) : null}
+              <DrawerTitle>
+                {formSubView === "photo"
+                  ? "Photo de la formule"
+                  : formSubView === "composition"
+                    ? "Composition du menu"
+                    : editingBundle
+                      ? "Modifier la formule"
+                      : "Nouvelle formule"}
+              </DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
               <BundleForm
@@ -496,19 +504,27 @@ export function BundlesClient({
           }}
         >
           <SheetContent side="right" className="w-full sm:max-w-2xl h-full overflow-hidden">
-            <SheetHeader>
+            <SheetHeader className={formSubView !== "main" ? "flex-row items-center gap-2" : undefined}>
               {formSubView !== "main" ? (
-                <SheetTitle className="flex items-center gap-2">
-                  <Button type="button" size="icon-sm" variant="ghost" onClick={() => setFormSubView("main")}>
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span>{formSubView === "photo" ? "Photo de la formule" : "Composition du menu"}</span>
-                </SheetTitle>
-              ) : (
-                <SheetTitle>
-                  {editingBundle ? "Modifier la formule" : "Nouvelle formule"}
-                </SheetTitle>
-              )}
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="ghost"
+                  onClick={() => setFormSubView("main")}
+                  aria-label="Retour"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              ) : null}
+              <SheetTitle>
+                {formSubView === "photo"
+                  ? "Photo de la formule"
+                  : formSubView === "composition"
+                    ? "Composition du menu"
+                    : editingBundle
+                      ? "Modifier la formule"
+                      : "Nouvelle formule"}
+              </SheetTitle>
             </SheetHeader>
             <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
               <BundleForm

@@ -38,6 +38,7 @@ export default async function VitrineMiseEnPagePage() {
         reviews={payload.reviews}
         storefrontPhotos={payload.storefrontPhotos}
         initialLayout={payload.storefrontBentoLayout}
+        initialStorefrontThemeKey={payload.storefrontThemeKey}
       />
     </div>
   );

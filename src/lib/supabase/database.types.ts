@@ -73,7 +73,6 @@ export interface Database {
           description: string | null;
           logo_url: string | null;
           cover_image_url: string | null;
-          owner_photo_url: string | null;
           address: string | null;
           phone: string | null;
           email_contact: string | null;
@@ -81,6 +80,7 @@ export interface Database {
           stripe_account_id: string | null;
           is_active: boolean;
           fulfillment_modes: Json;
+          storefront_theme_key: string;
           storefront_bento_layout: Json | null;
           opening_hours: Json | null;
           opening_timezone: string;
@@ -97,7 +97,6 @@ export interface Database {
           description?: string | null;
           logo_url?: string | null;
           cover_image_url?: string | null;
-          owner_photo_url?: string | null;
           address?: string | null;
           phone?: string | null;
           email_contact?: string | null;
@@ -105,6 +104,7 @@ export interface Database {
           stripe_account_id?: string | null;
           is_active?: boolean;
           fulfillment_modes?: Json;
+          storefront_theme_key?: string;
           storefront_bento_layout?: Json | null;
           opening_hours?: Json | null;
           opening_timezone?: string;
@@ -121,7 +121,6 @@ export interface Database {
           description?: string | null;
           logo_url?: string | null;
           cover_image_url?: string | null;
-          owner_photo_url?: string | null;
           address?: string | null;
           phone?: string | null;
           email_contact?: string | null;
@@ -129,6 +128,7 @@ export interface Database {
           stripe_account_id?: string | null;
           is_active?: boolean;
           fulfillment_modes?: Json;
+          storefront_theme_key?: string;
           storefront_bento_layout?: Json | null;
           opening_hours?: Json | null;
           opening_timezone?: string;

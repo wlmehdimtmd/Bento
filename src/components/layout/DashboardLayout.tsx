@@ -52,9 +52,9 @@ export function DashboardLayout({ user, shops, activeOrdersCount = 0, children }
       </Sheet>
 
       {/* Main content area */}
-      <div className="flex flex-1 flex-col min-w-0 bg-background">
+      <div className="flex flex-1 flex-col min-w-0 bg-card">
         {/* Mobile top header */}
-        <header className="md:hidden flex h-16 items-center justify-between border-b border-border px-4 bg-background shrink-0">
+        <header className="md:hidden flex h-16 items-center justify-between border-b border-border px-4 bg-card shrink-0">
           <Button
             variant="ghost"
             size="icon"
@@ -73,7 +73,7 @@ export function DashboardLayout({ user, shops, activeOrdersCount = 0, children }
         </header>
 
         {/* Page content */}
-        <main id="main-content" className="flex-1 overflow-y-auto">
+        <main id="main-content" className="flex-1 overflow-y-auto bg-card">
           {children}
         </main>
       </div>

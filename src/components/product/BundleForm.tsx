@@ -404,7 +404,7 @@ export function BundleForm({
             square
           />
         </div>
-        <div className="mt-auto border-t border-border bg-background py-3">
+        <div className="mt-auto border-t border-border py-3">
           <Button
             type="button"
             onClick={() => changeSubView("main")}
@@ -422,7 +422,7 @@ export function BundleForm({
     return (
       <div className="flex h-full min-h-0 flex-col">
         <div className="flex-1 space-y-4 pb-4">{compositionContent}</div>
-        <div className="mt-auto border-t border-border bg-background py-3">
+        <div className="mt-auto border-t border-border py-3">
           <Button
             type="button"
             onClick={() => changeSubView("main")}
@@ -515,7 +515,7 @@ export function BundleForm({
 
       {/* Actions */}
       <div
-        className={`mt-auto flex w-full gap-2 border-t border-border bg-background py-3 ${
+        className={`mt-auto flex w-full gap-2 border-t border-border py-3 ${
           sheetCtasFullWidth ? "" : "md:justify-end"
         }`}
       >

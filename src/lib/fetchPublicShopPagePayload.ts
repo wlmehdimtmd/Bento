@@ -2,6 +2,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { ShopInfo, CategoryInfo, BundleInfo, SlotSummary } from "@/components/bento/StoreView";
 import type { SocialLinks, ShopReviews, StorefrontPhoto } from "@/lib/types";
+import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
+import { coerceStorefrontThemeKey } from "@/lib/storefrontTheme";
 
 export type PublicShopPagePayload = {
   shop: ShopInfo;
@@ -11,6 +13,7 @@ export type PublicShopPagePayload = {
   reviews: ShopReviews | null;
   storefrontPhotos: StorefrontPhoto[];
   savedStorefrontLayout: unknown | null;
+  storefrontThemeKey: CategoryThemeKey;
   stripeAccountId: string | null;
 };
 
@@ -21,7 +24,6 @@ type ShopRow = {
   description: string | null;
   logo_url: string | null;
   cover_image_url: string | null;
-  owner_photo_url: string | null;
   address: string | null;
   phone: string | null;
   email_contact: string | null;
@@ -48,7 +50,7 @@ export async function fetchPublicShopPagePayload(
   let q = supabase
     .from("shops")
     .select(
-      "id, name, slug, description, logo_url, cover_image_url, owner_photo_url, address, phone, email_contact, social_links, fulfillment_modes, opening_hours, opening_timezone, open_on_public_holidays, stripe_account_id"
+      "id, name, slug, description, logo_url, cover_image_url, address, phone, email_contact, social_links, fulfillment_modes, opening_hours, opening_timezone, open_on_public_holidays, stripe_account_id"
     );
 
   const skipActiveFilter = "id" in opts && opts.includeInactiveShop === true;
@@ -85,6 +87,18 @@ export async function fetchPublicShopPagePayload(
     !layoutError && layoutRow
       ? (layoutRow as { storefront_bento_layout: unknown | null }).storefront_bento_layout
       : null;
+
+  const { data: themeRow, error: themeError } = await supabase
+    .from("shops")
+    .select("storefront_theme_key")
+    .eq("id", s.id)
+    .maybeSingle();
+
+  const storefrontThemeKey = coerceStorefrontThemeKey(
+    !themeError && themeRow
+      ? (themeRow as { storefront_theme_key?: unknown }).storefront_theme_key
+      : null
+  );
 
   const { data: groupedRow, error: groupedError } = await supabase
     .from("shops")
@@ -207,7 +221,6 @@ export async function fetchPublicShopPagePayload(
     description: s.description,
     logo_url: s.logo_url,
     cover_image_url: s.cover_image_url,
-    owner_photo_url: s.owner_photo_url,
     address: s.address,
     phone: s.phone,
     email_contact: s.email_contact ?? null,
@@ -226,6 +239,7 @@ export async function fetchPublicShopPagePayload(
     reviews: (shopReviews ?? null) as ShopReviews | null,
     storefrontPhotos: (storefrontPhotos ?? []) as StorefrontPhoto[],
     savedStorefrontLayout,
+    storefrontThemeKey,
     stripeAccountId: s.stripe_account_id,
   };
 }

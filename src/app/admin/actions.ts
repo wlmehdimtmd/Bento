@@ -182,14 +182,18 @@ export async function setDemoShopId(shopId: string | null) {
   redirect("/admin/demo/settings");
 }
 
-export async function saveStorefrontBentoLayoutAdmin(shopId: string, payload: Json) {
+export async function saveStorefrontBentoLayoutAdmin(
+  shopId: string,
+  payload: Json,
+  storefrontThemeKey: string
+) {
   const service = await requireAdmin();
   const { data: shop } = await service.from("shops").select("id").eq("id", shopId).maybeSingle();
   if (!shop) throw new Error("Boutique introuvable");
 
   const { error } = await service
     .from("shops")
-    .update({ storefront_bento_layout: payload })
+    .update({ storefront_bento_layout: payload, storefront_theme_key: storefrontThemeKey })
     .eq("id", shopId);
 
   if (error) throw new Error(error.message);
@@ -210,7 +214,6 @@ export async function updateShopProfileAdmin(
     email_contact: string | null;
     logo_url: string | null;
     cover_image_url: string | null;
-    owner_photo_url: string | null;
     social_links: Json;
     fulfillment_modes: Json;
     opening_hours: Json | null;

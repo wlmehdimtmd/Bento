@@ -1,4 +1,5 @@
 export const CATEGORY_THEME_KEYS = [
+  "brandMono",
   "indigo",
   "violet",
   "blue",
@@ -22,129 +23,304 @@ export type CategoryThemeScale = {
   label: string;
   light: CategoryThemeLevels;
   dark: CategoryThemeLevels;
+  buttons: {
+    light: {
+      primaryBg: string;
+      primaryText: string;
+      secondaryBg: string;
+      secondaryText: string;
+      secondaryBorder: string;
+    };
+    dark: {
+      primaryBg: string;
+      primaryText: string;
+      secondaryBg: string;
+      secondaryText: string;
+      secondaryBorder: string;
+    };
+  };
 };
 
 export const DEFAULT_CATEGORY_THEME_KEY: CategoryThemeKey = "indigo";
 
 export const CATEGORY_THEME_TOKENS: Record<CategoryThemeKey, CategoryThemeScale> = {
-  indigo: {
-    label: "Indigo",
+  brandMono: {
+    label: "Marque (Noir & Blanc)",
     light: {
-      background: "#e0e7ff",
-      surface: "#c7d2fe",
-      card: "#a5b4fc",
+      background: "#f0f0f0",
+      surface: "#f7f7f7",
+      card: "#ffffff",
       text: "#111111",
     },
     dark: {
-      background: "#312e81",
-      surface: "#3730a3",
-      card: "#4338ca",
+      background: "#0f0f0f",
+      surface: "#181818",
+      card: "#232323",
       text: "#ffffff",
+    },
+    buttons: {
+      light: {
+        primaryBg: "#111111",
+        primaryText: "#ffffff",
+        secondaryBg: "#f4f4f5",
+        secondaryText: "#111111",
+        secondaryBorder: "#d4d4d8",
+      },
+      dark: {
+        primaryBg: "#ffffff",
+        primaryText: "#111111",
+        secondaryBg: "#181818",
+        secondaryText: "#ffffff",
+        secondaryBorder: "#3f3f46",
+      },
+    },
+  },
+  indigo: {
+    label: "Indigo",
+    light: {
+      background: "#edf0ff",
+      surface: "#f4f6ff",
+      card: "#fbfcff",
+      text: "#111111",
+    },
+    dark: {
+      background: "#111433",
+      surface: "#181c45",
+      card: "#20255a",
+      text: "#ffffff",
+    },
+    buttons: {
+      light: {
+        primaryBg: "#111111",
+        primaryText: "#ffffff",
+        secondaryBg: "#f4f4f5",
+        secondaryText: "#111111",
+        secondaryBorder: "#d4d4d8",
+      },
+      dark: {
+        primaryBg: "#ffffff",
+        primaryText: "#111111",
+        secondaryBg: "#181818",
+        secondaryText: "#ffffff",
+        secondaryBorder: "#3f3f46",
+      },
     },
   },
   violet: {
     label: "Violet",
     light: {
-      background: "#f3e8ff",
-      surface: "#e9d5ff",
-      card: "#d8b4fe",
+      background: "#f2ecff",
+      surface: "#f7f3ff",
+      card: "#fcfaff",
       text: "#111111",
     },
     dark: {
-      background: "#581c87",
-      surface: "#6b21a8",
-      card: "#7e22ce",
+      background: "#261236",
+      surface: "#301747",
+      card: "#3c1d59",
       text: "#ffffff",
+    },
+    buttons: {
+      light: {
+        primaryBg: "#111111",
+        primaryText: "#ffffff",
+        secondaryBg: "#f4f4f5",
+        secondaryText: "#111111",
+        secondaryBorder: "#d4d4d8",
+      },
+      dark: {
+        primaryBg: "#ffffff",
+        primaryText: "#111111",
+        secondaryBg: "#181818",
+        secondaryText: "#ffffff",
+        secondaryBorder: "#3f3f46",
+      },
     },
   },
   blue: {
     label: "Blue",
     light: {
-      background: "#dbeafe",
-      surface: "#bfdbfe",
-      card: "#93c5fd",
+      background: "#eaf1ff",
+      surface: "#f2f7ff",
+      card: "#fafdff",
       text: "#111111",
     },
     dark: {
-      background: "#1e3a8a",
-      surface: "#1d4ed8",
-      card: "#2563eb",
+      background: "#10233c",
+      surface: "#14304f",
+      card: "#1a3f66",
       text: "#ffffff",
+    },
+    buttons: {
+      light: {
+        primaryBg: "#111111",
+        primaryText: "#ffffff",
+        secondaryBg: "#f4f4f5",
+        secondaryText: "#111111",
+        secondaryBorder: "#d4d4d8",
+      },
+      dark: {
+        primaryBg: "#ffffff",
+        primaryText: "#111111",
+        secondaryBg: "#181818",
+        secondaryText: "#ffffff",
+        secondaryBorder: "#3f3f46",
+      },
     },
   },
   teal: {
     label: "Teal",
     light: {
-      background: "#ccfbf1",
-      surface: "#99f6e4",
-      card: "#5eead4",
+      background: "#e5f8f5",
+      surface: "#eefbf8",
+      card: "#f8fefd",
       text: "#111111",
     },
     dark: {
-      background: "#134e4a",
-      surface: "#115e59",
-      card: "#0f766e",
+      background: "#0d2f2b",
+      surface: "#11403a",
+      card: "#165247",
       text: "#ffffff",
+    },
+    buttons: {
+      light: {
+        primaryBg: "#111111",
+        primaryText: "#ffffff",
+        secondaryBg: "#f4f4f5",
+        secondaryText: "#111111",
+        secondaryBorder: "#d4d4d8",
+      },
+      dark: {
+        primaryBg: "#ffffff",
+        primaryText: "#111111",
+        secondaryBg: "#181818",
+        secondaryText: "#ffffff",
+        secondaryBorder: "#3f3f46",
+      },
     },
   },
   emerald: {
     label: "Emerald",
     light: {
-      background: "#dcfce7",
-      surface: "#bbf7d0",
-      card: "#86efac",
+      background: "#e7f7ec",
+      surface: "#effbf3",
+      card: "#f9fefa",
       text: "#111111",
     },
     dark: {
-      background: "#14532d",
-      surface: "#166534",
-      card: "#15803d",
+      background: "#112e1e",
+      surface: "#164027",
+      card: "#1b5533",
       text: "#ffffff",
+    },
+    buttons: {
+      light: {
+        primaryBg: "#111111",
+        primaryText: "#ffffff",
+        secondaryBg: "#f4f4f5",
+        secondaryText: "#111111",
+        secondaryBorder: "#d4d4d8",
+      },
+      dark: {
+        primaryBg: "#ffffff",
+        primaryText: "#111111",
+        secondaryBg: "#181818",
+        secondaryText: "#ffffff",
+        secondaryBorder: "#3f3f46",
+      },
     },
   },
   amber: {
     label: "Amber",
     light: {
-      background: "#fef3c7",
-      surface: "#fde68a",
-      card: "#fcd34d",
+      background: "#faf2df",
+      surface: "#fcf7eb",
+      card: "#fffdf8",
       text: "#111111",
     },
     dark: {
-      background: "#78350f",
-      surface: "#92400e",
-      card: "#b45309",
+      background: "#39240f",
+      surface: "#4b3013",
+      card: "#603d18",
       text: "#ffffff",
+    },
+    buttons: {
+      light: {
+        primaryBg: "#111111",
+        primaryText: "#ffffff",
+        secondaryBg: "#f4f4f5",
+        secondaryText: "#111111",
+        secondaryBorder: "#d4d4d8",
+      },
+      dark: {
+        primaryBg: "#ffffff",
+        primaryText: "#111111",
+        secondaryBg: "#181818",
+        secondaryText: "#ffffff",
+        secondaryBorder: "#3f3f46",
+      },
     },
   },
   rose: {
     label: "Rose",
     light: {
-      background: "#ffe4e6",
-      surface: "#fecdd3",
-      card: "#fda4af",
+      background: "#fbecef",
+      surface: "#fdf3f5",
+      card: "#fffafb",
       text: "#111111",
     },
     dark: {
-      background: "#881337",
-      surface: "#9f1239",
-      card: "#be123c",
+      background: "#3a1422",
+      surface: "#4c1a2c",
+      card: "#622137",
       text: "#ffffff",
+    },
+    buttons: {
+      light: {
+        primaryBg: "#111111",
+        primaryText: "#ffffff",
+        secondaryBg: "#f4f4f5",
+        secondaryText: "#111111",
+        secondaryBorder: "#d4d4d8",
+      },
+      dark: {
+        primaryBg: "#ffffff",
+        primaryText: "#111111",
+        secondaryBg: "#181818",
+        secondaryText: "#ffffff",
+        secondaryBorder: "#3f3f46",
+      },
     },
   },
   slate: {
     label: "Slate",
     light: {
-      background: "#e2e8f0",
-      surface: "#cbd5e1",
-      card: "#94a3b8",
+      background: "#edf0f4",
+      surface: "#f4f6f9",
+      card: "#fbfcfe",
       text: "#111111",
     },
     dark: {
-      background: "#1e293b",
-      surface: "#334155",
-      card: "#475569",
+      background: "#161a24",
+      surface: "#1e2430",
+      card: "#283041",
       text: "#ffffff",
+    },
+    buttons: {
+      light: {
+        primaryBg: "#111111",
+        primaryText: "#ffffff",
+        secondaryBg: "#f4f4f5",
+        secondaryText: "#111111",
+        secondaryBorder: "#d4d4d8",
+      },
+      dark: {
+        primaryBg: "#ffffff",
+        primaryText: "#111111",
+        secondaryBg: "#181818",
+        secondaryText: "#ffffff",
+        secondaryBorder: "#3f3f46",
+      },
     },
   },
 };

@@ -34,6 +34,7 @@ export default async function AdminShopVitrineMiseEnPagePage({ params }: { param
           bundlesMenuGrouped={payload.bundlesMenuGrouped}
           reviews={payload.reviews}
           initialLayout={payload.storefrontBentoLayout}
+          initialStorefrontThemeKey={payload.storefrontThemeKey}
           backHref="/admin"
           layoutSaveMode="admin"
         />

@@ -8,11 +8,12 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -34,12 +35,6 @@ import { BentoCardBackFloating } from "./BentoCardBackFloating";
 import { BentoCardProduct } from "./BentoCardProduct";
 import { BundleDetail } from "./BundleDetail";
 import { ProductDetail, type PublicProduct } from "@/components/product/ProductDetail";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import type { BentoSize } from "@/components/bento/BentoCard";
 import {
   BUNDLES_MENU_TILE_ID,
@@ -52,6 +47,8 @@ import {
 } from "@/lib/storefrontBentoLayout";
 import { STOREFRONT_NAVIGATE_HOME } from "@/lib/storefrontNav";
 import type { StorefrontPhoto } from "@/lib/types";
+import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
+import { getStorefrontThemePreviewStyle } from "@/lib/storefrontTheme";
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -62,7 +59,6 @@ export interface ShopInfo {
   description: string | null;
   logo_url: string | null;
   cover_image_url: string | null;
-  owner_photo_url: string | null;
   address: string | null;
   phone: string | null;
   /** Email de contact affiché sur la carte boutique. */
@@ -112,6 +108,19 @@ interface StoreViewProps {
   savedStorefrontLayout?: unknown | null;
   /** Si fourni, remplace le chargement Supabase pour les produits d’une catégorie (ex. démo statique `/demo`). */
   loadCategoryProducts?: (categoryId: string) => Promise<PublicProduct[]>;
+  storefrontThemeKey?: CategoryThemeKey;
+}
+
+function subscribe() {
+  return () => {};
+}
+
+function getClientSnapshot() {
+  return true;
+}
+
+function getServerSnapshot() {
+  return false;
 }
 
 const MENU_CARD_NAME = "Menu";
@@ -178,8 +187,19 @@ export function StoreView({
   storefrontPhotos = [],
   savedStorefrontLayout,
   loadCategoryProducts: loadCategoryProductsProp,
+  storefrontThemeKey,
 }: StoreViewProps) {
   const isMobile = useIsMobile();
+  const { resolvedTheme } = useTheme();
+  const mounted = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
+  const isDark = mounted ? resolvedTheme === "dark" : false;
+  const storefrontThemeStyle = useMemo(
+    () =>
+      storefrontThemeKey
+        ? getStorefrontThemePreviewStyle(storefrontThemeKey, isDark)
+        : undefined,
+    [storefrontThemeKey, isDark]
+  );
   const addItem = useCartStore((s) => s.addItem);
   const backCardRef = useRef<HTMLDivElement | null>(null);
   const [isBackInView, setIsBackInView] = useState(true);
@@ -215,7 +235,6 @@ export function StoreView({
 
   const [detailProduct, setDetailProduct] = useState<PublicProduct | null>(null);
   const [selectedBundle, setSelectedBundle] = useState<BundleInfo | null>(null);
-  const [galleryOpen, setGalleryOpen] = useState(false);
 
   // ── Product loader (shared by category nav and bundle detail) ──
 
@@ -386,7 +405,6 @@ export function StoreView({
           description={shop.description}
           coverUrl={shop.cover_image_url}
           logoUrl={shop.logo_url}
-          ownerPhotoUrl={shop.owner_photo_url}
           address={shop.address}
           phone={shop.phone}
           emailContact={shop.email_contact}
@@ -457,7 +475,6 @@ export function StoreView({
           size={size}
           omitSizeClasses={omitSizeClasses}
           className={!omitSizeClasses ? "col-span-2 row-span-1" : undefined}
-          onClick={() => setGalleryOpen(true)}
         />
       );
     }
@@ -470,7 +487,7 @@ export function StoreView({
   const slideVars = makeSlideVariants(direction);
 
   return (
-    <>
+    <div style={storefrontThemeStyle}>
       <AnimatePresence mode="wait">
         {level === "l1" ? (
           <motion.div
@@ -620,37 +637,6 @@ export function StoreView({
         }
         onBack={goBack}
       />
-
-      <Dialog open={galleryOpen} onOpenChange={setGalleryOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogTitle>Galerie photos</DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            Découvrez les photos de la vitrine.
-          </DialogDescription>
-          {visibleStorefrontPhotos.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-border bg-muted/20 p-8 text-center text-sm text-muted-foreground">
-              Aucune photo disponible pour le moment.
-            </div>
-          ) : (
-            <div className="grid max-h-[70vh] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
-              {visibleStorefrontPhotos.map((photo, index) => (
-                <div
-                  key={photo.id}
-                  className="relative aspect-[4/3] overflow-hidden rounded-xl border border-border bg-muted"
-                >
-                  <Image
-                    src={photo.image_url}
-                    alt={photo.caption ?? `Photo vitrine ${index + 1}`}
-                    fill
-                    sizes="(max-width: 640px) 100vw, 50vw"
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+    </div>
   );
 }

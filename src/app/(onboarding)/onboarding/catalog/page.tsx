@@ -8,6 +8,7 @@ import {
   fetchPublicShopPagePayload,
   type PublicShopPagePayload,
 } from "@/lib/fetchPublicShopPagePayload";
+import { DEFAULT_CATEGORY_THEME_KEY } from "@/lib/categoryThemeTokens";
 import {
   backfillLegacyVitrineThenRedirectToCatalog,
   loadOwnedShopForOnboarding,
@@ -29,7 +30,6 @@ function emptyPayloadFromShop(shop: {
   description: string | null;
   logo_url: string | null;
   cover_image_url: string | null;
-  owner_photo_url: string | null;
   address: string | null;
   phone: string | null;
   email_contact: string | null;
@@ -50,7 +50,6 @@ function emptyPayloadFromShop(shop: {
     description: shop.description,
     logo_url: shop.logo_url,
     cover_image_url: shop.cover_image_url,
-    owner_photo_url: shop.owner_photo_url,
     address: shop.address,
     phone: shop.phone,
     email_contact: shop.email_contact ?? null,
@@ -68,6 +67,7 @@ function emptyPayloadFromShop(shop: {
     reviews: null,
     storefrontPhotos: [],
     savedStorefrontLayout: null,
+    storefrontThemeKey: DEFAULT_CATEGORY_THEME_KEY,
     stripeAccountId: shop.stripe_account_id,
   };
 }

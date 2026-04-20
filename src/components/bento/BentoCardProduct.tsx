@@ -68,7 +68,7 @@ export function BentoCardProduct({
           type="button"
           onClick={onAddToCart}
           aria-label={`Ajouter ${name} au panier`}
-          className="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full text-white shadow-md transition-transform hover:scale-110 active:scale-95"
+          className="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full text-primary-foreground shadow-md transition-transform hover:scale-110 active:scale-95"
           style={{ backgroundColor: "var(--color-bento-accent)" }}
         >
           <Plus className="h-4 w-4" strokeWidth={3} />
@@ -76,11 +76,11 @@ export function BentoCardProduct({
       )}
 
       {/* Bottom info */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 bg-black/85 p-3 [--p:0.75rem] [--inner-r:max(0px,calc(var(--outer-r)-var(--p)))] rounded-b-[var(--outer-r)] rounded-t-[var(--inner-r)]">
-        <p className="text-sm font-semibold text-white line-clamp-2 leading-tight mb-1">
+      <div className="absolute bottom-0 left-0 right-0 z-10 bg-white/85 p-3 [--p:0.75rem] [--inner-r:max(0px,calc(var(--outer-r)-var(--p)))] rounded-b-[var(--outer-r)] rounded-t-[var(--inner-r)] dark:bg-black/85">
+        <p className="text-sm font-semibold text-black line-clamp-2 leading-tight mb-1 dark:text-white">
           {name}
         </p>
-        <PriceTag price={price} size="sm" className="text-white" />
+        <PriceTag price={price} size="sm" className="text-black dark:text-white" />
       </div>
     </BentoCard>
   );

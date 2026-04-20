@@ -2,6 +2,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { BundleInfo, CategoryInfo, ShopInfo, SlotSummary } from "@/components/bento/StoreView";
 import type { SocialLinks, ShopReviews, StorefrontPhoto } from "@/lib/types";
+import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
+import { coerceStorefrontThemeKey } from "@/lib/storefrontTheme";
 
 export type ShopStorefrontEditorPayload = {
   shopId: string;
@@ -12,6 +14,7 @@ export type ShopStorefrontEditorPayload = {
   reviews: ShopReviews | null;
   storefrontPhotos: StorefrontPhoto[];
   storefrontBentoLayout: unknown | null;
+  storefrontThemeKey: CategoryThemeKey;
 };
 
 /**
@@ -24,7 +27,7 @@ export async function fetchShopStorefrontEditorPayload(
   const { data: shop } = await supabase
     .from("shops")
     .select(
-      "id, name, slug, description, logo_url, cover_image_url, owner_photo_url, address, phone, email_contact, social_links, fulfillment_modes, opening_hours, opening_timezone, open_on_public_holidays"
+      "id, name, slug, description, logo_url, cover_image_url, address, phone, email_contact, social_links, fulfillment_modes, opening_hours, opening_timezone, open_on_public_holidays"
     )
     .eq("id", shopId)
     .single();
@@ -42,6 +45,18 @@ export async function fetchShopStorefrontEditorPayload(
     !layoutError && layoutRow
       ? (layoutRow as { storefront_bento_layout: unknown | null }).storefront_bento_layout
       : null;
+
+  const { data: themeRow, error: themeError } = await supabase
+    .from("shops")
+    .select("storefront_theme_key")
+    .eq("id", shopId)
+    .maybeSingle();
+
+  const storefrontThemeKey = coerceStorefrontThemeKey(
+    !themeError && themeRow
+      ? (themeRow as { storefront_theme_key?: unknown }).storefront_theme_key
+      : null
+  );
 
   const { data: groupedRow, error: groupedError } = await supabase
     .from("shops")
@@ -163,7 +178,6 @@ export async function fetchShopStorefrontEditorPayload(
     description: shop.description,
     logo_url: shop.logo_url,
     cover_image_url: shop.cover_image_url,
-    owner_photo_url: shop.owner_photo_url,
     address: shop.address,
     phone: shop.phone,
     email_contact: (shop as { email_contact: string | null }).email_contact ?? null,
@@ -183,5 +197,6 @@ export async function fetchShopStorefrontEditorPayload(
     reviews: (shopReviews ?? null) as ShopReviews | null,
     storefrontPhotos: (storefrontPhotos ?? []) as StorefrontPhoto[],
     storefrontBentoLayout,
+    storefrontThemeKey,
   };
 }

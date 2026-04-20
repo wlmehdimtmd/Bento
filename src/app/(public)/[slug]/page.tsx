@@ -76,6 +76,7 @@ export default async function ShopPage({
     reviews,
     storefrontPhotos,
     savedStorefrontLayout,
+    storefrontThemeKey,
   } = payload;
 
   return (
@@ -88,6 +89,7 @@ export default async function ShopPage({
         reviews={reviews}
         storefrontPhotos={storefrontPhotos}
         savedStorefrontLayout={savedStorefrontLayout}
+        storefrontThemeKey={storefrontThemeKey}
       />
 
       {categories.length === 0 && bundles.length === 0 && (

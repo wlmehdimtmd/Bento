@@ -111,6 +111,7 @@ export default async function DemoPage() {
           bundlesMenuGrouped={payload.bundlesMenuGrouped}
           reviews={payload.reviews}
           savedStorefrontLayout={payload.savedStorefrontLayout}
+          storefrontThemeKey={payload.storefrontThemeKey}
           stripeAccountId={payload.stripeAccountId}
         />
       );

@@ -161,6 +161,7 @@ export function OnboardingCatalogWorkspace({
             bundlesMenuGrouped={payload.bundlesMenuGrouped}
             reviews={payload.reviews}
             savedStorefrontLayout={payload.savedStorefrontLayout}
+            storefrontThemeKey={payload.storefrontThemeKey}
           />
         </div>
       </div>

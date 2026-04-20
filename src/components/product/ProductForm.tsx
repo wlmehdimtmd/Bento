@@ -210,7 +210,7 @@ export function ProductForm({
             square
           />
         </div>
-        <div className="mt-auto border-t border-border bg-background py-3">
+        <div className="mt-auto border-t border-border py-3">
           <Button
             type="button"
             onClick={() => changeSubView("main")}
@@ -230,7 +230,7 @@ export function ProductForm({
         <div className="flex-1 pb-3">
           <TagSelector selected={tags} onChange={setTags} disabled={isSubmitting} />
         </div>
-        <div className="mt-auto border-t border-border bg-background py-3">
+        <div className="mt-auto border-t border-border py-3">
           <Button
             type="button"
             onClick={() => changeSubView("main")}
@@ -383,7 +383,7 @@ export function ProductForm({
 
       {/* Actions */}
       <div
-        className={`mt-auto flex w-full gap-2 border-t border-border bg-background py-3 ${
+        className={`mt-auto flex w-full gap-2 border-t border-border py-3 ${
           sheetCtasFullWidth ? "" : "md:justify-end"
         }`}
       >

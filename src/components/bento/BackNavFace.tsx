@@ -4,10 +4,9 @@ import type { CSSProperties } from "react";
 import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** Fond dégradé discret aligné sur `BentoCardBack` (couche opacity-10). */
+/** Fond monochrome discret aligné sur la DA marque. */
 export const backNavAccentGradientStyle: CSSProperties = {
-  background:
-    "linear-gradient(135deg, var(--color-bento-accent) 0%, var(--color-bento-accent-dark) 100%)",
+  background: "var(--color-bento-accent)",
 };
 
 export interface BackNavFaceProps {
@@ -40,7 +39,7 @@ export function BackNavFace({
           "flex shrink-0 items-center justify-center rounded-full",
           compact ? "h-8 w-8" : "h-10 w-10"
         )}
-        style={{ backgroundColor: "var(--color-bento-accent)/15" }}
+        style={{ backgroundColor: "color-mix(in srgb, var(--color-bento-accent) 14%, transparent)" }}
       >
         <ChevronLeft
           className={compact ? "h-5 w-5" : "h-6 w-6"}

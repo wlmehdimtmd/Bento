@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { toast } from "sonner";
+import { Circle, Plus } from "lucide-react";
 
 import { AppBrandMark } from "@/components/layout/AppBrandMark";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
@@ -140,9 +141,8 @@ export function DevDaClient() {
           <p className="text-xs text-muted-foreground">
             Référence documentaire (CLAUDE.md) : fond clair type{" "}
             <code className="rounded bg-muted px-1">#faf9f6</code>, texte{" "}
-            <code className="rounded bg-muted px-1">#1a1a1a</code>, accents{" "}
-            <code className="rounded bg-muted px-1">#e85d04</code> /{" "}
-            <code className="rounded bg-muted px-1">#f4a261</code> (sombre) — portés
+            <code className="rounded bg-muted px-1">#1a1a1a</code>, marque désormais
+            monochrome (sans accent chromatique) — portés
             en CSS via <code className="rounded bg-muted px-1">--color-cream</code>,{" "}
             <code className="rounded bg-muted px-1">--color-bento-accent</code>, etc.
           </p>
@@ -253,16 +253,13 @@ export function DevDaClient() {
             <div className="space-y-2">
               <div
                 className="flex h-16 w-28 items-center justify-center rounded-xl border border-border text-xs font-semibold text-charcoal shadow-sm dark:text-foreground"
-                style={{
-                  background:
-                    "linear-gradient(135deg, var(--color-bento-accent) 0%, var(--color-bento-accent-dark) 100%)",
-                }}
+                style={{ backgroundColor: "var(--color-bento-accent)" }}
               >
-                Dégradé
+                Accent
               </div>
-              <p className="text-xs font-medium">accent → accent-dark</p>
+              <p className="text-xs font-medium">accent monochrome</p>
               <code className="text-[10px] text-muted-foreground">
-                #f4a261 (dark mode accent UI)
+                variable adaptée au thème
               </code>
             </div>
           </div>
@@ -578,11 +575,11 @@ export function DevDaClient() {
           </div>
           <p className="text-xs text-muted-foreground">
             Couleurs marque fixes :{" "}
-            <code className="rounded bg-muted px-1">--color-cream</code> #faf9f6,{" "}
-            <code className="rounded bg-muted px-1">--color-charcoal</code> #1a1a1a,{" "}
-            <code className="rounded bg-muted px-1">--color-bento-accent</code> #e85d04,{" "}
+            <code className="rounded bg-muted px-1">--color-cream</code> #f7f7f7,{" "}
+            <code className="rounded bg-muted px-1">--color-charcoal</code> #111111,{" "}
+            <code className="rounded bg-muted px-1">--color-bento-accent</code> monochrome,{" "}
             <code className="rounded bg-muted px-1">--color-bento-accent-dark</code>{" "}
-            #f4a261
+            monochrome
           </p>
         </Section>
 
@@ -636,11 +633,13 @@ function CategoryThemeLevelsPreview({ themeKey }: { themeKey: CategoryThemeKey }
         <ThemeModeScale
           title="Light / texte noir"
           levels={theme.light}
+          buttons={theme.buttons.light}
           titleClassName="text-foreground"
         />
         <ThemeModeScale
           title="Dark / texte blanc"
           levels={theme.dark}
+          buttons={theme.buttons.dark}
           titleClassName="text-foreground"
         />
       </div>
@@ -651,6 +650,7 @@ function CategoryThemeLevelsPreview({ themeKey }: { themeKey: CategoryThemeKey }
 function ThemeModeScale({
   title,
   levels,
+  buttons,
   titleClassName,
 }: {
   title: string;
@@ -659,6 +659,13 @@ function ThemeModeScale({
     surface: string;
     card: string;
     text: string;
+  };
+  buttons: {
+    primaryBg: string;
+    primaryText: string;
+    secondaryBg: string;
+    secondaryText: string;
+    secondaryBorder: string;
   };
   titleClassName?: string;
 }) {
@@ -688,6 +695,28 @@ function ThemeModeScale({
         <p>bg: {levels.background}</p>
         <p>surface: {levels.surface}</p>
         <p>card: {levels.card}</p>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md transition-opacity hover:opacity-90"
+          style={{ backgroundColor: buttons.primaryBg, color: buttons.primaryText }}
+          aria-label="Primary icon button sample"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md border transition-opacity hover:opacity-90"
+          style={{
+            backgroundColor: buttons.secondaryBg,
+            color: buttons.secondaryText,
+            borderColor: buttons.secondaryBorder,
+          }}
+          aria-label="Secondary icon button sample"
+        >
+          <Circle className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );

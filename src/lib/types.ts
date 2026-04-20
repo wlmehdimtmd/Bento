@@ -26,7 +26,6 @@ export interface SocialLinks {
   twitter?: string;
   tiktok?: string;
   website?: string;
-  chef_name?: string;
   /** Lien fiche Google Maps / avis (formulaire vitrine). */
   google_maps_url?: string;
   /** Si `false`, adresse / téléphone / email ne s’affichent pas sur la carte vitrine. */
