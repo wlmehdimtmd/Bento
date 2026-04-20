@@ -153,7 +153,7 @@ export function DemoView({ reviews }: { reviews?: ShopReviews | null }) {
             </div>
 
             {/* ── Contenu principal (ISO avec la vraie page) ── */}
-            <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-8 pb-32 sm:pb-8">
+            <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-8 pb-32">
               <StoreView
                 shop={DEMO_SHOP}
                 categories={DEMO_CATEGORIES}

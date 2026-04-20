@@ -55,7 +55,7 @@ export default async function ShopPublicLayout({
               shopLogo={shop.logo_url}
               shopSlug={shop.slug}
             />
-            <main id="main-content" className="flex-1 pb-32 sm:pb-0">{children}</main>
+            <main id="main-content" className="flex-1 pb-32">{children}</main>
           </div>
           <CartButton />
           <CartDrawer />

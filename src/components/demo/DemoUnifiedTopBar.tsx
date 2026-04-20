@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { ACCENT_CTA_HOVER_OVERLAY_CLASS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 /**
@@ -14,7 +15,7 @@ export function DemoUnifiedTopBar() {
   return (
     <div className="border-b border-transparent bg-transparent">
       <div className="flex flex-row items-center justify-between gap-2 border-b border-white/10 px-4 py-2 text-xs font-medium sm:gap-3 sm:py-2.5">
-        <div className="flex min-w-0 flex-1 items-center">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           <Link
             href="/"
             aria-label="Retour à l'accueil"
@@ -24,6 +25,17 @@ export function DemoUnifiedTopBar() {
             )}
           >
             <ArrowLeft className="size-4 shrink-0" aria-hidden />
+          </Link>
+          <Link
+            href="/"
+            aria-label="Bento Resto, accueil"
+            className="inline-flex min-w-0 max-w-full items-center gap-1.5 truncate text-left text-sm font-semibold tracking-tight text-white transition-colors hover:text-white/90 sm:gap-2 sm:text-base"
+            style={{ fontFamily: "var(--font-onest)" }}
+          >
+            <span className="shrink-0 select-none text-base leading-none sm:text-lg" aria-hidden>
+              🍱
+            </span>
+            <span className="min-w-0 truncate">Bento Resto</span>
           </Link>
         </div>
 
@@ -41,11 +53,16 @@ export function DemoUnifiedTopBar() {
             href="/register"
             className={cn(
               buttonVariants({ variant: "default", size: "sm" }),
+              "group relative inline-flex max-w-full overflow-hidden border-transparent bg-bento-accent text-white shadow-none",
+              "focus-visible:ring-bento-accent/45",
               "max-sm:min-h-10 max-sm:min-w-10 max-sm:px-3 max-sm:text-xs"
             )}
           >
-            <span className="hidden sm:inline">Créer ma vitrine →</span>
-            <span className="sm:hidden">Créer ma vitrine</span>
+            <span aria-hidden className={ACCENT_CTA_HOVER_OVERLAY_CLASS} />
+            <span className="relative z-[2] inline-flex items-center">
+              <span className="hidden sm:inline">Créer ma vitrine →</span>
+              <span className="sm:hidden">Créer ma vitrine</span>
+            </span>
           </Link>
         </div>
       </div>
@@ -60,9 +77,13 @@ export function DemoUnifiedTopBar() {
           Aucune commande réelle n&apos;est enregistrée depuis cette page.{" "}
           <Link
             href="/register"
-            className="font-medium text-white underline decoration-white/45 underline-offset-2 transition-colors hover:text-white/90"
+            className={cn(
+              "group relative inline-flex items-center overflow-hidden rounded-lg bg-bento-accent px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm sm:text-xs",
+              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
+            )}
           >
-            Créez la vôtre
+            <span aria-hidden className={ACCENT_CTA_HOVER_OVERLAY_CLASS} />
+            <span className="relative z-[2]">Créez la vôtre</span>
           </Link>{" "}
           en quelques minutes.
         </p>

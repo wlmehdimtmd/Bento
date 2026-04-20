@@ -60,7 +60,7 @@ export function DemoLiveStoreView({
                 <DemoUnifiedTopBar />
               </div>
 
-              <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-8 pb-32 sm:pb-8">
+              <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-8 pb-32">
                 <StoreView
                   shop={shop}
                   categories={categories}
