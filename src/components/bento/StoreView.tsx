@@ -48,7 +48,8 @@ import {
 import { STOREFRONT_NAVIGATE_HOME } from "@/lib/storefrontNav";
 import type { StorefrontPhoto } from "@/lib/types";
 import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
-import { getStorefrontThemePreviewStyle } from "@/lib/storefrontTheme";
+import { getStorefrontThemePreviewStyle, type StorefrontThemeOverrides } from "@/lib/storefrontTheme";
+import type { ProductLabelOption } from "@/lib/shop-labels";
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -109,6 +110,8 @@ interface StoreViewProps {
   /** Si fourni, remplace le chargement Supabase pour les produits d’une catégorie (ex. démo statique `/demo`). */
   loadCategoryProducts?: (categoryId: string) => Promise<PublicProduct[]>;
   storefrontThemeKey?: CategoryThemeKey;
+  storefrontThemeOverrides?: StorefrontThemeOverrides;
+  shopLabels?: ProductLabelOption[];
 }
 
 function subscribe() {
@@ -188,6 +191,8 @@ export function StoreView({
   savedStorefrontLayout,
   loadCategoryProducts: loadCategoryProductsProp,
   storefrontThemeKey,
+  storefrontThemeOverrides,
+  shopLabels = [],
 }: StoreViewProps) {
   const isMobile = useIsMobile();
   const { resolvedTheme } = useTheme();
@@ -196,9 +201,9 @@ export function StoreView({
   const storefrontThemeStyle = useMemo(
     () =>
       storefrontThemeKey
-        ? getStorefrontThemePreviewStyle(storefrontThemeKey, isDark)
+        ? getStorefrontThemePreviewStyle(storefrontThemeKey, isDark, storefrontThemeOverrides)
         : undefined,
-    [storefrontThemeKey, isDark]
+    [storefrontThemeKey, isDark, storefrontThemeOverrides]
   );
   const addItem = useCartStore((s) => s.addItem);
   const backCardRef = useRef<HTMLDivElement | null>(null);
@@ -574,6 +579,7 @@ export function StoreView({
                       imageUrl={p.image_url}
                       fallbackEmoji={selectedCat?.icon_emoji}
                       tags={p.tags}
+                      shopLabels={shopLabels}
                       isAvailable={p.is_available}
                       onAddToCart={(e) => handleQuickAdd(p, e)}
                       onClick={() => setDetailProduct(p)}
@@ -617,6 +623,7 @@ export function StoreView({
         product={detailProduct}
         open={!!detailProduct}
         onClose={() => setDetailProduct(null)}
+        shopLabels={shopLabels}
       />
 
       <BundleDetail
@@ -624,6 +631,7 @@ export function StoreView({
         open={!!selectedBundle}
         onClose={() => setSelectedBundle(null)}
         loadCategoryProducts={loadProductsForCategory}
+        shopLabels={shopLabels}
       />
 
       <BentoCardBackFloating

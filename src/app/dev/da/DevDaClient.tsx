@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Circle, Plus } from "lucide-react";
@@ -13,6 +14,14 @@ import {
   CATEGORY_THEME_TOKENS,
   type CategoryThemeKey,
 } from "@/lib/categoryThemeTokens";
+import { createClient } from "@/lib/supabase/client";
+import {
+  buildStorefrontThemeDefaults,
+  coerceStorefrontThemeKey,
+  coerceStorefrontThemeOverrides,
+  getStorefrontThemeScaleWithOverrides,
+  type StorefrontThemeOverrides,
+} from "@/lib/storefrontTheme";
 import { cn } from "@/lib/utils";
 
 function Section({
@@ -74,7 +83,142 @@ const TYPO_SCALE = [
   { cls: "text-4xl", label: "text-4xl", rem: "2.25rem" },
 ] as const;
 
+type PreviewMode = "light" | "dark";
+type EditableColorField = "background" | "surface" | "card" | "text" | "primaryBg" | "primaryText";
+
 export function DevDaClient() {
+  const supabase = useMemo(() => createClient(), []);
+  const [selectedThemeKey, setSelectedThemeKey] = useState<CategoryThemeKey>("indigo");
+  const [previewMode, setPreviewMode] = useState<PreviewMode>("light");
+  const [shopId, setShopId] = useState<string | null>(null);
+  const [shopName, setShopName] = useState<string | null>(null);
+  const [overrides, setOverrides] = useState<StorefrontThemeOverrides>({});
+  const [loadingShop, setLoadingShop] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const defaultsByTheme = useMemo(() => buildStorefrontThemeDefaults(), []);
+
+  useEffect(() => {
+    let alive = true;
+    async function loadShopThemeEditorContext() {
+      setLoadingShop(true);
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (!alive) return;
+      if (userError || !user) {
+        setLoadingShop(false);
+        return;
+      }
+
+      const { data: shop, error: shopError } = await supabase
+        .from("shops")
+        .select("id, name, storefront_theme_key, storefront_theme_overrides")
+        .eq("owner_id", user.id)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (!alive) return;
+      setLoadingShop(false);
+
+      if (shopError) {
+        console.error("[DevDaClient] unable to load shop editor context", shopError);
+        toast.error("Impossible de charger la boutique pour l’éditeur de couleurs.");
+        return;
+      }
+
+      if (!shop) return;
+
+      setShopId(shop.id);
+      setShopName(shop.name);
+      setSelectedThemeKey(coerceStorefrontThemeKey(shop.storefront_theme_key));
+      setOverrides(coerceStorefrontThemeOverrides(shop.storefront_theme_overrides));
+    }
+
+    void loadShopThemeEditorContext();
+    return () => {
+      alive = false;
+    };
+  }, [supabase]);
+
+  const currentScale = useMemo(
+    () => getStorefrontThemeScaleWithOverrides(selectedThemeKey, overrides),
+    [selectedThemeKey, overrides]
+  );
+
+  function handleColorChange(
+    mode: "light" | "dark",
+    field: EditableColorField,
+    value: string
+  ) {
+    setOverrides((prev) => {
+      const next: StorefrontThemeOverrides = { ...prev };
+      const current = next[selectedThemeKey] ?? {};
+
+      if (field === "primaryBg" || field === "primaryText") {
+        const currentButtons = current.buttons ?? {};
+        const currentButtonsForMode = currentButtons[mode] ?? {};
+        next[selectedThemeKey] = {
+          ...current,
+          buttons: {
+            ...currentButtons,
+            [mode]: {
+              ...currentButtonsForMode,
+              [field]: value,
+            },
+          },
+        };
+        return next;
+      }
+
+      next[selectedThemeKey] = {
+        ...current,
+        [mode]: {
+          ...(current[mode] ?? {}),
+          [field]: value,
+        },
+      };
+      return next;
+    });
+  }
+
+  function handleResetTheme() {
+    setOverrides((prev) => {
+      const next: StorefrontThemeOverrides = { ...prev };
+      delete next[selectedThemeKey];
+      return next;
+    });
+    toast.success("Palette réinitialisée sur les valeurs par défaut.");
+  }
+
+  async function handleSaveOverrides() {
+    if (!shopId) {
+      toast.error("Aucune boutique liée à ce compte.");
+      return;
+    }
+
+    setSaving(true);
+    const { error } = await supabase
+      .from("shops")
+      .update({
+        storefront_theme_key: selectedThemeKey,
+        storefront_theme_overrides: overrides,
+      })
+      .eq("id", shopId);
+    setSaving(false);
+
+    if (error) {
+      console.error("[DevDaClient] unable to save theme overrides", error);
+      toast.error(error.message || "Impossible d’enregistrer les couleurs.");
+      return;
+    }
+
+    toast.success("Couleurs enregistrées sur la boutique.");
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
@@ -253,7 +397,7 @@ export function DevDaClient() {
             <div className="space-y-2">
               <div
                 className="flex h-16 w-28 items-center justify-center rounded-xl border border-border text-xs font-semibold text-charcoal shadow-sm dark:text-foreground"
-                style={{ backgroundColor: "var(--color-bento-accent)" }}
+                style={{ backgroundColor: "var(--primary)" }}
               >
                 Accent
               </div>
@@ -261,6 +405,125 @@ export function DevDaClient() {
               <code className="text-[10px] text-muted-foreground">
                 variable adaptée au thème
               </code>
+            </div>
+          </div>
+        </Section>
+
+        <Section
+          title="Theme Color Editor"
+          description="Editeur de la palette vitrine par theme key, avec enregistrement en base."
+        >
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 p-3">
+              <div className="text-xs text-muted-foreground">
+                {loadingShop
+                  ? "Chargement de la boutique…"
+                  : shopId
+                    ? `Boutique connectee : ${shopName ?? shopId}`
+                    : "Aucune boutique detectee (connecte-toi pour sauvegarder)."}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant={previewMode === "light" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setPreviewMode("light")}
+                >
+                  Aperçu clair
+                </Button>
+                <Button
+                  type="button"
+                  variant={previewMode === "dark" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setPreviewMode("dark")}
+                >
+                  Aperçu sombre
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              {CATEGORY_THEME_KEYS.map((key) => {
+                const token = CATEGORY_THEME_TOKENS[key];
+                const preview = previewMode === "dark" ? token.dark : token.light;
+                const selected = key === selectedThemeKey;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    className={cn(
+                      "rounded-xl border p-3 text-left transition-colors",
+                      selected
+                        ? "border-[var(--primary)] bg-accent/30"
+                        : "border-border hover:bg-muted/30"
+                    )}
+                    onClick={() => setSelectedThemeKey(key)}
+                    aria-pressed={selected}
+                  >
+                    <p className="font-heading text-sm font-semibold">{token.label}</p>
+                    <code className="text-[10px] text-muted-foreground">{key}</code>
+                    <span className="mt-2 flex items-center gap-1.5">
+                      <span
+                        className="h-4 w-4 rounded-full border border-black/10"
+                        style={{ backgroundColor: preview.background }}
+                      />
+                      <span
+                        className="h-4 w-4 rounded-full border border-black/10"
+                        style={{ backgroundColor: preview.surface }}
+                      />
+                      <span
+                        className="h-4 w-4 rounded-full border border-black/10"
+                        style={{ backgroundColor: preview.card }}
+                      />
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <ThemeColorFieldset
+                title="Mode clair"
+                values={currentScale.light}
+                buttonValues={currentScale.buttons.light}
+                onColorChange={(field, value) => handleColorChange("light", field, value)}
+              />
+              <ThemeColorFieldset
+                title="Mode sombre"
+                values={currentScale.dark}
+                buttonValues={currentScale.buttons.dark}
+                onColorChange={(field, value) => handleColorChange("dark", field, value)}
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <ThemeModeScale
+                title="Aperçu Light"
+                levels={currentScale.light}
+                buttons={{
+                  ...defaultsByTheme[selectedThemeKey].buttons.light,
+                  ...currentScale.buttons.light,
+                }}
+                titleClassName="text-foreground"
+              />
+              <ThemeModeScale
+                title="Aperçu Dark"
+                levels={currentScale.dark}
+                buttons={{
+                  ...defaultsByTheme[selectedThemeKey].buttons.dark,
+                  ...currentScale.buttons.dark,
+                }}
+                titleClassName="text-foreground"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" onClick={handleResetTheme}>
+                Reset theme courant
+              </Button>
+              <Button type="button" onClick={handleSaveOverrides} disabled={!shopId || saving}>
+                {saving ? "Enregistrement…" : "Enregistrer en base"}
+              </Button>
             </div>
           </div>
         </Section>
@@ -473,7 +736,7 @@ export function DevDaClient() {
         >
           <p className="text-sm text-muted-foreground">
             Tabulation jusqu’au bouton ci-dessous : contour{" "}
-            <code className="rounded bg-muted px-1">2px solid var(--color-bento-accent)</code>
+            <code className="rounded bg-muted px-1">2px solid var(--primary)</code>
             , offset 2px (voir{" "}
             <code className="rounded bg-muted px-1">globals.css</code>).
           </p>
@@ -597,6 +860,130 @@ export function DevDaClient() {
       </main>
     </div>
   );
+}
+
+function ThemeColorFieldset({
+  title,
+  values,
+  buttonValues,
+  onColorChange,
+}: {
+  title: string;
+  values: {
+    background: string;
+    surface: string;
+    card: string;
+    text: string;
+  };
+  buttonValues: {
+    primaryBg: string;
+    primaryText: string;
+  };
+  onColorChange: (
+    field: EditableColorField,
+    value: string
+  ) => void;
+}) {
+  return (
+    <div className="space-y-3 rounded-xl border border-border bg-card p-4">
+      <p className="font-heading text-sm font-semibold">{title}</p>
+      <div className="grid grid-cols-2 gap-3">
+        <ThemeColorInput
+          label="background"
+          value={values.background}
+          onChange={(value) => onColorChange("background", value)}
+        />
+        <ThemeColorInput
+          label="surface"
+          value={values.surface}
+          onChange={(value) => onColorChange("surface", value)}
+        />
+        <ThemeColorInput
+          label="card"
+          value={values.card}
+          onChange={(value) => onColorChange("card", value)}
+        />
+        <ThemeColorInput
+          label="text"
+          value={values.text}
+          onChange={(value) => onColorChange("text", value)}
+        />
+        <ThemeColorInput
+          label="primaryBg"
+          value={buttonValues.primaryBg}
+          onChange={(value) => onColorChange("primaryBg", value)}
+        />
+        <ThemeColorInput
+          label="primaryText"
+          value={buttonValues.primaryText}
+          onChange={(value) => onColorChange("primaryText", value)}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ThemeColorInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const parsed = parseHexWithAlpha(value);
+  return (
+    <label className="space-y-2 text-xs text-muted-foreground">
+      <span className="block font-medium text-foreground">{label}</span>
+      <input
+        type="color"
+        value={parsed.hex}
+        onChange={(event) => onChange(composeHexWithAlpha(event.target.value, parsed.alphaPercent))}
+        className="h-10 w-full cursor-pointer rounded-md border border-border bg-background p-1"
+      />
+      <div className="space-y-1">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[10px] uppercase tracking-wide">Opacité</span>
+          <code className="text-[10px]">{parsed.alphaPercent}%</code>
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={1}
+          value={parsed.alphaPercent}
+          onChange={(event) =>
+            onChange(composeHexWithAlpha(parsed.hex, Number.parseInt(event.target.value, 10)))
+          }
+          className="w-full accent-primary"
+        />
+      </div>
+      <code className="block text-[10px]">{value}</code>
+    </label>
+  );
+}
+
+function parseHexWithAlpha(value: string): { hex: string; alphaPercent: number } {
+  const normalized = value.trim().toLowerCase();
+  if (/^#[0-9a-f]{8}$/.test(normalized)) {
+    const hex = normalized.slice(0, 7);
+    const alphaHex = normalized.slice(7, 9);
+    const alphaPercent = Math.round((Number.parseInt(alphaHex, 16) / 255) * 100);
+    return { hex, alphaPercent };
+  }
+  if (/^#[0-9a-f]{6}$/.test(normalized)) return { hex: normalized, alphaPercent: 100 };
+  return { hex: "#111111", alphaPercent: 100 };
+}
+
+function composeHexWithAlpha(hex: string, alphaPercent: number): string {
+  const normalizedHex = /^#[0-9a-fA-F]{6}$/.test(hex) ? hex.toLowerCase() : "#111111";
+  const clamped = Math.min(100, Math.max(0, alphaPercent));
+  if (clamped >= 100) return normalizedHex;
+  const alphaHex = Math.round((clamped / 100) * 255)
+    .toString(16)
+    .padStart(2, "0");
+  return `${normalizedHex}${alphaHex}`;
 }
 
 function TokenRow({

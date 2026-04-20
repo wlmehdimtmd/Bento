@@ -57,6 +57,7 @@ export default async function ShopVitrineMiseEnPagePage({ params }: { params: Pa
         storefrontPhotos={payload.storefrontPhotos}
         initialLayout={payload.storefrontBentoLayout}
         initialStorefrontThemeKey={payload.storefrontThemeKey}
+        initialStorefrontThemeOverrides={payload.storefrontThemeOverrides}
       />
     </div>
   );

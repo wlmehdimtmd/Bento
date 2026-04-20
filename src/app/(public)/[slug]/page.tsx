@@ -78,10 +78,16 @@ export default async function ShopPage({
     storefrontPhotos,
     savedStorefrontLayout,
     storefrontThemeKey,
+    storefrontThemeOverrides,
+    shopLabels,
   } = payload;
 
   return (
-    <StorefrontThemeScope themeKey={storefrontThemeKey} className="min-h-screen">
+    <StorefrontThemeScope
+      themeKey={storefrontThemeKey}
+      themeOverrides={storefrontThemeOverrides}
+      className="min-h-screen"
+    >
       <div className="mx-auto max-w-5xl px-4 py-8">
         <StoreView
           shop={shop}
@@ -92,6 +98,8 @@ export default async function ShopPage({
           storefrontPhotos={storefrontPhotos}
           savedStorefrontLayout={savedStorefrontLayout}
           storefrontThemeKey={storefrontThemeKey}
+          storefrontThemeOverrides={storefrontThemeOverrides}
+          shopLabels={shopLabels}
         />
 
         {categories.length === 0 && bundles.length === 0 && (

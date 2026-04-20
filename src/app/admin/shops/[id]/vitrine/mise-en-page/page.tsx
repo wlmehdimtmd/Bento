@@ -35,6 +35,7 @@ export default async function AdminShopVitrineMiseEnPagePage({ params }: { param
           reviews={payload.reviews}
           initialLayout={payload.storefrontBentoLayout}
           initialStorefrontThemeKey={payload.storefrontThemeKey}
+          initialStorefrontThemeOverrides={payload.storefrontThemeOverrides}
           backHref="/admin"
           layoutSaveMode="admin"
         />

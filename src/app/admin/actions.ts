@@ -185,7 +185,8 @@ export async function setDemoShopId(shopId: string | null) {
 export async function saveStorefrontBentoLayoutAdmin(
   shopId: string,
   payload: Json,
-  storefrontThemeKey: string
+  storefrontThemeKey: string,
+  storefrontThemeOverrides?: Json
 ) {
   const service = await requireAdmin();
   const { data: shop } = await service.from("shops").select("id").eq("id", shopId).maybeSingle();
@@ -193,7 +194,11 @@ export async function saveStorefrontBentoLayoutAdmin(
 
   const { error } = await service
     .from("shops")
-    .update({ storefront_bento_layout: payload, storefront_theme_key: storefrontThemeKey })
+    .update({
+      storefront_bento_layout: payload,
+      storefront_theme_key: storefrontThemeKey,
+      storefront_theme_overrides: storefrontThemeOverrides ?? null,
+    })
     .eq("id", shopId);
 
   if (error) throw new Error(error.message);

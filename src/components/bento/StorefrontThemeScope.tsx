@@ -4,10 +4,11 @@ import { useMemo, useSyncExternalStore, type ReactNode } from "react";
 import { useTheme } from "next-themes";
 
 import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
-import { getStorefrontThemePreviewStyle } from "@/lib/storefrontTheme";
+import { getStorefrontThemePreviewStyle, type StorefrontThemeOverrides } from "@/lib/storefrontTheme";
 
 interface StorefrontThemeScopeProps {
   themeKey: CategoryThemeKey;
+  themeOverrides?: StorefrontThemeOverrides;
   className?: string;
   children: ReactNode;
 }
@@ -26,6 +27,7 @@ function getServerSnapshot() {
 
 export function StorefrontThemeScope({
   themeKey,
+  themeOverrides,
   className = "",
   children,
 }: StorefrontThemeScopeProps) {
@@ -34,8 +36,8 @@ export function StorefrontThemeScope({
   const isDark = mounted ? resolvedTheme === "dark" : false;
 
   const style = useMemo(
-    () => getStorefrontThemePreviewStyle(themeKey, isDark),
-    [themeKey, isDark]
+    () => getStorefrontThemePreviewStyle(themeKey, isDark, themeOverrides),
+    [themeKey, isDark, themeOverrides]
   );
 
   return (

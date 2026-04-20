@@ -36,7 +36,7 @@ import {
   CATEGORY_THEME_TOKENS,
   type CategoryThemeKey,
 } from "@/lib/categoryThemeTokens";
-import { getStorefrontThemePreviewStyle } from "@/lib/storefrontTheme";
+import { getStorefrontThemePreviewStyle, type StorefrontThemeOverrides } from "@/lib/storefrontTheme";
 
 const GridLayoutWithWidth = WidthProvider(ReactGridLayout);
 
@@ -52,12 +52,12 @@ function whToBentoSize(w: number, h: number): BentoSize {
 }
 
 function isMissingStorefrontLayoutColumn(message: string) {
-  return /storefront_bento_layout|storefront_theme_key|schema cache/i.test(message);
+  return /storefront_bento_layout|storefront_theme_key|storefront_theme_overrides|schema cache/i.test(message);
 }
 
 function formatLayoutSaveError(message: string): string {
   if (isMissingStorefrontLayoutColumn(message)) {
-    return "La colonne « storefront_bento_layout » ou « storefront_theme_key » n’existe pas encore sur la table « shops ». Exécutez les migrations SQL de vitrine (layout + thème), attendez ~1 minute (cache schéma), puis réessayez.";
+    return "Une colonne vitrine requise (« storefront_bento_layout », « storefront_theme_key » ou « storefront_theme_overrides ») n’existe pas encore sur la table « shops ». Exécutez les migrations SQL de vitrine, attendez ~1 minute (cache schéma), puis réessayez.";
   }
   return message;
 }
@@ -104,6 +104,7 @@ export interface StorefrontBentoEditorProps {
   storefrontPhotos?: StorefrontPhoto[];
   initialLayout: unknown;
   initialStorefrontThemeKey: CategoryThemeKey;
+  initialStorefrontThemeOverrides?: StorefrontThemeOverrides;
   backHref?: string;
   /** `admin` : enregistrement via server action (requireAdmin). */
   layoutSaveMode?: "owner" | "admin";
@@ -132,6 +133,7 @@ export function StorefrontBentoEditor({
   storefrontPhotos = [],
   initialLayout,
   initialStorefrontThemeKey,
+  initialStorefrontThemeOverrides = {},
   backHref,
   layoutSaveMode = "owner",
 }: StorefrontBentoEditorProps) {
@@ -159,6 +161,9 @@ export function StorefrontBentoEditor({
   const [storefrontThemeKey, setStorefrontThemeKey] = useState<CategoryThemeKey>(
     initialStorefrontThemeKey
   );
+  const [storefrontThemeOverrides, setStorefrontThemeOverrides] = useState<StorefrontThemeOverrides>(
+    initialStorefrontThemeOverrides
+  );
   const [previewDarkMode, setPreviewDarkMode] = useState(isDark);
 
   const [saving, setSaving] = useState(false);
@@ -172,6 +177,10 @@ export function StorefrontBentoEditor({
   }, [initialStorefrontThemeKey]);
 
   useEffect(() => {
+    setStorefrontThemeOverrides(initialStorefrontThemeOverrides);
+  }, [initialStorefrontThemeOverrides]);
+
+  useEffect(() => {
     setPreviewDarkMode(isDark);
   }, [isDark]);
 
@@ -180,8 +189,8 @@ export function StorefrontBentoEditor({
 
   const layoutMap = useMemo(() => new Map(layout.map((l) => [l.i, l])), [layout]);
   const storefrontThemeStyle = useMemo(
-    () => getStorefrontThemePreviewStyle(storefrontThemeKey, previewDarkMode),
-    [storefrontThemeKey, previewDarkMode]
+    () => getStorefrontThemePreviewStyle(storefrontThemeKey, previewDarkMode, storefrontThemeOverrides),
+    [storefrontThemeKey, previewDarkMode, storefrontThemeOverrides]
   );
 
   function renderPreview(i: string) {
@@ -283,7 +292,12 @@ export function StorefrontBentoEditor({
 
     if (layoutSaveMode === "admin") {
       try {
-        await saveStorefrontBentoLayoutAdmin(shopId, payload as Json, storefrontThemeKey);
+        await saveStorefrontBentoLayoutAdmin(
+          shopId,
+          payload as Json,
+          storefrontThemeKey,
+          storefrontThemeOverrides as Json
+        );
         toast.success("Mise en page enregistrée");
       } catch (e) {
         const raw = e instanceof Error ? e.message : "Enregistrement impossible";
@@ -309,7 +323,11 @@ export function StorefrontBentoEditor({
     const supabase = createClient();
     const { error } = await supabase
       .from("shops")
-      .update({ storefront_bento_layout: payload, storefront_theme_key: storefrontThemeKey })
+      .update({
+        storefront_bento_layout: payload,
+        storefront_theme_key: storefrontThemeKey,
+        storefront_theme_overrides: storefrontThemeOverrides as Json,
+      })
       .eq("id", shopId);
 
     setSaving(false);
@@ -384,8 +402,8 @@ export function StorefrontBentoEditor({
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                style={{ backgroundColor: "var(--color-bento-accent)" }}
-                className="text-white hover:opacity-90"
+                style={{ backgroundColor: "var(--primary)" }}
+                className="text-primary-foreground hover:opacity-90"
               >
                 {saving ? "Enregistrement…" : "Enregistrer"}
               </Button>
@@ -439,7 +457,7 @@ export function StorefrontBentoEditor({
                     className={cn(
                       "rounded-xl border p-2 text-left transition-colors",
                       selected
-                        ? "border-[var(--color-bento-accent)] bg-accent/30"
+                        ? "border-[var(--primary)] bg-accent/30"
                         : "border-border hover:bg-muted/40"
                     )}
                     onClick={() => setStorefrontThemeKey(themeKey)}

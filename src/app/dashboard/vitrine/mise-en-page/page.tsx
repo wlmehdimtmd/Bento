@@ -39,6 +39,7 @@ export default async function VitrineMiseEnPagePage() {
         storefrontPhotos={payload.storefrontPhotos}
         initialLayout={payload.storefrontBentoLayout}
         initialStorefrontThemeKey={payload.storefrontThemeKey}
+        initialStorefrontThemeOverrides={payload.storefrontThemeOverrides}
       />
     </div>
   );

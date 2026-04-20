@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BundleInfo, CategoryInfo, ShopInfo, SlotSummary } from "@/components/bento/StoreView";
 import type { SocialLinks, ShopReviews, StorefrontPhoto } from "@/lib/types";
 import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
-import { coerceStorefrontThemeKey } from "@/lib/storefrontTheme";
+import { coerceStorefrontThemeKey, coerceStorefrontThemeOverrides, type StorefrontThemeOverrides } from "@/lib/storefrontTheme";
 
 export type ShopStorefrontEditorPayload = {
   shopId: string;
@@ -15,6 +15,7 @@ export type ShopStorefrontEditorPayload = {
   storefrontPhotos: StorefrontPhoto[];
   storefrontBentoLayout: unknown | null;
   storefrontThemeKey: CategoryThemeKey;
+  storefrontThemeOverrides: StorefrontThemeOverrides;
 };
 
 /**
@@ -48,13 +49,18 @@ export async function fetchShopStorefrontEditorPayload(
 
   const { data: themeRow, error: themeError } = await supabase
     .from("shops")
-    .select("storefront_theme_key")
+    .select("storefront_theme_key, storefront_theme_overrides")
     .eq("id", shopId)
     .maybeSingle();
 
   const storefrontThemeKey = coerceStorefrontThemeKey(
     !themeError && themeRow
       ? (themeRow as { storefront_theme_key?: unknown }).storefront_theme_key
+      : null
+  );
+  const storefrontThemeOverrides = coerceStorefrontThemeOverrides(
+    !themeError && themeRow
+      ? (themeRow as { storefront_theme_overrides?: unknown }).storefront_theme_overrides
       : null
   );
 
@@ -198,5 +204,6 @@ export async function fetchShopStorefrontEditorPayload(
     storefrontPhotos: (storefrontPhotos ?? []) as StorefrontPhoto[],
     storefrontBentoLayout,
     storefrontThemeKey,
+    storefrontThemeOverrides,
   };
 }

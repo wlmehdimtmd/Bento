@@ -81,6 +81,7 @@ export interface Database {
           is_active: boolean;
           fulfillment_modes: Json;
           storefront_theme_key: string;
+          storefront_theme_overrides: Json | null;
           storefront_bento_layout: Json | null;
           opening_hours: Json | null;
           opening_timezone: string;
@@ -105,6 +106,7 @@ export interface Database {
           is_active?: boolean;
           fulfillment_modes?: Json;
           storefront_theme_key?: string;
+          storefront_theme_overrides?: Json | null;
           storefront_bento_layout?: Json | null;
           opening_hours?: Json | null;
           opening_timezone?: string;
@@ -129,6 +131,7 @@ export interface Database {
           is_active?: boolean;
           fulfillment_modes?: Json;
           storefront_theme_key?: string;
+          storefront_theme_overrides?: Json | null;
           storefront_bento_layout?: Json | null;
           opening_hours?: Json | null;
           opening_timezone?: string;
@@ -274,6 +277,47 @@ export interface Database {
             columns: ["category_id"];
             isOneToOne: false;
             referencedRelation: "categories";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      shop_labels: {
+        Row: {
+          id: string;
+          shop_id: string;
+          value: string;
+          label: string;
+          color: string;
+          display_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          shop_id: string;
+          value: string;
+          label: string;
+          color: string;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          shop_id?: string;
+          value?: string;
+          label?: string;
+          color?: string;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "shop_labels_shop_id_fkey";
+            columns: ["shop_id"];
+            isOneToOne: false;
+            referencedRelation: "shops";
             referencedColumns: ["id"];
           }
         ];

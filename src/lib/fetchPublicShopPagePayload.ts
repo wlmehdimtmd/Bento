@@ -3,7 +3,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ShopInfo, CategoryInfo, BundleInfo, SlotSummary } from "@/components/bento/StoreView";
 import type { SocialLinks, ShopReviews, StorefrontPhoto } from "@/lib/types";
 import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
-import { coerceStorefrontThemeKey } from "@/lib/storefrontTheme";
+import { coerceStorefrontThemeKey, coerceStorefrontThemeOverrides, type StorefrontThemeOverrides } from "@/lib/storefrontTheme";
+import { fetchShopLabelsForPublic, type ProductLabelOption } from "@/lib/shop-labels";
 
 export type PublicShopPagePayload = {
   shop: ShopInfo;
@@ -14,7 +15,9 @@ export type PublicShopPagePayload = {
   storefrontPhotos: StorefrontPhoto[];
   savedStorefrontLayout: unknown | null;
   storefrontThemeKey: CategoryThemeKey;
+  storefrontThemeOverrides: StorefrontThemeOverrides;
   stripeAccountId: string | null;
+  shopLabels: ProductLabelOption[];
 };
 
 type ShopRow = {
@@ -90,13 +93,18 @@ export async function fetchPublicShopPagePayload(
 
   const { data: themeRow, error: themeError } = await supabase
     .from("shops")
-    .select("storefront_theme_key")
+    .select("storefront_theme_key, storefront_theme_overrides")
     .eq("id", s.id)
     .maybeSingle();
 
   const storefrontThemeKey = coerceStorefrontThemeKey(
     !themeError && themeRow
       ? (themeRow as { storefront_theme_key?: unknown }).storefront_theme_key
+      : null
+  );
+  const storefrontThemeOverrides = coerceStorefrontThemeOverrides(
+    !themeError && themeRow
+      ? (themeRow as { storefront_theme_overrides?: unknown }).storefront_theme_overrides
       : null
   );
 
@@ -214,6 +222,8 @@ export async function fetchPublicShopPagePayload(
     ? (s.fulfillment_modes as string[])
     : [];
 
+  const shopLabels = await fetchShopLabelsForPublic(supabase, s.id);
+
   const shopInfo: ShopInfo = {
     id: s.id,
     name: s.name,
@@ -240,6 +250,8 @@ export async function fetchPublicShopPagePayload(
     storefrontPhotos: (storefrontPhotos ?? []) as StorefrontPhoto[],
     savedStorefrontLayout,
     storefrontThemeKey,
+    storefrontThemeOverrides,
     stripeAccountId: s.stripe_account_id,
+    shopLabels,
   };
 }
