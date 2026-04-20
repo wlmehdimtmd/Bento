@@ -36,7 +36,7 @@ export function PublicHeader({
   }
 
   return (
-    <header className="sticky top-0 z-40 h-16 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 h-16 w-full border-b border-border/60 bg-white/85 backdrop-blur-md dark:bg-black/85">
       <div className="mx-auto flex h-full max-w-5xl items-center justify-between px-4">
         {/* Logo + Shop name — même URL : retour grille catégories (StoreView écoute l’événement). */}
         <Link

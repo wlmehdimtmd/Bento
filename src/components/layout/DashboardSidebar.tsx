@@ -88,6 +88,8 @@ function SidebarColumn({
     exact ? pathname === href : pathname.startsWith(href);
 
   const settingsActive = pathname === settingsHref || pathname.startsWith(`${settingsHref}/`);
+  const activeItemClass =
+    "bg-[var(--color-bento-accent)] [color:var(--color-bento-accent-foreground)]";
 
   const carteChildHrefs = [categoriesHref, productsHref, bundlesHref];
   const carteGroupActive = carteChildHrefs.some((h) => isActive(h));
@@ -130,7 +132,7 @@ function SidebarColumn({
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
             isActive("/dashboard", true)
-              ? "bg-[var(--color-bento-accent)] text-white"
+              ? activeItemClass
               : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           )}
         >
@@ -164,7 +166,7 @@ function SidebarColumn({
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   isActive(vitrineConfigHref)
-                    ? "bg-[var(--color-bento-accent)] text-white"
+                    ? activeItemClass
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
@@ -176,7 +178,7 @@ function SidebarColumn({
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   isActive(vitrineLayoutHref) || pathname.includes("/bento")
-                    ? "bg-[var(--color-bento-accent)] text-white"
+                    ? activeItemClass
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
@@ -213,7 +215,7 @@ function SidebarColumn({
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   isActive(categoriesHref)
-                    ? "bg-[var(--color-bento-accent)] text-white"
+                    ? activeItemClass
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
@@ -225,7 +227,7 @@ function SidebarColumn({
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   isActive(productsHref)
-                    ? "bg-[var(--color-bento-accent)] text-white"
+                    ? activeItemClass
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
@@ -237,7 +239,7 @@ function SidebarColumn({
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   isActive(bundlesHref)
-                    ? "bg-[var(--color-bento-accent)] text-white"
+                    ? activeItemClass
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
@@ -253,7 +255,7 @@ function SidebarColumn({
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
             isActive(ordersHref)
-              ? "bg-[var(--color-bento-accent)] text-white"
+              ? activeItemClass
               : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           )}
         >
@@ -290,7 +292,7 @@ function SidebarColumn({
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
             settingsActive
-              ? "bg-[var(--color-bento-accent)] text-white"
+              ? activeItemClass
                 : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           )}
         >

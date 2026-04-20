@@ -28,8 +28,11 @@ export function CartBadge() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.4, opacity: 0 }}
             transition={{ type: "spring", stiffness: 500, damping: 18 }}
-            className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white"
-            style={{ backgroundColor: "var(--color-bento-accent)" }}
+            className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold"
+            style={{
+              backgroundColor: "var(--color-bento-accent)",
+              color: "var(--color-bento-accent-foreground)",
+            }}
           >
             {count > 9 ? "9+" : count}
           </motion.span>

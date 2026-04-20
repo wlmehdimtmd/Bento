@@ -325,8 +325,11 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
         <Button
           type="submit"
           disabled={isSubmitting || items.length === 0}
-          className="w-full text-white font-semibold gap-2 hover:opacity-90"
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
+          className="w-full font-semibold gap-2 hover:opacity-90"
+          style={{
+            backgroundColor: "var(--color-bento-accent)",
+            color: "var(--color-bento-accent-foreground)",
+          }}
         >
           {isSubmitting ? (
             <>

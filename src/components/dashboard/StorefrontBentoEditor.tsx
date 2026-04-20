@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ExternalLink, RotateCcw } from "lucide-react";
+import { ExternalLink, Moon, RotateCcw, Sun } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 import { BentoCardInfo } from "@/components/bento/BentoCardInfo";
@@ -159,6 +159,7 @@ export function StorefrontBentoEditor({
   const [storefrontThemeKey, setStorefrontThemeKey] = useState<CategoryThemeKey>(
     initialStorefrontThemeKey
   );
+  const [previewDarkMode, setPreviewDarkMode] = useState(isDark);
 
   const [saving, setSaving] = useState(false);
 
@@ -170,13 +171,17 @@ export function StorefrontBentoEditor({
     setStorefrontThemeKey(initialStorefrontThemeKey);
   }, [initialStorefrontThemeKey]);
 
+  useEffect(() => {
+    setPreviewDarkMode(isDark);
+  }, [isDark]);
+
   const catById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const bundleById = useMemo(() => new Map(bundles.map((b) => [b.id, b])), [bundles]);
 
   const layoutMap = useMemo(() => new Map(layout.map((l) => [l.i, l])), [layout]);
   const storefrontThemeStyle = useMemo(
-    () => getStorefrontThemePreviewStyle(storefrontThemeKey, isDark),
-    [storefrontThemeKey, isDark]
+    () => getStorefrontThemePreviewStyle(storefrontThemeKey, previewDarkMode),
+    [storefrontThemeKey, previewDarkMode]
   );
 
   function renderPreview(i: string) {
@@ -403,15 +408,29 @@ export function StorefrontBentoEditor({
       ) : (
         <div className="mx-auto w-full max-w-5xl space-y-4">
           <section className="rounded-xl border border-border bg-card/50 p-4">
-            <h2 className="text-sm font-semibold">Palette de couleurs (vitrine uniquement)</h2>
-            <p className="mt-1 text-xs text-muted-foreground">
-              L’aperçu est appliqué uniquement au bento ci-dessous, puis à la vitrine publique après
-              enregistrement.
-            </p>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold">Palette de couleurs (vitrine uniquement)</h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  L’aperçu est appliqué uniquement au bento ci-dessous, puis à la vitrine publique après
+                  enregistrement.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setPreviewDarkMode((prev) => !prev)}
+                className="inline-flex items-center gap-2"
+              >
+                {previewDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                Tester en mode {previewDarkMode ? "clair" : "sombre"}
+              </Button>
+            </div>
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
               {CATEGORY_THEME_KEYS.map((themeKey) => {
                 const token = CATEGORY_THEME_TOKENS[themeKey];
-                const preview = isDark ? token.dark : token.light;
+                const preview = previewDarkMode ? token.dark : token.light;
                 const selected = storefrontThemeKey === themeKey;
                 return (
                   <button
@@ -447,7 +466,7 @@ export function StorefrontBentoEditor({
             </div>
           </section>
 
-          <div className="rounded-xl border border-border bg-card/50 p-3 sm:p-4" style={storefrontThemeStyle}>
+          <div className="rounded-xl border border-border bg-background p-3 sm:p-4" style={storefrontThemeStyle}>
             <GridLayoutWithWidth
               className="layout"
               cols={4}

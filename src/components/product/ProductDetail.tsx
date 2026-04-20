@@ -270,8 +270,11 @@ function ProductDetailContent({
       </div>
 
       <Button
-        className={stickyActionBar ? "min-h-11 w-full gap-2 text-white font-semibold hover:opacity-90" : "min-h-11 flex-1 gap-2 text-white font-semibold hover:opacity-90"}
-        style={{ backgroundColor: "var(--color-bento-accent)" }}
+        className={stickyActionBar ? "min-h-11 w-full gap-2 font-semibold hover:opacity-90" : "min-h-11 flex-1 gap-2 font-semibold hover:opacity-90"}
+        style={{
+          backgroundColor: "var(--color-bento-accent)",
+          color: "var(--color-bento-accent-foreground)",
+        }}
         onClick={handleAdd}
         disabled={!product.is_available}
       >

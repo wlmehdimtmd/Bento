@@ -181,7 +181,7 @@ function BundleDetailContent({
                 <div
                   className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                     done
-                      ? "bg-[var(--color-bento-accent)] text-white"
+                      ? "bg-[var(--color-bento-accent)] text-[var(--color-bento-accent-foreground)]"
                       : active
                       ? "border-2 border-[var(--color-bento-accent)] text-[var(--color-bento-accent)]"
                       : "border-2 border-muted-foreground/30 text-muted-foreground"
@@ -308,7 +308,7 @@ function BundleDetailContent({
                     <div
                       className={`h-5 w-5 rounded-full flex items-center justify-center shrink-0 transition-all ${
                         isSelected
-                          ? "bg-[var(--color-bento-accent)] text-white"
+                          ? "bg-[var(--color-bento-accent)] text-[var(--color-bento-accent-foreground)]"
                           : "border-2 border-muted-foreground/30"
                       }`}
                     >
@@ -393,8 +393,11 @@ function BundleDetailContent({
             size="sm"
             onClick={() => setStep((s) => s + 1)}
             disabled={!stepComplete}
-            className="gap-1 text-white hover:opacity-90"
-            style={{ backgroundColor: "var(--color-bento-accent)" }}
+            className="gap-1 hover:opacity-90"
+            style={{
+              backgroundColor: "var(--color-bento-accent)",
+              color: "var(--color-bento-accent-foreground)",
+            }}
           >
             Suivant
             <ChevronRight className="h-4 w-4" />
@@ -404,8 +407,11 @@ function BundleDetailContent({
             size="sm"
             onClick={handleAddToCart}
             disabled={!allComplete}
-            className="gap-1.5 text-white hover:opacity-90"
-            style={{ backgroundColor: "var(--color-bento-accent)" }}
+            className="gap-1.5 hover:opacity-90"
+            style={{
+              backgroundColor: "var(--color-bento-accent)",
+              color: "var(--color-bento-accent-foreground)",
+            }}
           >
             <ShoppingCart className="h-4 w-4" />
             Ajouter au panier

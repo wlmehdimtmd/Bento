@@ -51,8 +51,11 @@ export function CartButton() {
             <div className="mx-auto flex w-full max-w-md justify-center">
               <button
                 onClick={openDrawer}
-                className="flex w-full max-w-md items-center justify-center gap-3 rounded-2xl px-5 py-3 text-white shadow-lg transition-opacity hover:opacity-90 active:scale-[0.98]"
-                style={{ backgroundColor: "var(--color-bento-accent)" }}
+                className="flex w-full max-w-md items-center justify-center gap-3 rounded-2xl px-5 py-3 shadow-lg transition-opacity hover:opacity-90 active:scale-[0.98]"
+                style={{
+                  backgroundColor: "var(--color-bento-accent)",
+                  color: "var(--color-bento-accent-foreground)",
+                }}
                 aria-label={label}
               >
                 {buttonInner}
@@ -61,8 +64,11 @@ export function CartButton() {
           ) : (
             <button
               onClick={openDrawer}
-              className="flex items-center gap-3 rounded-2xl px-5 py-3 text-white shadow-xl transition-opacity hover:opacity-90 active:scale-95"
-              style={{ backgroundColor: "var(--color-bento-accent)" }}
+              className="flex items-center gap-3 rounded-2xl px-5 py-3 shadow-xl transition-opacity hover:opacity-90 active:scale-95"
+              style={{
+                backgroundColor: "var(--color-bento-accent)",
+                color: "var(--color-bento-accent-foreground)",
+              }}
               aria-label={label}
             >
               {buttonInner}

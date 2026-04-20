@@ -41,6 +41,9 @@ export function getStorefrontThemePreviewStyle(
     "--border": isDark ? "rgba(255,255,255,0.12)" : "#d4d4d8",
     "--input": isDark ? "rgba(255,255,255,0.16)" : "#d4d4d8",
     "--ring": buttonScale.primaryBg,
+    "--primary": buttonScale.primaryBg,
+    "--primary-foreground": buttonScale.primaryText,
     "--color-bento-accent": buttonScale.primaryBg,
+    "--color-bento-accent-foreground": buttonScale.primaryText,
   } as CSSProperties;
 }

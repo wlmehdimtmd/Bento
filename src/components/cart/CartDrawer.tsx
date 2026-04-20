@@ -100,8 +100,11 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
               {item.bundleSelections.map((s, i) => (
                 <div key={i} className="flex items-start gap-2">
                   <span
-                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white mt-0.5"
-                    style={{ backgroundColor: "var(--color-bento-accent)" }}
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold mt-0.5"
+                    style={{
+                      backgroundColor: "var(--color-bento-accent)",
+                      color: "var(--color-bento-accent-foreground)",
+                    }}
                   >
                     {i + 1}
                   </span>
@@ -130,8 +133,11 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
               {bundleSteps.map((s, i) => (
                 <div key={i} className="flex items-start gap-2">
                   <span
-                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white mt-0.5"
-                    style={{ backgroundColor: "var(--color-bento-accent)" }}
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold mt-0.5"
+                    style={{
+                      backgroundColor: "var(--color-bento-accent)",
+                      color: "var(--color-bento-accent-foreground)",
+                    }}
                   >
                     {i + 1}
                   </span>
@@ -304,8 +310,11 @@ function CartView({ onClose, onCheckout }: CartViewProps) {
         </div>
 
         <Button
-          className="w-full text-white font-semibold gap-2 hover:opacity-90"
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
+          className="w-full font-semibold gap-2 hover:opacity-90"
+          style={{
+            backgroundColor: "var(--color-bento-accent)",
+            color: "var(--color-bento-accent-foreground)",
+          }}
           onClick={onCheckout}
         >
           Passer la commande

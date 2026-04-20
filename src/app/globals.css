@@ -51,6 +51,7 @@
   --color-cream: #f7f7f7;
   --color-charcoal: #111111;
   --color-bento-accent: #111111;
+  --color-bento-accent-foreground: #ffffff;
   --color-bento-accent-dark: #111111;
 }
 
@@ -94,6 +95,7 @@
 
 .dark {
   --color-bento-accent: #ffffff;
+  --color-bento-accent-foreground: #111111;
   --color-bento-accent-dark: #ffffff;
   /* Canvas plus bas que les surfaces (cartes) pour une hiérarchie lisible */
   --background: #0f0f0f;
