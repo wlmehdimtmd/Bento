@@ -7,7 +7,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
@@ -32,14 +31,15 @@ export function ImportMenuDropdown({
       <DropdownMenuTrigger
         className={cn(
           buttonVariants({ variant: "outline" }),
-          "inline-flex shrink-0 gap-1.5"
+          "inline-flex shrink-0 gap-1.5 whitespace-nowrap"
         )}
       >
         Importer
         <ChevronDown className="h-4 w-4 opacity-70" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-56">
+      <DropdownMenuContent align="end" className="min-w-64">
         <DropdownMenuItem
+          className="whitespace-nowrap"
           onClick={() => {
             onImportTemplate();
           }}
@@ -48,6 +48,7 @@ export function ImportMenuDropdown({
           Importer depuis un modèle
         </DropdownMenuItem>
         <DropdownMenuItem
+          className="whitespace-nowrap"
           disabled={!aiEnabled}
           onClick={() => {
             if (aiEnabled) onImportAi?.();
@@ -55,7 +56,6 @@ export function ImportMenuDropdown({
         >
           <Sparkles />
           Importer mon menu avec l&apos;IA
-          {!aiEnabled && <DropdownMenuShortcut>Bientôt</DropdownMenuShortcut>}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

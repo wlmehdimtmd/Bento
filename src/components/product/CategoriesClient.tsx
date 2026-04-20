@@ -481,7 +481,7 @@ export function CategoriesClient({
                 {editingCategory ? "Modifier la catégorie" : "Nouvelle catégorie"}
               </SheetTitle>
             </SheetHeader>
-            <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
+            <div className="h-full min-h-0 overflow-y-auto px-4 pb-24">
               <CategoryForm
                 shopId={shopId}
                 nextOrder={nextOrder}

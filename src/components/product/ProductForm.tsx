@@ -214,7 +214,8 @@ export function ProductForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
+      <div className="space-y-5 pb-4">
       {/* Category */}
       <div className="space-y-1.5">
         <Label>Catégorie *</Label>
@@ -347,14 +348,16 @@ export function ProductForm({
           </div>
         </div>
       </div>
+      </div>
 
       {/* Actions */}
-      <div className="sticky bottom-0 mt-auto flex justify-end gap-2 border-t border-border bg-background py-3">
+      <div className="sticky bottom-0 z-20 mt-auto flex w-full gap-2 border-t border-border bg-background py-3 md:justify-end">
         <Button
           type="button"
           variant="outline"
           onClick={onCancel}
           disabled={isSubmitting}
+          className="flex-1 md:flex-none"
         >
           Annuler
         </Button>
@@ -362,7 +365,7 @@ export function ProductForm({
           type="submit"
           disabled={isSubmitting}
           style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="text-white hover:opacity-90"
+          className="flex-1 text-white hover:opacity-90 md:flex-none"
         >
           {isSubmitting ? (
             <>

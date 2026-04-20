@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, Gift, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Gift, Search, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 
@@ -84,6 +84,7 @@ export function BundlesClient({
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingBundle, setEditingBundle] = useState<BundleRow | null>(null);
+  const [formSubView, setFormSubView] = useState<"main" | "composition">("main");
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -136,11 +137,13 @@ export function BundlesClient({
 
   function openCreate() {
     setEditingBundle(null);
+    setFormSubView("main");
     setFormOpen(true);
   }
 
   function openEdit(b: BundleRow) {
     setEditingBundle(b);
+    setFormSubView("main");
     setFormOpen(true);
   }
 
@@ -151,6 +154,7 @@ export function BundlesClient({
 
   function handleFormSuccess(updated: BundleRow) {
     setFormOpen(false);
+    setFormSubView("main");
     setBundles((prev) => {
       const exists = prev.find((b) => b.id === updated.id);
       if (exists) return prev.map((b) => (b.id === updated.id ? updated : b));
@@ -434,12 +438,27 @@ export function BundlesClient({
 
       {/* Create / Edit panel */}
       {isMobile ? (
-        <Drawer open={formOpen} onOpenChange={setFormOpen}>
+        <Drawer
+          open={formOpen}
+          onOpenChange={(open) => {
+            setFormOpen(open);
+            if (!open) setFormSubView("main");
+          }}
+        >
           <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden">
             <DrawerHeader>
-              <DrawerTitle>
-                {editingBundle ? "Modifier la formule" : "Nouvelle formule"}
-              </DrawerTitle>
+              {formSubView === "composition" ? (
+                <DrawerTitle className="flex items-center gap-2">
+                  <Button type="button" size="icon-sm" variant="ghost" onClick={() => setFormSubView("main")}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span>Composition du menu</span>
+                </DrawerTitle>
+              ) : (
+                <DrawerTitle>
+                  {editingBundle ? "Modifier la formule" : "Nouvelle formule"}
+                </DrawerTitle>
+              )}
             </DrawerHeader>
             <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
               <BundleForm
@@ -449,19 +468,36 @@ export function BundlesClient({
                 onSuccess={handleFormSuccess}
                 onCancel={() => setFormOpen(false)}
                 onSave={adminActions?.onSave}
+                subViewOverride={formSubView}
+                onSubViewChange={setFormSubView}
               />
             </div>
           </DrawerContent>
         </Drawer>
       ) : (
-        <Sheet open={formOpen} onOpenChange={setFormOpen}>
+        <Sheet
+          open={formOpen}
+          onOpenChange={(open) => {
+            setFormOpen(open);
+            if (!open) setFormSubView("main");
+          }}
+        >
           <SheetContent side="right" className="w-full sm:max-w-2xl h-full overflow-hidden">
             <SheetHeader>
-              <SheetTitle>
-                {editingBundle ? "Modifier la formule" : "Nouvelle formule"}
-              </SheetTitle>
+              {formSubView === "composition" ? (
+                <SheetTitle className="flex items-center gap-2">
+                  <Button type="button" size="icon-sm" variant="ghost" onClick={() => setFormSubView("main")}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span>Composition du menu</span>
+                </SheetTitle>
+              ) : (
+                <SheetTitle>
+                  {editingBundle ? "Modifier la formule" : "Nouvelle formule"}
+                </SheetTitle>
+              )}
             </SheetHeader>
-            <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
+            <div className="h-full min-h-0 overflow-y-auto px-4 pb-24">
               <BundleForm
                 shopId={shopId}
                 categories={categories}
@@ -469,6 +505,8 @@ export function BundlesClient({
                 onSuccess={handleFormSuccess}
                 onCancel={() => setFormOpen(false)}
                 onSave={adminActions?.onSave}
+                subViewOverride={formSubView}
+                onSubViewChange={setFormSubView}
               />
             </div>
           </SheetContent>

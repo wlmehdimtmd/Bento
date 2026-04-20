@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ChevronLeft, Plus, Trash2, Loader2, GripVertical, X } from "lucide-react";
+import { Plus, Trash2, Loader2, GripVertical, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -59,6 +59,8 @@ interface BundleFormProps {
   onSuccess: (bundle: BundleRow) => void;
   onCancel: () => void;
   onSave?: (payload: BundleSavePayload, isEdit: boolean, existingId?: string) => Promise<BundleRow>;
+  subViewOverride?: "main" | "composition";
+  onSubViewChange?: (subView: "main" | "composition") => void;
 }
 
 // ─── Schema ───────────────────────────────────────────────────
@@ -97,6 +99,8 @@ export function BundleForm({
   onSuccess,
   onCancel,
   onSave,
+  subViewOverride,
+  onSubViewChange,
 }: BundleFormProps) {
   const isEdit = !!initialData;
   const [imageUrl, setImageUrl] = useState<string | null>(
@@ -107,6 +111,21 @@ export function BundleForm({
     initialData?.slots.map((s) => s.category_id) ?? [""]
   );
   const [subView, setSubView] = useState<"main" | "composition">("main");
+
+  useEffect(() => {
+    if (subViewOverride && subViewOverride !== subView) {
+      setSubView(subViewOverride);
+    }
+  }, [subView, subViewOverride]);
+
+  useEffect(() => {
+    onSubViewChange?.(subView);
+  }, [onSubViewChange, subView]);
+
+  function changeSubView(next: "main" | "composition") {
+    setSubView(next);
+    onSubViewChange?.(next);
+  }
 
   const {
     register,
@@ -375,20 +394,25 @@ export function BundleForm({
 
   if (subView === "composition") {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Button type="button" size="icon-sm" variant="ghost" onClick={() => setSubView("main")}>
-            <ChevronLeft className="h-4 w-4" />
+      <div className="flex min-h-full flex-col">
+        <div className="pb-4">{compositionContent}</div>
+        <div className="sticky bottom-0 z-20 mt-auto border-t border-border bg-background py-3">
+          <Button
+            type="button"
+            onClick={() => changeSubView("main")}
+            style={{ backgroundColor: "var(--color-bento-accent)" }}
+            className="w-full text-white hover:opacity-90"
+          >
+            Valider
           </Button>
-          <h3 className="text-sm font-medium">Composition du menu</h3>
         </div>
-        {compositionContent}
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
+      <div className="space-y-6 pb-4">
       {/* Name */}
       <div className="space-y-1.5">
         <Label htmlFor="name">Nom de la formule *</Label>
@@ -459,18 +483,20 @@ export function BundleForm({
 
       <div className="space-y-4">
         <Label>Composition du menu</Label>
-        <Button type="button" variant="outline" className="w-full justify-start" onClick={() => setSubView("composition")}>
+        <Button type="button" variant="outline" className="w-full justify-start" onClick={() => changeSubView("composition")}>
           Gérer la composition
         </Button>
       </div>
+      </div>
 
       {/* Actions */}
-      <div className="sticky bottom-0 mt-auto flex justify-end gap-2 border-t border-border bg-background py-3">
+      <div className="sticky bottom-0 z-20 mt-auto flex w-full gap-2 border-t border-border bg-background py-3 md:justify-end">
         <Button
           type="button"
           variant="outline"
           onClick={onCancel}
           disabled={isSubmitting}
+          className="flex-1 md:flex-none"
         >
           Annuler
         </Button>
@@ -478,7 +504,7 @@ export function BundleForm({
           type="submit"
           disabled={isSubmitting}
           style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="text-white hover:opacity-90"
+          className="flex-1 text-white hover:opacity-90 md:flex-none"
         >
           {isSubmitting ? (
             <>

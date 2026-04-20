@@ -511,7 +511,7 @@ export function ProductsClient({
                 {editingProduct ? "Modifier le produit" : "Nouveau produit"}
               </SheetTitle>
             </SheetHeader>
-            <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
+            <div className="h-full min-h-0 overflow-y-auto px-4 pb-24">
               <ProductForm
                 categories={categories}
                 nextOrder={nextOrder}

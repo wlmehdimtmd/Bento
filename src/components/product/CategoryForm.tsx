@@ -191,9 +191,10 @@ export function CategoryForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      {/* Name */}
-      <div className="space-y-1.5">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
+      <div className="space-y-5 pb-4">
+        {/* Name */}
+        <div className="space-y-1.5">
         <Label htmlFor="name">Nom *</Label>
         <Input
           id="name"
@@ -205,66 +206,68 @@ export function CategoryForm({
         {errors.name && (
           <p className="text-xs text-destructive">{errors.name.message}</p>
         )}
-      </div>
+        </div>
 
-      <div className="space-y-1.5">
-        <Label>Icône</Label>
-        <Button type="button" variant="outline" className="w-full justify-start gap-2" onClick={() => setSubView("icon")}>
-          <span className="text-lg leading-none">{iconEmoji}</span>
-          <span>Choisir une icône</span>
-        </Button>
-      </div>
+        <div className="space-y-1.5">
+          <Label>Icône</Label>
+          <Button type="button" variant="outline" className="w-full justify-start gap-2" onClick={() => setSubView("icon")}>
+            <span className="text-lg leading-none">{iconEmoji}</span>
+            <span>Choisir une icône</span>
+          </Button>
+        </div>
 
       {/* Description */}
-      <div className="space-y-1.5">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          {...register("description")}
-          placeholder="Description optionnelle de la catégorie…"
-          rows={2}
-          maxLength={32}
-          disabled={isSubmitting}
-        />
-        <p className="text-xs text-muted-foreground text-right">
-          {(watch("description") ?? "").length}/32
-        </p>
-        {errors.description && (
-          <p className="text-xs text-destructive">{errors.description.message}</p>
-        )}
-      </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            {...register("description")}
+            placeholder="Description optionnelle de la catégorie…"
+            rows={2}
+            maxLength={32}
+            disabled={isSubmitting}
+          />
+          <p className="text-xs text-muted-foreground text-right">
+            {(watch("description") ?? "").length}/32
+          </p>
+          {errors.description && (
+            <p className="text-xs text-destructive">{errors.description.message}</p>
+          )}
+        </div>
 
-      <div className="space-y-1.5">
-        <Label>Image de couverture</Label>
-        <Button type="button" variant="outline" className="w-full justify-start" onClick={() => setSubView("cover")}>
-          {coverUrl ? "Modifier l’image de couverture" : "Ajouter une image de couverture"}
-        </Button>
-      </div>
+        <div className="space-y-1.5">
+          <Label>Image de couverture</Label>
+          <Button type="button" variant="outline" className="w-full justify-start" onClick={() => setSubView("cover")}>
+            {coverUrl ? "Modifier l’image de couverture" : "Ajouter une image de couverture"}
+          </Button>
+        </div>
 
       {/* Active toggle */}
-      <div className="flex items-center justify-between rounded-lg border border-border p-3">
-        <div>
-          <p className="text-sm font-medium">Catégorie active</p>
-          <p className="text-xs text-muted-foreground">
-            Visible sur la vitrine publique
-          </p>
+        <div className="flex items-center justify-between rounded-lg border border-border p-3">
+          <div>
+            <p className="text-sm font-medium">Catégorie active</p>
+            <p className="text-xs text-muted-foreground">
+              Visible sur la vitrine publique
+            </p>
+          </div>
+          <Switch
+            checked={isActive}
+            onCheckedChange={(checked) =>
+              setValue("is_active", checked, { shouldValidate: true })
+            }
+            disabled={isSubmitting}
+          />
         </div>
-        <Switch
-          checked={isActive}
-          onCheckedChange={(checked) =>
-            setValue("is_active", checked, { shouldValidate: true })
-          }
-          disabled={isSubmitting}
-        />
       </div>
 
       {/* Actions */}
-      <div className="sticky bottom-0 mt-auto flex justify-end gap-2 border-t border-border bg-background py-3">
+      <div className="sticky bottom-0 z-20 mt-auto flex w-full gap-2 border-t border-border bg-background py-3 md:justify-end">
         <Button
           type="button"
           variant="outline"
           onClick={onCancel}
           disabled={isSubmitting}
+          className="flex-1 md:flex-none"
         >
           Annuler
         </Button>
@@ -272,7 +275,7 @@ export function CategoryForm({
           type="submit"
           disabled={isSubmitting}
           style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="text-white hover:opacity-90"
+          className="flex-1 text-white hover:opacity-90 md:flex-none"
         >
           {isSubmitting ? (
             <>
