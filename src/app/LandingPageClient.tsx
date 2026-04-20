@@ -56,7 +56,7 @@ function HeroDemoPreview({ hero }: { hero: LandingDemoHeroData }) {
         transition={{ duration: 0.65, delay: 0.2, ease: EASE }}
         className="relative"
       >
-        <div className="rounded-2xl border border-border bg-background shadow-xl overflow-hidden ring-1 ring-foreground/[0.04] transition-shadow group-hover:shadow-[0_24px_64px_-24px_color-mix(in_srgb,var(--color-bento-accent)_45%,transparent)]">
+        <div className="rounded-2xl border border-border bg-background shadow-xl overflow-hidden ring-1 ring-foreground/[0.04] transition-shadow group-hover:shadow-2xl">
           <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border bg-muted/35">
             <div className="min-w-0">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Démo en ligne</p>
@@ -64,7 +64,7 @@ function HeroDemoPreview({ hero }: { hero: LandingDemoHeroData }) {
                 {hero.shopName}
               </p>
             </div>
-            <span className="text-xs font-semibold shrink-0" style={{ color: "var(--color-bento-accent)" }}>
+            <span className="text-xs font-semibold shrink-0 text-foreground">
               Voir la démo →
             </span>
           </div>
@@ -96,7 +96,7 @@ function HeroDemoPreview({ hero }: { hero: LandingDemoHeroData }) {
                       </span>
                     </div>
                   )}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent pt-10 pb-2 px-2">
+                  <div className="absolute inset-x-0 bottom-0 bg-black/65 pt-10 pb-2 px-2">
                     <p className="text-[11px] font-semibold text-white leading-snug line-clamp-2">{tile.label}</p>
                     <p className="text-[11px] text-white/90 font-medium tabular-nums">{tile.price}</p>
                   </div>
@@ -122,10 +122,7 @@ function HeroDemoPreview({ hero }: { hero: LandingDemoHeroData }) {
           </div>
         </div>
 
-        <div
-          className="absolute -bottom-6 left-1/2 -translate-x-1/2 h-16 w-2/3 rounded-full blur-3xl opacity-15 group-hover:opacity-30 transition-opacity pointer-events-none"
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
-        />
+        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 h-16 w-2/3 rounded-full bg-foreground/10 blur-3xl opacity-15 group-hover:opacity-30 transition-opacity pointer-events-none" />
       </motion.div>
 
       <p className="mt-3 text-center text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
@@ -326,7 +323,7 @@ const PRICING_POINTS = [
 
 export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-background text-foreground">
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <AppBrandMark variant="header" />
@@ -336,11 +333,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
             <Link href="/login" className={buttonVariants({ variant: "ghost", size: "sm" })}>
               Connexion
             </Link>
-            <Link
-              href="/register"
-              className={buttonVariants({ size: "sm" })}
-              style={{ backgroundColor: "var(--color-bento-accent)", color: "white" }}
-            >
+            <Link href="/register" className={buttonVariants({ size: "sm" })}>
               S&apos;inscrire
             </Link>
           </div>
@@ -348,20 +341,12 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
       </header>
 
       <main className="flex-1">
-        <section className="relative overflow-hidden">
-          <div
-            className="absolute inset-0 opacity-[0.06] dark:opacity-[0.08]"
-            style={{
-              background:
-                "radial-gradient(ellipse 80% 60% at 50% -10%, var(--color-bento-accent), transparent)",
-            }}
-          />
-
+        <section className="relative overflow-hidden bg-white">
           <div className="relative mx-auto max-w-6xl px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <Reveal>
                 <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
-                  <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "var(--color-bento-accent)" }} />
+                  <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
                   Pour les restaurateurs &amp; commerçants
                 </div>
               </Reveal>
@@ -372,7 +357,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
                   style={{ fontFamily: "var(--font-onest)" }}
                 >
                   Lancez votre{" "}
-                  <span style={{ color: "var(--color-bento-accent)" }}>carte digitale</span>
+                  <span className="text-foreground">carte digitale</span>
                   <br />
                   en{" "}
                   <span className="relative whitespace-nowrap">
@@ -385,7 +370,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
                     >
                       <path
                         d="M2 6 Q50 2 100 5 Q150 8 198 4"
-                        stroke="var(--color-bento-accent)"
+                        stroke="currentColor"
                         strokeWidth="2.5"
                         strokeLinecap="round"
                         fill="none"
@@ -405,11 +390,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
 
               <Reveal delay={0.15}>
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <Link
-                    href="/register"
-                    className={buttonVariants({ size: "lg" })}
-                    style={{ backgroundColor: "var(--color-bento-accent)", color: "white" }}
-                  >
+                  <Link href="/register" className={buttonVariants({ size: "lg" })}>
                     Commencer gratuitement
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
@@ -423,7 +404,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground pt-2">
                   {["Aucune carte requise", "Gratuit pour démarrer", "Configuration en 5 min"].map((item) => (
                     <span key={item} className="flex items-center gap-1.5">
-                      <Check className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--color-bento-accent)" }} />
+                      <Check className="h-3.5 w-3.5 shrink-0 text-foreground" />
                       {item}
                     </span>
                   ))}
@@ -439,10 +420,10 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
           </div>
         </section>
 
-        <section id="comment-ca-marche" className="py-20 md:py-28">
+        <section id="comment-ca-marche" className="py-20 md:py-28 bg-white">
           <div className="mx-auto max-w-6xl px-6">
             <Reveal className="text-center mb-14">
-              <p className="text-sm font-semibold uppercase tracking-widest mb-3" style={{ color: "var(--color-bento-accent)" }}>
+              <p className="text-sm font-semibold uppercase tracking-widest mb-3 text-foreground">
                 Simple comme bonjour
               </p>
               <h2 className="text-3xl sm:text-4xl font-black" style={{ fontFamily: "var(--font-onest)" }}>
@@ -457,10 +438,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
                     {i < STEPS.length - 1 && (
                       <div className="hidden md:block absolute top-10 -right-5 lg:-right-6 w-10 lg:w-12 h-px bg-border z-10" />
                     )}
-                    <div
-                      className="text-4xl font-black mb-4 leading-none"
-                      style={{ color: "var(--color-bento-accent)", fontFamily: "var(--font-onest)", opacity: 0.2 }}
-                    >
+                    <div className="text-4xl font-black mb-4 leading-none text-foreground/25" style={{ fontFamily: "var(--font-onest)" }}>
                       {step.n}
                     </div>
                     <h3 className="font-bold text-lg mb-2">{step.title}</h3>
@@ -472,10 +450,10 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
           </div>
         </section>
 
-        <section className="py-20 md:py-28 overflow-x-hidden">
+        <section className="py-20 md:py-28 overflow-x-hidden bg-white">
           <div className="mx-auto max-w-6xl px-6">
             <Reveal className="text-center mb-10 md:mb-12">
-              <p className="text-sm font-semibold uppercase tracking-widest mb-3" style={{ color: "var(--color-bento-accent)" }}>
+              <p className="text-sm font-semibold uppercase tracking-widest mb-3 text-foreground">
                 Polyvalent
               </p>
               <h2 className="text-3xl sm:text-4xl font-black" style={{ fontFamily: "var(--font-onest)" }}>
@@ -494,10 +472,10 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
           </div>
         </section>
 
-        <section id="fonctionnalites" className="py-20 md:py-28">
+        <section id="fonctionnalites" className="py-20 md:py-28 bg-white">
           <div className="mx-auto max-w-6xl px-6">
             <Reveal className="text-center mb-14">
-              <p className="text-sm font-semibold uppercase tracking-widest mb-3" style={{ color: "var(--color-bento-accent)" }}>
+              <p className="text-sm font-semibold uppercase tracking-widest mb-3 text-foreground">
                 Tout ce dont vous avez besoin
               </p>
               <h2 className="text-3xl sm:text-4xl font-black" style={{ fontFamily: "var(--font-onest)" }}>
@@ -509,11 +487,8 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
               {FEATURES.map((f, i) => (
                 <Reveal key={f.title} delay={i * 0.05}>
                   <div className="rounded-2xl border border-border bg-card p-5 shadow-sm h-full hover:border-muted-foreground/20 transition-colors">
-                    <div
-                      className="flex h-10 w-10 items-center justify-center rounded-xl mb-4"
-                      style={{ backgroundColor: "color-mix(in srgb, var(--color-bento-accent) 12%, transparent)" }}
-                    >
-                      <f.icon className="h-5 w-5" style={{ color: "var(--color-bento-accent)" }} />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl mb-4 bg-muted">
+                      <f.icon className="h-5 w-5 text-foreground" />
                     </div>
                     <h3 className="font-bold mb-1.5">{f.title}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
@@ -524,14 +499,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
           </div>
         </section>
 
-        <section className="py-20 md:py-28 relative overflow-hidden">
-          <div
-            className="absolute inset-0 opacity-[0.05] dark:opacity-[0.07]"
-            style={{
-              background:
-                "radial-gradient(ellipse 70% 80% at 50% 50%, var(--color-bento-accent), transparent)",
-            }}
-          />
+        <section className="py-20 md:py-28 relative overflow-hidden bg-white">
           <Reveal className="relative mx-auto max-w-2xl px-6 text-center space-y-6">
             <h2 className="text-3xl sm:text-4xl font-black" style={{ fontFamily: "var(--font-onest)" }}>
               Votre menu en ligne, en 5 minutes
@@ -541,11 +509,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
               depuis votre téléphone.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link
-                href="/register"
-                className={buttonVariants({ size: "lg" })}
-                style={{ backgroundColor: "var(--color-bento-accent)", color: "white" }}
-              >
+              <Link href="/register" className={buttonVariants({ size: "lg" })}>
                 Créer ma vitrine gratuitement
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -553,7 +517,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
             <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground pt-2">
               {PRICING_POINTS.map((p) => (
                 <li key={p} className="flex items-center gap-1.5">
-                  <Check className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--color-bento-accent)" }} />
+                  <Check className="h-3.5 w-3.5 shrink-0 text-foreground" />
                   {p}
                 </li>
               ))}
