@@ -53,7 +53,7 @@ export function PublicHeader({
               className="rounded-full object-cover shrink-0"
             />
           ) : (
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-bento-accent)] text-lg text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-lg text-white">
               🍱
             </span>
           )}

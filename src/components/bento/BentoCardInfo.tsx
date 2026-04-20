@@ -68,7 +68,7 @@ export function BentoCardInfo({
 
   const iconActionClass = cn(
     buttonVariants({ variant: "outline", size: "icon" }),
-    "shrink-0"
+    "shrink-0 text-foreground"
   );
 
   return (
@@ -91,7 +91,7 @@ export function BentoCardInfo({
         ) : (
           <div
             className="h-full w-full"
-            style={{ backgroundColor: "var(--color-bento-accent)" }}
+            style={{ backgroundColor: "var(--primary)" }}
           />
         )}
         <div className="pointer-events-auto absolute right-2 bottom-2 z-10 max-w-[min(100%-0.75rem,16rem)]">
@@ -103,7 +103,7 @@ export function BentoCardInfo({
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3 p-4 [--p:1rem] [--inner-r:max(0px,calc(var(--outer-r)-var(--p)))]">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 bg-[var(--color-bento-card-bg,var(--card))] p-4 [--p:1rem] [--inner-r:max(0px,calc(var(--outer-r)-var(--p)))]">
         <ShopOpenStatus
           fulfillmentModes={fulfillmentModes}
           openingHoursJson={openingHoursJson}

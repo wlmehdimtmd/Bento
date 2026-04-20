@@ -398,7 +398,7 @@ export function TemplatePickerDialog({
                 className={cn(
                   "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors border",
                   !activeType
-                    ? "bg-[var(--color-bento-accent)] text-white border-transparent"
+                    ? "bg-[var(--primary)] text-white border-transparent"
                     : "border-border text-muted-foreground hover:bg-muted"
                 )}
               >
@@ -412,7 +412,7 @@ export function TemplatePickerDialog({
                   className={cn(
                     "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors border",
                     bt.id === activeType
-                      ? "bg-[var(--color-bento-accent)] text-white border-transparent"
+                      ? "bg-[var(--primary)] text-white border-transparent"
                       : "border-border text-muted-foreground hover:bg-muted"
                   )}
                 >
@@ -485,7 +485,7 @@ export function TemplatePickerDialog({
                               key={prod.id}
                               className={cn(
                                 "flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors",
-                                isSelected ? "bg-[var(--color-bento-accent)]/5" : "hover:bg-muted/30"
+                                isSelected ? "bg-[var(--primary)]/5" : "hover:bg-muted/30"
                               )}
                             >
                               <Checkbox
@@ -545,7 +545,7 @@ export function TemplatePickerDialog({
                           key={bundle.id}
                           className={cn(
                             "flex items-start gap-2 px-2 py-2 rounded-lg transition-colors",
-                            isSelected ? "bg-[var(--color-bento-accent)]/5" : "hover:bg-muted/30"
+                            isSelected ? "bg-[var(--primary)]/5" : "hover:bg-muted/30"
                           )}
                         >
                           <Checkbox
@@ -590,8 +590,8 @@ export function TemplatePickerDialog({
             <Button
               onClick={handleImport}
               disabled={importing || (selectedProducts.size === 0 && selectedBundles.size === 0)}
-              style={{ backgroundColor: "var(--color-bento-accent)" }}
-              className="text-white hover:opacity-90"
+              style={{ backgroundColor: "var(--primary)" }}
+              className="text-primary-foreground hover:opacity-90"
             >
               {importing ? (
                 <>

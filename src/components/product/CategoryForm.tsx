@@ -170,7 +170,7 @@ export function CategoryForm({
                 type="button"
                 onClick={() => setValue("icon_emoji", emoji, { shouldValidate: true })}
                 disabled={isSubmitting}
-                className={`flex items-center justify-center h-9 w-full rounded-lg border text-xl transition-colors ${iconEmoji === emoji ? "border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/10" : "border-border hover:border-muted-foreground"}`}
+                className={`flex items-center justify-center h-9 w-full rounded-lg border text-xl transition-colors ${iconEmoji === emoji ? "border-[var(--primary)] bg-[var(--primary)]/10" : "border-border hover:border-muted-foreground"}`}
               >
                 {emoji}
               </button>
@@ -181,8 +181,8 @@ export function CategoryForm({
           <Button
             type="button"
             onClick={() => changeSubView("main")}
-            style={{ backgroundColor: "var(--color-bento-accent)" }}
-            className="w-full text-white hover:opacity-90"
+            style={{ backgroundColor: "var(--primary)" }}
+            className="w-full text-primary-foreground hover:opacity-90"
           >
             Valider
           </Button>
@@ -208,8 +208,8 @@ export function CategoryForm({
           <Button
             type="button"
             onClick={() => changeSubView("main")}
-            style={{ backgroundColor: "var(--color-bento-accent)" }}
-            className="w-full text-white hover:opacity-90"
+            style={{ backgroundColor: "var(--primary)" }}
+            className="w-full text-primary-foreground hover:opacity-90"
           >
             Valider
           </Button>
@@ -306,8 +306,8 @@ export function CategoryForm({
         <Button
           type="submit"
           disabled={isSubmitting}
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className={sheetCtasFullWidth ? "flex-1 text-white hover:opacity-90" : "flex-1 text-white hover:opacity-90 md:flex-none"}
+          style={{ backgroundColor: "var(--primary)" }}
+          className={sheetCtasFullWidth ? "flex-1 text-primary-foreground hover:opacity-90" : "flex-1 text-primary-foreground hover:opacity-90 md:flex-none"}
         >
           {isSubmitting ? (
             <>

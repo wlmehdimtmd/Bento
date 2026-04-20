@@ -291,7 +291,7 @@ export function OrderDetail({
           {/* Total */}
           <div className="flex justify-between font-bold text-base">
             <span>Total</span>
-            <span style={{ color: "var(--color-bento-accent)" }}>
+            <span style={{ color: "var(--primary)" }}>
               {formatPrice(order.total_amount)}
             </span>
           </div>

@@ -46,7 +46,7 @@ export function CategoryDestinationPicker({
       <label
         className={cn(
           "flex cursor-pointer gap-2 rounded-md border p-2 text-sm transition-colors",
-          mode === "suggested" ? "border-[var(--color-bento-accent)] bg-background" : "border-transparent"
+          mode === "suggested" ? "border-[var(--primary)] bg-background" : "border-transparent"
         )}
       >
         <input
@@ -61,7 +61,7 @@ export function CategoryDestinationPicker({
       <label
         className={cn(
           "flex cursor-pointer gap-2 rounded-md border p-2 text-sm transition-colors",
-          mode === "single" ? "border-[var(--color-bento-accent)] bg-background" : "border-transparent"
+          mode === "single" ? "border-[var(--primary)] bg-background" : "border-transparent"
         )}
       >
         <input

@@ -110,8 +110,8 @@ export default async function AdminPage() {
           <div className="flex flex-shrink-0 items-center gap-2">
             <Link
               href="/admin/shops/new"
-              className={cn(buttonVariants(), "text-white hover:opacity-90")}
-              style={{ backgroundColor: "var(--color-bento-accent)" }}
+              className={cn(buttonVariants(), "text-primary-foreground hover:opacity-90")}
+              style={{ backgroundColor: "var(--primary)" }}
             >
               <Plus className="mr-1.5 h-4 w-4" />
               Nouvelle boutique

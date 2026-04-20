@@ -164,8 +164,8 @@ export function PasteJsonImportDialog({
           type="button"
           onClick={() => void handleImport()}
           disabled={isImporting || !parseResult.ok}
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="text-white hover:opacity-90"
+          style={{ backgroundColor: "var(--primary)" }}
+          className="text-primary-foreground hover:opacity-90"
         >
           {isImporting ? "Import..." : "Importer le JSON"}
         </Button>

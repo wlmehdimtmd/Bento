@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 /** Fond monochrome discret aligné sur la DA marque. */
 export const backNavAccentGradientStyle: CSSProperties = {
-  background: "var(--color-bento-accent)",
+  background: "var(--primary)",
 };
 
 export interface BackNavFaceProps {
@@ -39,11 +39,11 @@ export function BackNavFace({
           "flex shrink-0 items-center justify-center rounded-full",
           compact ? "h-8 w-8" : "h-10 w-10"
         )}
-        style={{ backgroundColor: "color-mix(in srgb, var(--color-bento-accent) 14%, transparent)" }}
+        style={{ backgroundColor: "color-mix(in srgb, var(--primary) 14%, transparent)" }}
       >
         <ChevronLeft
           className={compact ? "h-5 w-5" : "h-6 w-6"}
-          style={{ color: "var(--color-bento-accent)" }}
+          style={{ color: "var(--primary)" }}
           aria-hidden
         />
       </div>

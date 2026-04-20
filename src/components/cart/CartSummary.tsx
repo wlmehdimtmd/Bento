@@ -18,7 +18,7 @@ export function CartSummary({ count, total }: CartSummaryProps) {
         <span>Total</span>
         <span
           className="tabular-nums"
-          style={{ color: "var(--color-bento-accent)" }}
+          style={{ color: "var(--primary)" }}
         >
           {formatPrice(total)}
         </span>

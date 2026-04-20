@@ -328,8 +328,8 @@ export function CategoriesClient({
             )}
             <Button
               onClick={openCreate}
-              style={{ backgroundColor: "var(--color-bento-accent)" }}
-              className="text-white hover:opacity-90"
+              style={{ backgroundColor: "var(--primary)" }}
+              className="text-primary-foreground hover:opacity-90"
             >
               <Plus className="mr-1.5 h-4 w-4" />
               Nouvelle catégorie

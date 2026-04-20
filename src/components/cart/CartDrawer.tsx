@@ -80,12 +80,12 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
           <div className="flex-1 min-w-0">
             <p className="font-bold text-base leading-tight">{item.name}</p>
             {item.isBundle && (
-              <span className="inline-block text-xs font-medium px-1.5 py-0.5 rounded-full bg-[var(--color-bento-accent)]/10 text-[var(--color-bento-accent)] mt-1">
+              <span className="inline-block text-xs font-medium px-1.5 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] mt-1">
                 Formule
               </span>
             )}
           </div>
-          <p className="text-base font-black tabular-nums shrink-0" style={{ color: "var(--color-bento-accent)" }}>
+          <p className="text-base font-black tabular-nums shrink-0" style={{ color: "var(--primary)" }}>
             {formatPrice(item.price * item.quantity)}
           </p>
         </div>
@@ -102,8 +102,8 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
                   <span
                     className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold mt-0.5"
                     style={{
-                      backgroundColor: "var(--color-bento-accent)",
-                      color: "var(--color-bento-accent-foreground)",
+                      backgroundColor: "var(--primary)",
+                      color: "var(--primary-foreground)",
                     }}
                   >
                     {i + 1}
@@ -135,8 +135,8 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
                   <span
                     className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold mt-0.5"
                     style={{
-                      backgroundColor: "var(--color-bento-accent)",
-                      color: "var(--color-bento-accent-foreground)",
+                      backgroundColor: "var(--primary)",
+                      color: "var(--primary-foreground)",
                     }}
                   >
                     {i + 1}
@@ -233,11 +233,11 @@ function CartView({ onClose, onCheckout }: CartViewProps) {
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-16 text-center">
         <div
           className="flex h-20 w-20 items-center justify-center rounded-full"
-          style={{ backgroundColor: "var(--color-bento-accent)/10" }}
+          style={{ backgroundColor: "var(--primary)/10" }}
         >
           <ShoppingBag
             className="h-9 w-9"
-            style={{ color: "var(--color-bento-accent)" }}
+            style={{ color: "var(--primary)" }}
           />
         </div>
         <div>
@@ -312,8 +312,8 @@ function CartView({ onClose, onCheckout }: CartViewProps) {
         <Button
           className="w-full font-semibold gap-2 hover:opacity-90"
           style={{
-            backgroundColor: "var(--color-bento-accent)",
-            color: "var(--color-bento-accent-foreground)",
+            backgroundColor: "var(--primary)",
+            color: "var(--primary-foreground)",
           }}
           onClick={onCheckout}
         >
@@ -369,7 +369,7 @@ export function CartDrawer() {
     <div className="flex items-center gap-2">
       <ShoppingCart
         className="h-4 w-4"
-        style={{ color: "var(--color-bento-accent)" }}
+        style={{ color: "var(--primary)" }}
       />
       Mon panier
     </div>

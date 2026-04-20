@@ -86,6 +86,25 @@ create table if not exists public.products (
 alter table public.products enable row level security;
 
 
+-- ─── public.shop_labels ───────────────────────────────────────
+create table if not exists public.shop_labels (
+  id            uuid primary key default gen_random_uuid(),
+  shop_id       uuid not null references public.shops on delete cascade,
+  value         text not null,
+  label         text not null,
+  color         text not null,
+  display_order integer not null default 0,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now(),
+  unique (shop_id, value),
+  constraint shop_labels_value_format check (value ~ '^[a-z0-9]+(?:_[a-z0-9]+)*$'),
+  constraint shop_labels_color_hex check (color ~ '^#[0-9A-Fa-f]{6}$'),
+  constraint shop_labels_label_not_blank check (btrim(label) <> '')
+);
+
+alter table public.shop_labels enable row level security;
+
+
 -- ─── public.bundles ──────────────────────────────────────────
 create table if not exists public.bundles (
   id          uuid primary key default gen_random_uuid(),
@@ -331,6 +350,31 @@ create policy "products: owner delete"
   );
 
 
+-- ─── shop_labels ───────────────────────────────────────────────
+create policy "shop_labels: public select (active shop)"
+  on public.shop_labels for select
+  using (
+    exists (
+      select 1 from public.shops
+       where shops.id = shop_labels.shop_id
+         and shops.is_active = true
+    )
+  );
+
+create policy "shop_labels: owner insert"
+  on public.shop_labels for insert
+  with check (public.is_shop_owner(shop_id));
+
+create policy "shop_labels: owner update"
+  on public.shop_labels for update
+  using (public.is_shop_owner(shop_id))
+  with check (public.is_shop_owner(shop_id));
+
+create policy "shop_labels: owner delete"
+  on public.shop_labels for delete
+  using (public.is_shop_owner(shop_id));
+
+
 -- ─── bundles ─────────────────────────────────────────────────
 create policy "bundles: public select (active shop)"
   on public.bundles for select
@@ -537,6 +581,9 @@ create index if not exists idx_shops_owner_id      on public.shops (owner_id);
 create index if not exists idx_shops_slug           on public.shops (slug);
 create index if not exists idx_categories_shop_id   on public.categories (shop_id);
 create index if not exists idx_products_category_id on public.products (category_id);
+create index if not exists idx_shop_labels_shop_id on public.shop_labels (shop_id);
+create index if not exists idx_shop_labels_shop_id_display_order
+  on public.shop_labels (shop_id, display_order);
 create index if not exists idx_bundles_shop_id      on public.bundles (shop_id);
 create index if not exists idx_bundle_slots_bundle  on public.bundle_slots (bundle_id);
 create index if not exists idx_orders_shop_id       on public.orders (shop_id);

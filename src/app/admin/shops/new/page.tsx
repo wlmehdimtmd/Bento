@@ -122,7 +122,7 @@ export default async function AdminNewShopPage() {
             <button
               type="submit"
               className="rounded-md px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-              style={{ backgroundColor: "var(--color-bento-accent)" }}
+              style={{ backgroundColor: "var(--primary)" }}
             >
               Créer la boutique
             </button>

@@ -155,7 +155,7 @@ export function OrderList({ initialOrders, shopId }: OrderListProps) {
               onClick={() => setActiveTab(t.id)}
               className={`flex items-center gap-1.5 shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-[var(--color-bento-accent)] text-white"
+                  ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -164,7 +164,7 @@ export function OrderList({ initialOrders, shopId }: OrderListProps) {
                 <span
                   className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-bold ${
                     isActive
-                      ? "bg-white/20 text-white"
+                      ? "bg-primary-foreground/20 text-primary-foreground"
                       : "bg-border text-foreground"
                   }`}
                 >

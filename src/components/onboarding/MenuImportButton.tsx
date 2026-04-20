@@ -53,8 +53,8 @@ export function MenuImportButton({ shopId, categories, onImported }: MenuImportB
         className={cn(
           "w-full flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed py-5 text-sm transition-colors",
           dragging
-            ? "border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/5 text-[var(--color-bento-accent)]"
-            : "border-border text-muted-foreground hover:border-[var(--color-bento-accent)] hover:text-[var(--color-bento-accent)]"
+            ? "border-[var(--primary)] bg-[var(--primary)]/5 text-[var(--primary)]"
+            : "border-border text-muted-foreground hover:border-[var(--primary)] hover:text-[var(--primary)]"
         )}
       >
         <div className="flex items-center gap-2">

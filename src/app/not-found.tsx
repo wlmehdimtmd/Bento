@@ -6,7 +6,7 @@ export default function NotFound() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 text-center">
       {/* Bento grid illustration */}
       <div className="grid grid-cols-3 gap-2 w-40 h-32 opacity-30 pointer-events-none">
-        <div className="col-span-2 rounded-xl" style={{ backgroundColor: "var(--color-bento-accent)" }} />
+        <div className="col-span-2 rounded-xl" style={{ backgroundColor: "var(--primary)" }} />
         <div className="rounded-xl bg-muted" />
         <div className="rounded-xl bg-muted" />
         <div className="col-span-2 rounded-xl bg-muted" />
@@ -15,7 +15,7 @@ export default function NotFound() {
       <div className="space-y-2">
         <p
           className="text-7xl font-black tabular-nums"
-          style={{ color: "var(--color-bento-accent)", fontFamily: "var(--font-onest)" }}
+          style={{ color: "var(--primary)", fontFamily: "var(--font-onest)" }}
         >
           404
         </p>
@@ -34,7 +34,7 @@ export default function NotFound() {
         <Link
           href="/"
           className={buttonVariants()}
-          style={{ backgroundColor: "var(--color-bento-accent)", color: "white" }}
+          style={{ backgroundColor: "var(--primary)", color: "white" }}
         >
           Retour à l&apos;accueil
         </Link>

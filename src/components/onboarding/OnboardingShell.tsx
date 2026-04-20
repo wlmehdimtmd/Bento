@@ -66,9 +66,9 @@ export function OnboardingShell({
                 className={cn(
                   "rounded-full transition-all duration-300",
                   i + 1 === subSteps.current
-                    ? "h-2 w-5 bg-[var(--color-bento-accent)]"
+                    ? "h-2 w-5 bg-[var(--primary)]"
                     : i + 1 < subSteps.current
-                      ? "h-2 w-2 bg-[var(--color-bento-accent)] opacity-50"
+                      ? "h-2 w-2 bg-[var(--primary)] opacity-50"
                       : "h-2 w-2 bg-muted border border-muted-foreground/20"
                 )}
               />
@@ -79,9 +79,9 @@ export function OnboardingShell({
                 className={cn(
                   "rounded-full transition-all duration-300",
                   step === currentStep
-                    ? "h-2 w-5 bg-[var(--color-bento-accent)]"
+                    ? "h-2 w-5 bg-[var(--primary)]"
                     : step < currentStep
-                      ? "h-2 w-2 bg-[var(--color-bento-accent)] opacity-50"
+                      ? "h-2 w-2 bg-[var(--primary)] opacity-50"
                       : "h-2 w-2 bg-muted border border-muted-foreground/20"
                 )}
               />

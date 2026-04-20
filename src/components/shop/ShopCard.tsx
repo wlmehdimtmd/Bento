@@ -34,7 +34,7 @@ export function ShopCard({ id, name, slug, type, logo_url, is_active }: ShopCard
           {/* Info */}
           <div className="min-w-0 flex-1 space-y-1">
             <p
-              className="truncate font-semibold group-hover:text-[var(--color-bento-accent)] transition-colors"
+              className="truncate font-semibold group-hover:text-[var(--primary)] transition-colors"
               style={{ fontFamily: "var(--font-onest)" }}
             >
               {name}

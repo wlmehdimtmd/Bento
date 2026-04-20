@@ -59,6 +59,7 @@ import { PasteJsonImportDialog } from "@/components/import/PasteJsonImportDialog
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
+import type { ProductLabelOption } from "@/lib/shop-labels";
 
 interface CategoryOption {
   id: string;
@@ -75,6 +76,7 @@ interface ProductsClientProps {
   shopId: string;
   categories: CategoryOption[];
   initialProducts: (ProductRow & { categoryName: string })[];
+  shopLabels: ProductLabelOption[];
   adminActions?: AdminProductActions;
 }
 
@@ -84,6 +86,7 @@ export function ProductsClient({
   shopId,
   categories,
   initialProducts,
+  shopLabels,
   adminActions,
 }: ProductsClientProps) {
   const router = useRouter();
@@ -337,8 +340,8 @@ export function ProductsClient({
             )}
             <Button
               onClick={openCreate}
-              style={{ backgroundColor: "var(--color-bento-accent)" }}
-              className="text-white hover:opacity-90"
+              style={{ backgroundColor: "var(--primary)" }}
+              className="text-primary-foreground hover:opacity-90"
             >
               <Plus className="mr-1.5 h-4 w-4" />
               Nouveau produit
@@ -430,7 +433,7 @@ export function ProductsClient({
                   <TableCell className="hidden md:table-cell py-2">
                     <div className="flex flex-wrap gap-1 max-w-[160px]">
                       {(p.tags ?? []).slice(0, 4).map((t) => (
-                        <TagBadge key={t} value={t} size="sm" />
+                        <TagBadge key={t} value={t} size="sm" labels={shopLabels} />
                       ))}
                       {(p.tags ?? []).length > 4 && (
                         <span className="text-xs text-muted-foreground">
@@ -536,6 +539,7 @@ export function ProductsClient({
                 onSave={adminActions?.onSave}
                 subViewOverride={formSubView}
                 onSubViewChange={setFormSubView}
+                labels={shopLabels}
               />
             </div>
           </DrawerContent>
@@ -583,6 +587,7 @@ export function ProductsClient({
                 sheetCtasFullWidth
                 subViewOverride={formSubView}
                 onSubViewChange={setFormSubView}
+                labels={shopLabels}
               />
             </div>
           </SheetContent>

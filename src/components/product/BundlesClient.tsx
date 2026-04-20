@@ -305,8 +305,8 @@ export function BundlesClient({
             )}
             <Button
               onClick={openCreate}
-              style={{ backgroundColor: "var(--color-bento-accent)" }}
-              className="text-white hover:opacity-90"
+              style={{ backgroundColor: "var(--primary)" }}
+              className="text-primary-foreground hover:opacity-90"
             >
               <Plus className="mr-1.5 h-4 w-4" />
               Nouvelle formule
@@ -390,7 +390,7 @@ export function BundlesClient({
                       {bundleSlotsSummary(bundle, catMap)}
                     </p>
                   </TableCell>
-                  <TableCell className="text-right py-2 font-medium tabular-nums text-[var(--color-bento-accent)]">
+                  <TableCell className="text-right py-2 font-medium tabular-nums text-[var(--primary)]">
                     {formatPrice(bundle.price)}
                   </TableCell>
                   {!adminActions && (

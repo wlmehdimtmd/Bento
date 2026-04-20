@@ -375,8 +375,8 @@ export function MenuImportDialog({
               type="button"
               disabled={importing || selectedIds.size === 0}
               onClick={() => void handleConfirmImport()}
-              style={{ backgroundColor: "var(--color-bento-accent)" }}
-              className="text-white hover:opacity-90"
+              style={{ backgroundColor: "var(--primary)" }}
+              className="text-primary-foreground hover:opacity-90"
             >
               {importing
                 ? "Import…"

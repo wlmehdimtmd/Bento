@@ -62,8 +62,8 @@ export function MenuUploadZone({ disabled, onFile }: MenuUploadZoneProps) {
         className={cn(
           "w-full flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed py-8 text-sm transition-colors",
           dragging
-            ? "border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/5 text-[var(--color-bento-accent)]"
-            : "border-border text-muted-foreground hover:border-[var(--color-bento-accent)] hover:text-[var(--color-bento-accent)]",
+            ? "border-[var(--primary)] bg-[var(--primary)]/5 text-[var(--primary)]"
+            : "border-border text-muted-foreground hover:border-[var(--primary)] hover:text-[var(--primary)]",
           disabled && "pointer-events-none opacity-50"
         )}
       >

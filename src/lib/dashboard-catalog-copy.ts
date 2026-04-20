@@ -8,3 +8,6 @@ export const PRODUCT_PAGE_DESCRIPTION =
 
 export const BUNDLE_PAGE_DESCRIPTION =
   "Offres à prix fixe qui assemblent plusieurs choix (produits d’une catégorie ou créneaux dédiés) pour composer un menu-type.";
+
+export const LABEL_PAGE_DESCRIPTION =
+  "Badges personnalisés affichés sur les produits (ex. Nouveauté, Best-seller) pour mettre en avant votre carte.";

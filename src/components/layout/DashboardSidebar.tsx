@@ -15,6 +15,7 @@ import {
   LayoutGrid,
   SlidersHorizontal,
   Store,
+  Tags,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +64,10 @@ function SidebarColumn({
     ? `/dashboard/shops/${routeShopId}/bundles`
     : "/dashboard/bundles";
 
+  const labelsHref = routeShopId
+    ? `/dashboard/shops/${routeShopId}/labels`
+    : "/dashboard/labels";
+
   const vitrineConfigHref = effectiveShopId
     ? `/dashboard/shops/${effectiveShopId}/settings`
     : "/dashboard";
@@ -89,9 +94,9 @@ function SidebarColumn({
 
   const settingsActive = pathname === settingsHref || pathname.startsWith(`${settingsHref}/`);
   const activeItemClass =
-    "bg-[var(--color-bento-accent)] [color:var(--color-bento-accent-foreground)]";
+    "bg-[var(--primary)] [color:var(--primary-foreground)]";
 
-  const carteChildHrefs = [categoriesHref, productsHref, bundlesHref];
+  const carteChildHrefs = [categoriesHref, productsHref, bundlesHref, labelsHref];
   const carteGroupActive = carteChildHrefs.some((h) => isActive(h));
   const vitrineChildHrefs = [vitrineConfigHref, vitrineLayoutHref];
   const vitrineGroupActive =
@@ -246,6 +251,18 @@ function SidebarColumn({
                 <Gift className="h-4 w-4 shrink-0" />
                 Formules
               </Link>
+              <Link
+                href={labelsHref}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  isActive(labelsHref)
+                    ? activeItemClass
+                    : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                )}
+              >
+                <Tags className="h-4 w-4 shrink-0" />
+                Labels
+              </Link>
             </div>
           ) : null}
         </div>
@@ -267,7 +284,7 @@ function SidebarColumn({
                 "flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums leading-none",
                 isActive(ordersHref)
                   ? "bg-white/20 text-white"
-                  : "bg-[var(--color-bento-accent)] text-white"
+                  : "bg-[var(--primary)] text-white"
               )}
               aria-label={`${activeOrdersCount} commande${activeOrdersCount > 1 ? "s" : ""} à traiter`}
             >

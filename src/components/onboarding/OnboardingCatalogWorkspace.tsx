@@ -243,8 +243,8 @@ export function OnboardingCatalogWorkspace({
       <Button
         type="button"
         onClick={() => goStep("success")}
-        style={{ backgroundColor: "var(--color-bento-accent)" }}
-        className="flex-1 sm:flex-initial text-white hover:opacity-90 gap-1.5"
+        style={{ backgroundColor: "var(--primary)" }}
+        className="flex-1 sm:flex-initial text-primary-foreground hover:opacity-90 gap-1.5"
       >
         Suivant
         <ChevronRight className="h-4 w-4" />

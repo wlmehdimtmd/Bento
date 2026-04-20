@@ -129,7 +129,7 @@ export function ExtractedProductCard({
                             className={cn(
                               "rounded-full border px-2 py-0.5 text-xs",
                               on
-                                ? "border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/10"
+                                ? "border-[var(--primary)] bg-[var(--primary)]/10"
                                 : "border-border text-muted-foreground"
                             )}
                           >

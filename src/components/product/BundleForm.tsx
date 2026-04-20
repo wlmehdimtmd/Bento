@@ -343,7 +343,7 @@ export function BundleForm({
                       disabled={isSubmitting}
                       className={
                         active
-                          ? "rounded-full border border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/10 px-2.5 py-1 text-xs font-medium text-foreground"
+                          ? "rounded-full border border-[var(--primary)] bg-[var(--primary)]/10 px-2.5 py-1 text-xs font-medium text-foreground"
                           : "rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-muted-foreground"
                       }
                     >
@@ -408,8 +408,8 @@ export function BundleForm({
           <Button
             type="button"
             onClick={() => changeSubView("main")}
-            style={{ backgroundColor: "var(--color-bento-accent)" }}
-            className="w-full text-white hover:opacity-90"
+            style={{ backgroundColor: "var(--primary)" }}
+            className="w-full text-primary-foreground hover:opacity-90"
           >
             Valider
           </Button>
@@ -426,8 +426,8 @@ export function BundleForm({
           <Button
             type="button"
             onClick={() => changeSubView("main")}
-            style={{ backgroundColor: "var(--color-bento-accent)" }}
-            className="w-full text-white hover:opacity-90"
+            style={{ backgroundColor: "var(--primary)" }}
+            className="w-full text-primary-foreground hover:opacity-90"
           >
             Valider
           </Button>
@@ -531,8 +531,8 @@ export function BundleForm({
         <Button
           type="submit"
           disabled={isSubmitting}
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className={sheetCtasFullWidth ? "flex-1 text-white hover:opacity-90" : "flex-1 text-white hover:opacity-90 md:flex-none"}
+          style={{ backgroundColor: "var(--primary)" }}
+          className={sheetCtasFullWidth ? "flex-1 text-primary-foreground hover:opacity-90" : "flex-1 text-primary-foreground hover:opacity-90 md:flex-none"}
         >
           {isSubmitting ? (
             <>

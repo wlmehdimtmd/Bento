@@ -185,7 +185,7 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
                 key={mode}
                 className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 cursor-pointer transition-colors ${
                   fulfillmentMode === mode
-                    ? "border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/5"
+                    ? "border-[var(--primary)] bg-[var(--primary)]/5"
                     : "border-border hover:border-muted-foreground/40"
                 }`}
               >
@@ -196,7 +196,7 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
                   onChange={() =>
                     setValue("fulfillment_mode", mode, { shouldValidate: true })
                   }
-                  className="accent-[var(--color-bento-accent)]"
+                  className="accent-[var(--primary)]"
                 />
                 <span className="text-sm font-medium">
                   {FULFILLMENT_LABELS[mode]}
@@ -313,7 +313,7 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
           </div>
           <div className="flex justify-between font-bold text-base pt-1 border-t border-border">
             <span>Total</span>
-            <span style={{ color: "var(--color-bento-accent)" }}>
+            <span style={{ color: "var(--primary)" }}>
               {formatPrice(total)}
             </span>
           </div>
@@ -327,8 +327,8 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
           disabled={isSubmitting || items.length === 0}
           className="w-full font-semibold gap-2 hover:opacity-90"
           style={{
-            backgroundColor: "var(--color-bento-accent)",
-            color: "var(--color-bento-accent-foreground)",
+            backgroundColor: "var(--primary)",
+            color: "var(--primary-foreground)",
           }}
         >
           {isSubmitting ? (

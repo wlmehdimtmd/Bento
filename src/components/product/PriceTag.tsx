@@ -16,7 +16,7 @@ export function PriceTag({ price, size = "md", className }: PriceTagProps) {
   return (
     <span
       className={cn("tabular-nums", sizeClasses[size], className)}
-      style={{ color: "var(--color-bento-accent)" }}
+      style={{ color: "var(--primary)" }}
     >
       {formatPrice(price)}
     </span>

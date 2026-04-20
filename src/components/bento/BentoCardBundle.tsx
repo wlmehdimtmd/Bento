@@ -53,7 +53,7 @@ export function BentoCardBundle({
           <div className="h-full w-full flex items-center justify-center bg-muted">
             <Gift
               className="h-10 w-10"
-              style={{ color: "var(--color-bento-accent)" }}
+              style={{ color: "var(--primary)" }}
             />
           </div>
         )}
@@ -67,8 +67,8 @@ export function BentoCardBundle({
             variant="secondary"
             className="text-xs shrink-0"
             style={{
-              backgroundColor: "var(--color-bento-accent)/10",
-              color: "var(--color-bento-accent)",
+              backgroundColor: "var(--primary)/10",
+              color: "var(--primary)",
             }}
           >
             Formule

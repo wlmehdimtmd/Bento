@@ -281,7 +281,7 @@ export function OnboardingCategoriesStep({
               className={cn(
                 "flex h-10 w-full items-center justify-center rounded-lg border text-xl transition-colors",
                 newEmoji === emoji
-                  ? "border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/10"
+                  ? "border-[var(--primary)] bg-[var(--primary)]/10"
                   : "border-border hover:border-muted-foreground"
               )}
               aria-label={`Icône ${emoji}`}
@@ -295,8 +295,8 @@ export function OnboardingCategoriesStep({
         <Button
           type="button"
           onClick={() => setSubView("main")}
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="w-full text-white hover:opacity-90"
+          style={{ backgroundColor: "var(--primary)" }}
+          className="w-full text-primary-foreground hover:opacity-90"
         >
           Valider
         </Button>
@@ -320,8 +320,8 @@ export function OnboardingCategoriesStep({
         <Button
           type="button"
           onClick={() => setSubView("main")}
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="w-full text-white hover:opacity-90"
+          style={{ backgroundColor: "var(--primary)" }}
+          className="w-full text-primary-foreground hover:opacity-90"
         >
           Valider
         </Button>
@@ -404,8 +404,8 @@ export function OnboardingCategoriesStep({
             type="button"
             onClick={() => void addCategory()}
             disabled={saving || !newName.trim()}
-            style={{ backgroundColor: "var(--color-bento-accent)" }}
-            className="flex-1 text-white hover:opacity-90"
+            style={{ backgroundColor: "var(--primary)" }}
+            className="flex-1 text-primary-foreground hover:opacity-90"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Ajouter"}
           </Button>
@@ -432,7 +432,7 @@ export function OnboardingCategoriesStep({
             onDragEnd={() => setDragOver(null)}
             className={cn(
               "flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5 transition-all",
-              dragOver === i && "ring-2 ring-[var(--color-bento-accent)] opacity-80"
+              dragOver === i && "ring-2 ring-[var(--primary)] opacity-80"
             )}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab shrink-0" />
@@ -511,7 +511,7 @@ export function OnboardingCategoriesStep({
           setSubView("main");
           setCreateOpen(true);
         }}
-        className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm text-muted-foreground hover:border-[var(--color-bento-accent)] hover:text-[var(--color-bento-accent)] transition-colors"
+        className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm text-muted-foreground hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors"
       >
         <Plus className="h-4 w-4" />
         Nouvelle catégorie

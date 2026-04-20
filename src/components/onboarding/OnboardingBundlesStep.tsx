@@ -226,8 +226,8 @@ export function OnboardingBundlesStep({
         type="button"
         onClick={() => void saveBundle()}
         disabled={saving}
-        style={{ backgroundColor: "var(--color-bento-accent)" }}
-        className="text-white hover:opacity-90 flex-1"
+        style={{ backgroundColor: "var(--primary)" }}
+        className="text-primary-foreground hover:opacity-90 flex-1"
       >
         {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Créer la formule"}
       </Button>
@@ -279,7 +279,7 @@ export function OnboardingBundlesStep({
                       onClick={() => setSlotCategory(i, c.id)}
                       className={
                         active
-                          ? "rounded-full border border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/10 px-2.5 py-1 text-xs font-medium text-foreground"
+                          ? "rounded-full border border-[var(--primary)] bg-[var(--primary)]/10 px-2.5 py-1 text-xs font-medium text-foreground"
                           : "rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-muted-foreground"
                       }
                     >
@@ -306,8 +306,8 @@ export function OnboardingBundlesStep({
         <Button
           type="button"
           onClick={() => setSubView("main")}
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="w-full text-white hover:opacity-90"
+          style={{ backgroundColor: "var(--primary)" }}
+          className="w-full text-primary-foreground hover:opacity-90"
         >
           Valider
         </Button>
@@ -382,7 +382,7 @@ export function OnboardingBundlesStep({
           >
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{bundle.name}</p>
-              <p className="text-sm font-bold" style={{ color: "var(--color-bento-accent)" }}>
+              <p className="text-sm font-bold" style={{ color: "var(--primary)" }}>
                 {bundle.price.toFixed(2)}&nbsp;€
               </p>
             </div>
@@ -404,7 +404,7 @@ export function OnboardingBundlesStep({
             setSubView("main");
             setShowForm(true);
           }}
-          className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm text-muted-foreground hover:border-[var(--color-bento-accent)] hover:text-[var(--color-bento-accent)] transition-colors"
+          className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm text-muted-foreground hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors"
         >
           <Plus className="h-4 w-4" />
           Créer une formule

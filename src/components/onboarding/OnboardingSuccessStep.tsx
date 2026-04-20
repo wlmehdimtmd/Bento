@@ -71,8 +71,8 @@ export function OnboardingSuccessStep({
         <Button
           onClick={() => void goDashboard()}
           disabled={finishing}
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="text-white hover:opacity-90 w-full gap-2"
+          style={{ backgroundColor: "var(--primary)" }}
+          className="text-primary-foreground hover:opacity-90 w-full gap-2"
           size="lg"
         >
           <LayoutDashboard className="h-4 w-4" />

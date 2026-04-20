@@ -26,12 +26,14 @@ import { formatPrice } from "@/lib/utils";
 import { ALLERGENS } from "@/lib/constants";
 import type { BundleInfo } from "@/components/bento/StoreView";
 import type { PublicProduct } from "@/components/product/ProductDetail";
+import type { ProductLabelOption } from "@/lib/shop-labels";
 
 export interface BundleDetailProps {
   bundle: BundleInfo | null;
   open: boolean;
   onClose: () => void;
   loadCategoryProducts: (categoryId: string) => Promise<PublicProduct[]>;
+  shopLabels?: ProductLabelOption[];
 }
 
 type Selections = Record<number, PublicProduct[]>;
@@ -174,16 +176,16 @@ function BundleDetailContent({
                 onClick={() => setStep(i)}
                 className={`flex-1 flex flex-col items-center gap-1 rounded-xl p-2 transition-colors ${
                   active
-                    ? "bg-[var(--color-bento-accent)]/10"
+                    ? "bg-[var(--primary)]/10"
                     : "hover:bg-muted/60"
                 }`}
               >
                 <div
                   className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                     done
-                      ? "bg-[var(--color-bento-accent)] text-[var(--color-bento-accent-foreground)]"
+                      ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
                       : active
-                      ? "border-2 border-[var(--color-bento-accent)] text-[var(--color-bento-accent)]"
+                      ? "border-2 border-[var(--primary)] text-[var(--primary)]"
                       : "border-2 border-muted-foreground/30 text-muted-foreground"
                   }`}
                 >
@@ -238,7 +240,7 @@ function BundleDetailContent({
                   key={product.id}
                   className={`rounded-xl border transition-all ${
                     isSelected
-                      ? "border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/5 shadow-sm"
+                      ? "border-[var(--primary)] bg-[var(--primary)]/5 shadow-sm"
                       : "border-border"
                   }`}
                 >
@@ -308,7 +310,7 @@ function BundleDetailContent({
                     <div
                       className={`h-5 w-5 rounded-full flex items-center justify-center shrink-0 transition-all ${
                         isSelected
-                          ? "bg-[var(--color-bento-accent)] text-[var(--color-bento-accent-foreground)]"
+                          ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
                           : "border-2 border-muted-foreground/30"
                       }`}
                     >
@@ -395,8 +397,8 @@ function BundleDetailContent({
             disabled={!stepComplete}
             className="gap-1 hover:opacity-90"
             style={{
-              backgroundColor: "var(--color-bento-accent)",
-              color: "var(--color-bento-accent-foreground)",
+              backgroundColor: "var(--primary)",
+              color: "var(--primary-foreground)",
             }}
           >
             Suivant
@@ -409,8 +411,8 @@ function BundleDetailContent({
             disabled={!allComplete}
             className="gap-1.5 hover:opacity-90"
             style={{
-              backgroundColor: "var(--color-bento-accent)",
-              color: "var(--color-bento-accent-foreground)",
+              backgroundColor: "var(--primary)",
+              color: "var(--primary-foreground)",
             }}
           >
             <ShoppingCart className="h-4 w-4" />
@@ -429,6 +431,7 @@ export function BundleDetail({
   open,
   onClose,
   loadCategoryProducts,
+  shopLabels: _shopLabels,
 }: BundleDetailProps) {
   const isMobile = useIsMobile();
 

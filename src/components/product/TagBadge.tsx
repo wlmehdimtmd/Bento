@@ -1,24 +1,27 @@
 import { ALLERGENS, LABELS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import type { ProductLabelOption } from "@/lib/shop-labels";
 
 interface TagBadgeProps {
   value: string;
   size?: "sm" | "md";
+  labels?: ProductLabelOption[];
 }
 
 // Resolve tag metadata from constants
-function resolveTag(value: string) {
+function resolveTag(value: string, labels?: ProductLabelOption[]) {
   const allergen = ALLERGENS.find((a) => a.value === value);
   if (allergen) return { label: allergen.label, emoji: allergen.emoji, type: "allergen" as const, color: null };
 
-  const label = LABELS.find((l) => l.value === value);
+  const labelOptions = labels?.length ? labels : LABELS;
+  const label = labelOptions.find((l) => l.value === value);
   if (label) return { label: label.label, emoji: null, type: "label" as const, color: label.color };
 
   return { label: value, emoji: null, type: "unknown" as const, color: null };
 }
 
-export function TagBadge({ value, size = "md" }: TagBadgeProps) {
-  const { label, emoji, type, color } = resolveTag(value);
+export function TagBadge({ value, size = "md", labels }: TagBadgeProps) {
+  const { label, emoji, type, color } = resolveTag(value, labels);
 
   if (size === "sm") {
     const visible = type === "allergen" && emoji ? emoji : label.slice(0, 3);

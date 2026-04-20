@@ -41,7 +41,7 @@ export function QRCodeDisplay({ url, shopName }: QRCodeDisplayProps) {
   return (
     <div className="flex flex-col items-center gap-5 py-2">
       {/* Visible SVG QR code */}
-      <div className="rounded-2xl border-4 border-[var(--color-bento-accent)] p-3 bg-white">
+      <div className="rounded-2xl border-4 border-[var(--primary)] p-3 bg-white">
         <QRCodeSVG
           value={url}
           size={200}

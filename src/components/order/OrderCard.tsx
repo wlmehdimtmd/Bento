@@ -143,7 +143,7 @@ export function OrderCard({
         <div className="flex items-center gap-2 shrink-0">
           <p
             className="font-bold tabular-nums text-sm"
-            style={{ color: "var(--color-bento-accent)" }}
+            style={{ color: "var(--primary)" }}
           >
             {formatPrice(order.total_amount)}
           </p>
@@ -175,7 +175,7 @@ export function OrderCard({
               size="sm"
               disabled={isUpdating}
               className="flex-1 text-white text-xs hover:opacity-90"
-              style={{ backgroundColor: "var(--color-bento-accent)" }}
+              style={{ backgroundColor: "var(--primary)" }}
               onClick={advanceStatus}
             >
               {ADVANCE_LABEL[order.status]} →

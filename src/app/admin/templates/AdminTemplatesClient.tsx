@@ -379,7 +379,7 @@ export function AdminTemplatesClient({
 
         {/* ── Tab 1: Business Types ── */}
         <TabsContent value="types" className="space-y-4">
-          <Button size="sm" onClick={openBtCreate} style={{ backgroundColor: "var(--color-bento-accent)" }} className="text-white hover:opacity-90">
+          <Button size="sm" onClick={openBtCreate} style={{ backgroundColor: "var(--primary)" }} className="text-primary-foreground hover:opacity-90">
             <Plus className="mr-1.5 h-4 w-4" />
             Ajouter un type
           </Button>
@@ -648,7 +648,7 @@ export function AdminTemplatesClient({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setBtOpen(false)}>Annuler</Button>
-            <Button onClick={saveBt} disabled={btSaving} style={{ backgroundColor: "var(--color-bento-accent)" }} className="text-white hover:opacity-90">
+            <Button onClick={saveBt} disabled={btSaving} style={{ backgroundColor: "var(--primary)" }} className="text-primary-foreground hover:opacity-90">
               {btSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enregistrer"}
             </Button>
           </DialogFooter>
@@ -695,7 +695,7 @@ export function AdminTemplatesClient({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCatOpen(false)}>Annuler</Button>
-            <Button onClick={saveCat} disabled={catSaving} style={{ backgroundColor: "var(--color-bento-accent)" }} className="text-white hover:opacity-90">
+            <Button onClick={saveCat} disabled={catSaving} style={{ backgroundColor: "var(--primary)" }} className="text-primary-foreground hover:opacity-90">
               {catSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enregistrer"}
             </Button>
           </DialogFooter>
@@ -740,7 +740,7 @@ export function AdminTemplatesClient({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setProdOpen(false)}>Annuler</Button>
-            <Button onClick={saveProd} disabled={prodSaving} style={{ backgroundColor: "var(--color-bento-accent)" }} className="text-white hover:opacity-90">
+            <Button onClick={saveProd} disabled={prodSaving} style={{ backgroundColor: "var(--primary)" }} className="text-primary-foreground hover:opacity-90">
               {prodSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enregistrer"}
             </Button>
           </DialogFooter>
@@ -838,7 +838,7 @@ export function AdminTemplatesClient({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setBundleOpen(false)}>Annuler</Button>
-            <Button onClick={saveBundle} disabled={bundleSaving} style={{ backgroundColor: "var(--color-bento-accent)" }} className="text-white hover:opacity-90">
+            <Button onClick={saveBundle} disabled={bundleSaving} style={{ backgroundColor: "var(--primary)" }} className="text-primary-foreground hover:opacity-90">
               {bundleSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enregistrer"}
             </Button>
           </DialogFooter>

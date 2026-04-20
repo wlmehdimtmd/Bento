@@ -104,10 +104,10 @@ export default async function ShopDashboardPage({ params }: { params: Params }) 
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard icon={<FolderOpen className="h-5 w-5" />} label="Catégories" value={catCount ?? 0} iconColor="bg-amber-500" />
-        <StatsCard icon={<Package className="h-5 w-5" />} label="Produits" value={productCount} iconColor="bg-violet-500" />
-        <StatsCard icon={<ShoppingCart className="h-5 w-5" />} label="Commandes" value={orderCount ?? 0} iconColor="bg-blue-500" />
-        <StatsCard icon={<TrendingUp className="h-5 w-5" />} label="Chiffre d'affaires" value={revenue} type="currency" iconColor="bg-[var(--color-bento-accent)]" />
+        <StatsCard icon={<FolderOpen className="h-5 w-5" />} label="Catégories" value={catCount ?? 0} iconColor="bg-amber-500 text-white" />
+        <StatsCard icon={<Package className="h-5 w-5" />} label="Produits" value={productCount} iconColor="bg-violet-500 text-white" />
+        <StatsCard icon={<ShoppingCart className="h-5 w-5" />} label="Commandes" value={orderCount ?? 0} iconColor="bg-blue-500 text-white" />
+        <StatsCard icon={<TrendingUp className="h-5 w-5" />} label="Chiffre d'affaires" value={revenue} type="currency" iconColor="bg-primary text-primary-foreground dark:bg-[oklch(0.205_0_0)] dark:text-[oklch(0.985_0_0)]" />
       </div>
 
       {/* Quick actions */}

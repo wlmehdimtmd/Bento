@@ -142,7 +142,7 @@ export function LoginForm() {
         Pas encore de compte ?{" "}
         <Link
           href="/register"
-          className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--color-bento-accent)]"
+          className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary)]"
         >
           S&apos;inscrire
         </Link>

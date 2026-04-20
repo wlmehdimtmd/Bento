@@ -42,7 +42,7 @@ export function StatsCard({
   value,
   type = "count",
   trend,
-  iconColor = "bg-[var(--color-bento-accent)]",
+  iconColor = "bg-primary text-primary-foreground dark:bg-[oklch(0.205_0_0)] dark:text-[oklch(0.985_0_0)]",
 }: StatsCardProps) {
   const animated = useCountAnimation(value);
 
@@ -73,7 +73,7 @@ export function StatsCard({
           </div>
           <div
             className={cn(
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white",
+              "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg [&_svg]:text-current",
               iconColor
             )}
           >

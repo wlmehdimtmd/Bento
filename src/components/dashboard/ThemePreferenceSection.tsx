@@ -46,7 +46,7 @@ export function ThemePreferenceSection() {
           type="button"
           variant={theme === value ? "default" : "outline"}
           size="sm"
-          className={cn("min-w-[100px]", theme === value && "bg-[var(--color-bento-accent)]")}
+          className={cn("min-w-[100px]", theme === value && "bg-[var(--primary)]")}
           onClick={() => setTheme(value)}
         >
           <Icon className="mr-2 h-4 w-4 shrink-0" />

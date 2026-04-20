@@ -172,7 +172,7 @@ export function RegisterForm() {
         </p>
         <Link
           href="/login"
-          className="block text-sm font-medium text-foreground underline underline-offset-4 hover:text-[var(--color-bento-accent)]"
+          className="block text-sm font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary)]"
         >
           Retour à la connexion
         </Link>
@@ -286,7 +286,7 @@ export function RegisterForm() {
         Déjà un compte ?{" "}
         <Link
           href="/login"
-          className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--color-bento-accent)]"
+          className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary)]"
         >
           Se connecter
         </Link>

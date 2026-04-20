@@ -28,6 +28,7 @@ import { PriceTag } from "@/components/product/PriceTag";
 import { useCartStore } from "@/lib/stores/cartStore";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { formatPrice } from "@/lib/utils";
+import type { ProductLabelOption } from "@/lib/shop-labels";
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -46,6 +47,7 @@ interface ProductDetailProps {
   product: PublicProduct | null;
   open: boolean;
   onClose: () => void;
+  shopLabels?: ProductLabelOption[];
 }
 
 // ── Shared content ─────────────────────────────────────────────
@@ -56,6 +58,7 @@ interface ContentProps {
   isMobile?: boolean;
   /** Mobile drawer : zone centrale scrollable + barre d’actions fixe en bas */
   stickyActionBar?: boolean;
+  shopLabels?: ProductLabelOption[];
 }
 
 function ProductDetailContent({
@@ -63,6 +66,7 @@ function ProductDetailContent({
   onClose,
   isMobile,
   stickyActionBar,
+  shopLabels,
 }: ContentProps) {
   const addItem = useCartStore((s) => s.addItem);
   const [quantity, setQuantity] = useState(1);
@@ -218,7 +222,7 @@ function ProductDetailContent({
       {product.tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {product.tags.map((t) => (
-            <TagBadge key={t} value={t} size="md" />
+            <TagBadge key={t} value={t} size="md" labels={shopLabels} />
           ))}
         </div>
       )}
@@ -272,8 +276,8 @@ function ProductDetailContent({
       <Button
         className={stickyActionBar ? "min-h-11 w-full gap-2 font-semibold hover:opacity-90" : "min-h-11 flex-1 gap-2 font-semibold hover:opacity-90"}
         style={{
-          backgroundColor: "var(--color-bento-accent)",
-          color: "var(--color-bento-accent-foreground)",
+          backgroundColor: "var(--primary)",
+          color: "var(--primary-foreground)",
         }}
         onClick={handleAdd}
         disabled={!product.is_available}
@@ -317,7 +321,7 @@ function ProductDetailContent({
 
 // ── Root component ─────────────────────────────────────────────
 
-export function ProductDetail({ product, open, onClose }: ProductDetailProps) {
+export function ProductDetail({ product, open, onClose, shopLabels }: ProductDetailProps) {
   const isMobile = useIsMobile();
 
   if (!product) return null;
@@ -332,6 +336,7 @@ export function ProductDetail({ product, open, onClose }: ProductDetailProps) {
             onClose={onClose}
             isMobile
             stickyActionBar
+            shopLabels={shopLabels}
           />
         </DrawerContent>
       </Drawer>
@@ -352,7 +357,12 @@ export function ProductDetail({ product, open, onClose }: ProductDetailProps) {
           <X className="h-4 w-4" />
         </button>
         <div className="max-h-[85vh] overflow-y-auto">
-          <ProductDetailContent key={product.id} product={product} onClose={onClose} />
+          <ProductDetailContent
+            key={product.id}
+            product={product}
+            onClose={onClose}
+            shopLabels={shopLabels}
+          />
         </div>
       </DialogContent>
     </Dialog>

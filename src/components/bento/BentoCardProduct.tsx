@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { BentoCard } from "./BentoCard";
 import { PriceTag } from "@/components/product/PriceTag";
 import { TagBadge } from "@/components/product/TagBadge";
+import type { ProductLabelOption } from "@/lib/shop-labels";
 
 interface BentoCardProductProps {
   name: string;
@@ -12,6 +13,7 @@ interface BentoCardProductProps {
   imageUrl?: string | null;
   fallbackEmoji?: string;
   tags?: string[];
+  shopLabels?: ProductLabelOption[];
   isAvailable: boolean;
   onAddToCart: (e: React.MouseEvent) => void;
   onClick: () => void;
@@ -23,6 +25,7 @@ export function BentoCardProduct({
   imageUrl,
   fallbackEmoji = "🍽️",
   tags = [],
+  shopLabels,
   isAvailable,
   onAddToCart,
   onClick,
@@ -57,7 +60,7 @@ export function BentoCardProduct({
       {tags.length > 0 && (
         <div className="absolute top-2 left-2 flex gap-1 z-10">
           {tags.slice(0, 2).map((t) => (
-            <TagBadge key={t} value={t} size="sm" />
+            <TagBadge key={t} value={t} size="sm" labels={shopLabels} />
           ))}
         </div>
       )}
@@ -69,7 +72,7 @@ export function BentoCardProduct({
           onClick={onAddToCart}
           aria-label={`Ajouter ${name} au panier`}
           className="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full text-primary-foreground shadow-md transition-transform hover:scale-110 active:scale-95"
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
+          style={{ backgroundColor: "var(--primary)" }}
         >
           <Plus className="h-4 w-4" strokeWidth={3} />
         </button>

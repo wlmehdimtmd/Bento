@@ -87,9 +87,9 @@ export default async function AdminDemoSettingsPage() {
                 type="submit"
                 className={cn(
                   buttonVariants(),
-                  "text-white hover:opacity-90"
+                  "text-primary-foreground hover:opacity-90"
                 )}
-                style={{ backgroundColor: "var(--color-bento-accent)" }}
+                style={{ backgroundColor: "var(--primary)" }}
               >
                 Créer la boutique modèle Maison Kanpai
               </button>
@@ -160,8 +160,8 @@ export default async function AdminDemoSettingsPage() {
           <div className="flex flex-wrap gap-2">
             <button
               type="submit"
-              className={cn(buttonVariants(), "text-white hover:opacity-90")}
-              style={{ backgroundColor: "var(--color-bento-accent)" }}
+              className={cn(buttonVariants(), "text-primary-foreground hover:opacity-90")}
+              style={{ backgroundColor: "var(--primary)" }}
             >
               Enregistrer
             </button>

@@ -26,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { OnboardingStepTitle } from "@/components/onboarding/OnboardingStepTitle";
 import { ImageUploader } from "@/components/product/ImageUploader";
 import { TagSelector } from "@/components/product/TagSelector";
+import { DEFAULT_PRODUCT_LABELS } from "@/lib/shop-labels";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { MenuImportButton } from "@/components/onboarding/MenuImportButton";
@@ -268,8 +269,8 @@ export function OnboardingProductsStep({
           type="button"
           onClick={() => void saveProduct()}
           disabled={saving}
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="text-white hover:opacity-90 flex-1"
+          style={{ backgroundColor: "var(--primary)" }}
+          className="text-primary-foreground hover:opacity-90 flex-1"
         >
           {saving ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -286,14 +287,18 @@ export function OnboardingProductsStep({
   const allergensPanel = (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex-1 pb-3">
-        <TagSelector selected={form.tags} onChange={(tags) => setForm((f) => ({ ...f, tags }))} />
+        <TagSelector
+          selected={form.tags}
+          onChange={(tags) => setForm((f) => ({ ...f, tags }))}
+          labels={DEFAULT_PRODUCT_LABELS}
+        />
       </div>
       <div className="sticky bottom-0 mt-auto border-t border-border py-3">
         <Button
           type="button"
           onClick={() => setSubView("main")}
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="w-full text-white hover:opacity-90"
+          style={{ backgroundColor: "var(--primary)" }}
+          className="w-full text-primary-foreground hover:opacity-90"
         >
           Valider
         </Button>
@@ -304,6 +309,11 @@ export function OnboardingProductsStep({
   const photoPanel = (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex-1 pb-4">
+        {form.name.trim() ? (
+          <p className="mb-3 text-sm text-muted-foreground">
+            Produit : <span className="font-medium text-foreground">{form.name.trim()}</span>
+          </p>
+        ) : null}
         <ImageUploader
           bucket="product-images"
           label="Photo du produit"
@@ -317,8 +327,8 @@ export function OnboardingProductsStep({
         <Button
           type="button"
           onClick={() => setSubView("main")}
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className="w-full text-white hover:opacity-90"
+          style={{ backgroundColor: "var(--primary)" }}
+          className="w-full text-primary-foreground hover:opacity-90"
         >
           Valider
         </Button>
@@ -373,19 +383,19 @@ export function OnboardingProductsStep({
           type="button"
           variant="outline"
           onClick={() => setSubView("photo")}
-          className="h-12 w-full justify-between rounded-xl px-3 text-base"
+          className="h-14 w-full justify-between rounded-xl px-3 text-base"
         >
           <span className="flex items-center gap-2">
-            {form.imageUrl ? (
-              <span className="relative h-7 w-7 overflow-hidden rounded-md border border-border shrink-0">
-                <Image src={form.imageUrl} alt="Aperçu photo produit" fill className="object-cover" sizes="28px" />
-              </span>
-            ) : (
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-muted shrink-0">
-                <Camera className="h-4 w-4 text-muted-foreground" />
-              </span>
-            )}
-            {form.imageUrl ? "Modifier la photo du produit" : "Ajouter une photo du produit"}
+            <span className="relative h-10 w-10 overflow-hidden rounded-md border border-border bg-muted shrink-0">
+              {form.imageUrl ? (
+                <Image src={form.imageUrl} alt="Aperçu photo produit" fill className="object-cover" sizes="40px" />
+              ) : (
+                <span className="inline-flex h-full w-full items-center justify-center">
+                  <Camera className="h-4 w-4 text-muted-foreground" />
+                </span>
+              )}
+            </span>
+            {form.imageUrl ? "Modifier la photo" : "Ajouter une photo"}
           </span>
           <ChevronRight className="h-4 w-4" />
         </Button>
@@ -437,7 +447,7 @@ export function OnboardingProductsStep({
               className={cn(
                 "shrink-0 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap",
                 activeTab === cat.id
-                  ? "bg-[var(--color-bento-accent)] text-white"
+                  ? "bg-[var(--primary)] text-white"
                   : "bg-muted text-muted-foreground hover:text-foreground"
               )}
             >
@@ -467,7 +477,7 @@ export function OnboardingProductsStep({
             )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{product.name}</p>
-              <p className="text-sm font-bold" style={{ color: "var(--color-bento-accent)" }}>
+              <p className="text-sm font-bold" style={{ color: "var(--primary)" }}>
                 {product.price.toFixed(2)}&nbsp;€
               </p>
             </div>
@@ -496,7 +506,7 @@ export function OnboardingProductsStep({
           type="button"
           onClick={openNewForm}
           disabled={!activeTab}
-          className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm text-muted-foreground hover:border-[var(--color-bento-accent)] hover:text-[var(--color-bento-accent)] transition-colors disabled:opacity-40"
+          className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm text-muted-foreground hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors disabled:opacity-40"
         >
           <Plus className="h-4 w-4" />
           Nouveau produit

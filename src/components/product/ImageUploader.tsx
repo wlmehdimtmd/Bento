@@ -189,7 +189,7 @@ export function ImageUploader({
             "flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition-colors cursor-pointer",
             square ? "aspect-square" : "h-36",
             dragging
-              ? "border-[var(--color-bento-accent)] bg-orange-50/40 dark:bg-orange-950/20"
+              ? "border-[var(--primary)] bg-orange-50/40 dark:bg-orange-950/20"
               : "border-border bg-muted/40 hover:border-muted-foreground/40",
             uploading && "pointer-events-none opacity-60"
           )}

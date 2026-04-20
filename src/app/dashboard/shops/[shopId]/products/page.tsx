@@ -5,6 +5,7 @@ import { PRODUCT_PAGE_DESCRIPTION } from "@/lib/dashboard-catalog-copy";
 import { buttonVariants } from "@/components/ui/button";
 import { ProductsClient } from "@/components/product/ProductsClient";
 import type { ProductRow } from "@/components/product/ProductForm";
+import { fetchShopLabelsForDashboard } from "@/lib/shop-labels";
 
 type Params = Promise<{ shopId: string }>;
 
@@ -65,6 +66,8 @@ export default async function ProductsPage({ params }: { params: Params }) {
     }));
   }
 
+  const shopLabels = await fetchShopLabelsForDashboard(supabase, shopId);
+
   return (
     <div className="p-6 md:p-8 space-y-6">
       {/* Header */}
@@ -98,6 +101,7 @@ export default async function ProductsPage({ params }: { params: Params }) {
           shopId={shopId}
           categories={cats}
           initialProducts={initialProducts}
+          shopLabels={shopLabels}
         />
       )}
     </div>

@@ -532,8 +532,8 @@ export function ShopForm({
     <Button
       type="submit"
       disabled={isSubmitting}
-      style={{ backgroundColor: "var(--color-bento-accent)" }}
-      className="text-white hover:opacity-90 w-full sm:w-auto"
+      style={{ backgroundColor: "var(--primary)" }}
+      className="text-primary-foreground hover:opacity-90 w-full sm:w-auto"
     >
       {isSubmitting ? (
         <>

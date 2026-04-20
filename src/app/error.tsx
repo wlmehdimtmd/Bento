@@ -40,7 +40,7 @@ export default function RootError({ error, reset }: ErrorProps) {
         <button
           onClick={reset}
           className={buttonVariants()}
-          style={{ backgroundColor: "var(--color-bento-accent)", color: "white" }}
+          style={{ backgroundColor: "var(--primary)", color: "white" }}
         >
           Réessayer
         </button>

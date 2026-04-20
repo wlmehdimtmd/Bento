@@ -30,8 +30,8 @@ export function CartBadge() {
             transition={{ type: "spring", stiffness: 500, damping: 18 }}
             className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold"
             style={{
-              backgroundColor: "var(--color-bento-accent)",
-              color: "var(--color-bento-accent-foreground)",
+              backgroundColor: "var(--primary)",
+              color: "var(--primary-foreground)",
             }}
           >
             {count > 9 ? "9+" : count}

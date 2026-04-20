@@ -66,17 +66,19 @@ function badgeForMode(mode: ShopOpenStateMode): { label: string; className: stri
       return {
         label: "Ouvert",
         className:
-          "bg-emerald-500/15 text-emerald-700 border border-emerald-500/40 dark:text-emerald-300",
+          "border border-emerald-500/40 bg-emerald-500/12 text-emerald-700 dark:border-emerald-400/45 dark:bg-emerald-400/18 dark:text-emerald-200",
       };
     case "closed":
       return {
         label: "Fermé",
-        className: "bg-red-500/15 text-red-700 border border-red-500/40 dark:text-red-300",
+        className:
+          "border border-destructive/45 bg-destructive/12 text-destructive dark:border-destructive/50 dark:bg-destructive/18 dark:text-destructive",
       };
     case "unknown":
       return {
         label: "Horaire",
-        className: "bg-amber-500/10 text-amber-900 border border-amber-500/35 dark:text-amber-100",
+        className:
+          "border border-border/80 bg-background/95 text-foreground dark:border-border dark:bg-background/70",
       };
     default:
       return { label: "", className: "" };

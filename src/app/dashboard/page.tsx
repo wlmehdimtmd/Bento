@@ -108,20 +108,20 @@ export default async function DashboardPage() {
           icon={<Package className="h-5 w-5" />}
           label="Produits actifs"
           value={productCount}
-          iconColor="bg-violet-500"
+          iconColor="bg-violet-500 text-white"
         />
         <StatsCard
           icon={<ShoppingCart className="h-5 w-5" />}
           label="Commandes totales"
           value={orderCount}
-          iconColor="bg-blue-500"
+          iconColor="bg-blue-500 text-white"
         />
         <StatsCard
           icon={<TrendingUp className="h-5 w-5" />}
           label="Chiffre d'affaires"
           value={revenue}
           type="currency"
-          iconColor="bg-[var(--color-bento-accent)]"
+          iconColor="bg-primary text-primary-foreground dark:bg-[oklch(0.205_0_0)] dark:text-[oklch(0.985_0_0)]"
         />
       </div>
 

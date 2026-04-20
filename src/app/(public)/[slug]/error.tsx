@@ -33,7 +33,7 @@ export default function PublicStoreError({ error, reset }: ErrorProps) {
       <button
         onClick={reset}
         className={buttonVariants()}
-        style={{ backgroundColor: "var(--color-bento-accent)", color: "white" }}
+        style={{ backgroundColor: "var(--primary)", color: "white" }}
       >
         <RotateCcw className="mr-2 h-4 w-4" />
         Réessayer

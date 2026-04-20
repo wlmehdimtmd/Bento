@@ -456,9 +456,9 @@ export function OnboardingShopStep({
           type="button"
           disabled={isSubmitting}
           onClick={() => void handleSubmit(onSubmit)()}
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
+          style={{ backgroundColor: "var(--primary)" }}
           className={cn(
-            "text-white hover:opacity-90 gap-1.5",
+            "text-primary-foreground hover:opacity-90 gap-1.5",
             subStep > 1 ? "flex-1 sm:flex-initial" : "w-full"
           )}
         >
@@ -478,9 +478,9 @@ export function OnboardingShopStep({
         <Button
           type="button"
           onClick={() => void handleNext()}
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
+          style={{ backgroundColor: "var(--primary)" }}
           className={cn(
-            "text-white hover:opacity-90 gap-1.5",
+            "text-primary-foreground hover:opacity-90 gap-1.5",
             subStep > 1 ? "flex-1 sm:flex-initial" : "w-full"
           )}
         >

@@ -43,7 +43,10 @@ export function BentoCardCategory({
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
       ) : (
-        <div className="absolute inset-0 bg-muted" />
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: "var(--color-bento-card-bg,var(--card))" }}
+        />
       )}
 
       {/* Solid overlay on image for legibility */}

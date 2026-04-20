@@ -128,7 +128,7 @@ export function CartItemRow({ item, onReview }: CartItemRowProps) {
       <div className="flex flex-col items-end gap-2 shrink-0">
         <p
           className="text-sm font-bold tabular-nums"
-          style={{ color: "var(--color-bento-accent)" }}
+          style={{ color: "var(--primary)" }}
         >
           {formatPrice(item.price * item.quantity)}
         </p>

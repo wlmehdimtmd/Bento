@@ -35,7 +35,7 @@ export function MenuAnalysisProgress({ onCancel }: MenuAnalysisProgressProps) {
           animate={{ scale: [1, 1.06, 1] }}
           transition={{ repeat: Infinity, duration: 1.8 }}
         >
-          <Loader2 className="h-10 w-10 animate-spin text-[var(--color-bento-accent)]" />
+          <Loader2 className="h-10 w-10 animate-spin text-[var(--primary)]" />
         </motion.div>
         <p className="font-heading text-base font-medium">L&apos;IA analyse votre menu…</p>
         <p className="text-xs text-muted-foreground">Cela peut prendre quelques secondes (max. 30 s)</p>
@@ -44,7 +44,7 @@ export function MenuAnalysisProgress({ onCancel }: MenuAnalysisProgressProps) {
       <div className="space-y-2">
         <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
           <motion.div
-            className="h-full rounded-full bg-[var(--color-bento-accent)]"
+            className="h-full rounded-full bg-[var(--primary)]"
             initial={{ width: "8%" }}
             animate={{ width: `${Math.round(fakePct)}%` }}
             transition={{ type: "spring", stiffness: 120, damping: 20 }}

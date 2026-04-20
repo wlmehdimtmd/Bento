@@ -65,8 +65,8 @@ export function OnboardingTemplatesStep({ shopId, existingCategories }: Props) {
       </button>
       <Button
         onClick={goNext}
-        style={{ backgroundColor: "var(--color-bento-accent)" }}
-        className="text-white hover:opacity-90 gap-1.5"
+        style={{ backgroundColor: "var(--primary)" }}
+        className="text-primary-foreground hover:opacity-90 gap-1.5"
       >
         {imported ? "Continuer" : "Passer"}
         <ChevronRight className="h-4 w-4" />
@@ -94,7 +94,7 @@ export function OnboardingTemplatesStep({ shopId, existingCategories }: Props) {
           <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-6 flex flex-col items-center gap-4 text-center">
             <div
               className="h-14 w-14 rounded-2xl flex items-center justify-center text-2xl"
-              style={{ backgroundColor: "var(--color-bento-accent)", opacity: 0.9 }}
+              style={{ backgroundColor: "var(--primary)", opacity: 0.9 }}
             >
               <Sparkles className="h-7 w-7 text-white" />
             </div>
@@ -111,8 +111,8 @@ export function OnboardingTemplatesStep({ shopId, existingCategories }: Props) {
             ) : (
               <Button
                 onClick={() => setPickerOpen(true)}
-                style={{ backgroundColor: "var(--color-bento-accent)" }}
-                className="text-white hover:opacity-90"
+                style={{ backgroundColor: "var(--primary)" }}
+                className="text-primary-foreground hover:opacity-90"
               >
                 <Sparkles className="mr-1.5 h-4 w-4" />
                 {imported ? "Importer encore" : "Choisir des modèles"}

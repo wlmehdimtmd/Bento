@@ -323,7 +323,7 @@ const PRICING_POINTS = [
 
 export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-background text-foreground">
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <AppBrandMark variant="header" />
@@ -341,7 +341,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
       </header>
 
       <main className="flex-1">
-        <section className="relative overflow-hidden bg-white">
+        <section className="relative overflow-hidden bg-background">
           <div className="relative mx-auto max-w-6xl px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <Reveal>
@@ -420,7 +420,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
           </div>
         </section>
 
-        <section id="comment-ca-marche" className="py-20 md:py-28 bg-white">
+        <section id="comment-ca-marche" className="py-20 md:py-28 bg-background">
           <div className="mx-auto max-w-6xl px-6">
             <Reveal className="text-center mb-14">
               <p className="text-sm font-semibold uppercase tracking-widest mb-3 text-foreground">
@@ -450,7 +450,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
           </div>
         </section>
 
-        <section className="py-20 md:py-28 overflow-x-hidden bg-white">
+        <section className="py-20 md:py-28 overflow-x-hidden bg-background">
           <div className="mx-auto max-w-6xl px-6">
             <Reveal className="text-center mb-10 md:mb-12">
               <p className="text-sm font-semibold uppercase tracking-widest mb-3 text-foreground">
@@ -472,7 +472,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
           </div>
         </section>
 
-        <section id="fonctionnalites" className="py-20 md:py-28 bg-white">
+        <section id="fonctionnalites" className="py-20 md:py-28 bg-background">
           <div className="mx-auto max-w-6xl px-6">
             <Reveal className="text-center mb-14">
               <p className="text-sm font-semibold uppercase tracking-widest mb-3 text-foreground">
@@ -499,7 +499,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
           </div>
         </section>
 
-        <section className="py-20 md:py-28 relative overflow-hidden bg-white">
+        <section className="py-20 md:py-28 relative overflow-hidden bg-background">
           <Reveal className="relative mx-auto max-w-2xl px-6 text-center space-y-6">
             <h2 className="text-3xl sm:text-4xl font-black" style={{ fontFamily: "var(--font-onest)" }}>
               Votre menu en ligne, en 5 minutes

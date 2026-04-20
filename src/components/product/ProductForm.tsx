@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import Image from "next/image";
+import { Camera, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { ImageUploader } from "@/components/product/ImageUploader";
 import { TagSelector } from "@/components/product/TagSelector";
 import { createClient } from "@/lib/supabase/client";
+import type { ProductLabelOption } from "@/lib/shop-labels";
 
 // ─── Types ────────────────────────────────────────────────────
 export interface ProductRow {
@@ -69,6 +71,7 @@ interface ProductFormProps {
   sheetCtasFullWidth?: boolean;
   subViewOverride?: "main" | "photo" | "tags";
   onSubViewChange?: (subView: "main" | "photo" | "tags") => void;
+  labels: ProductLabelOption[];
 }
 
 // ─── Schema ───────────────────────────────────────────────────
@@ -98,6 +101,7 @@ export function ProductForm({
   sheetCtasFullWidth = false,
   subViewOverride,
   onSubViewChange,
+  labels,
 }: ProductFormProps) {
   const isEdit = !!initialData;
 
@@ -140,6 +144,7 @@ export function ProductForm({
 
   const categoryId = watch("category_id");
   const isAvailable = watch("is_available");
+  const productName = watch("name")?.trim() ?? "";
 
   const categorySelectItems = useMemo(
     () =>
@@ -201,6 +206,11 @@ export function ProductForm({
     return (
       <div className="flex h-full min-h-0 flex-col">
         <div className="flex-1 pb-4">
+          {productName ? (
+            <p className="mb-3 text-sm text-muted-foreground">
+              Produit : <span className="font-medium text-foreground">{productName}</span>
+            </p>
+          ) : null}
           <ImageUploader
             bucket="product-images"
             label="Photo du produit"
@@ -214,8 +224,8 @@ export function ProductForm({
           <Button
             type="button"
             onClick={() => changeSubView("main")}
-            style={{ backgroundColor: "var(--color-bento-accent)" }}
-            className="w-full text-white hover:opacity-90"
+            style={{ backgroundColor: "var(--primary)" }}
+            className="w-full text-primary-foreground hover:opacity-90"
           >
             Valider
           </Button>
@@ -228,14 +238,19 @@ export function ProductForm({
     return (
       <div className="flex h-full min-h-0 flex-col">
         <div className="flex-1 pb-3">
-          <TagSelector selected={tags} onChange={setTags} disabled={isSubmitting} />
+          <TagSelector
+            selected={tags}
+            onChange={setTags}
+            labels={labels}
+            disabled={isSubmitting}
+          />
         </div>
         <div className="mt-auto border-t border-border py-3">
           <Button
             type="button"
             onClick={() => changeSubView("main")}
-            style={{ backgroundColor: "var(--color-bento-accent)" }}
-            className="w-full text-white hover:opacity-90"
+            style={{ backgroundColor: "var(--primary)" }}
+            className="w-full text-primary-foreground hover:opacity-90"
           >
             Valider
           </Button>
@@ -320,8 +335,31 @@ export function ProductForm({
 
       <div className="space-y-1.5">
         <Label>Photo du produit</Label>
-        <Button type="button" variant="outline" className="w-full justify-start" onClick={() => changeSubView("photo")}>
-          {imageUrl ? "Modifier la photo du produit" : "Ajouter une photo du produit"}
+        <Button
+          type="button"
+          variant="outline"
+          className="h-14 w-full justify-between rounded-xl px-3"
+          onClick={() => changeSubView("photo")}
+        >
+          <span className="flex items-center gap-2">
+            <span className="relative h-10 w-10 overflow-hidden rounded-md border border-border bg-muted shrink-0">
+              {imageUrl ? (
+                <Image
+                  src={imageUrl}
+                  alt={productName || "Aperçu photo produit"}
+                  fill
+                  className="object-cover"
+                  sizes="40px"
+                />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center">
+                  <Camera className="h-4 w-4 text-muted-foreground" />
+                </span>
+              )}
+            </span>
+            {imageUrl ? "Modifier la photo" : "Ajouter une photo"}
+          </span>
+          <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
@@ -399,8 +437,8 @@ export function ProductForm({
         <Button
           type="submit"
           disabled={isSubmitting}
-          style={{ backgroundColor: "var(--color-bento-accent)" }}
-          className={sheetCtasFullWidth ? "flex-1 text-white hover:opacity-90" : "flex-1 text-white hover:opacity-90 md:flex-none"}
+          style={{ backgroundColor: "var(--primary)" }}
+          className={sheetCtasFullWidth ? "flex-1 text-primary-foreground hover:opacity-90" : "flex-1 text-primary-foreground hover:opacity-90 md:flex-none"}
         >
           {isSubmitting ? (
             <>

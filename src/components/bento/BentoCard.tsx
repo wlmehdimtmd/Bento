@@ -37,7 +37,7 @@ export const BentoCard = forwardRef<HTMLDivElement, BentoCardProps>(function Ben
       transition={{ duration: 0.2 }}
       onClick={onClick}
       className={cn(
-        "relative overflow-hidden rounded-[var(--bento-outer-r)] border border-border bg-card [--outer-r:var(--bento-outer-r)]",
+        "relative overflow-hidden rounded-[var(--bento-outer-r)] border border-border bg-[var(--color-bento-card-bg,var(--card))] [--outer-r:var(--bento-outer-r)]",
         onClick && "cursor-pointer",
         !omitSizeClasses && sizeClasses[size],
         className

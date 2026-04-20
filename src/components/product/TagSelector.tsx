@@ -1,15 +1,17 @@
 "use client";
 
-import { ALLERGENS, LABELS } from "@/lib/constants";
+import { ALLERGENS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import type { ProductLabelOption } from "@/lib/shop-labels";
 
 interface TagSelectorProps {
   selected: string[];
   onChange: (tags: string[]) => void;
+  labels: ProductLabelOption[];
   disabled?: boolean;
 }
 
-export function TagSelector({ selected, onChange, disabled }: TagSelectorProps) {
+export function TagSelector({ selected, onChange, labels, disabled }: TagSelectorProps) {
   const toggle = (value: string) => {
     if (selected.includes(value)) {
       onChange(selected.filter((t) => t !== value));
@@ -62,7 +64,7 @@ export function TagSelector({ selected, onChange, disabled }: TagSelectorProps) 
           Labels
         </p>
         <div className="flex flex-wrap gap-1.5">
-          {LABELS.map((l) => {
+          {labels.map((l) => {
             const active = selected.includes(l.value);
             return (
               <button
