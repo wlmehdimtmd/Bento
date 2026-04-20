@@ -89,7 +89,7 @@ export function TemplatePickerDialog({
   open,
   onOpenChange,
 }: TemplatePickerDialogProps) {
-  const isMobile = useIsMobile(640);
+  const isMobile = useIsMobile(768);
   const [data, setData] = useState<BusinessTypeWithData[]>([]);
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
