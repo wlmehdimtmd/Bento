@@ -7,6 +7,11 @@ import { AppBrandMark } from "@/components/layout/AppBrandMark";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import {
+  CATEGORY_THEME_KEYS,
+  CATEGORY_THEME_TOKENS,
+  type CategoryThemeKey,
+} from "@/lib/categoryThemeTokens";
 import { cn } from "@/lib/utils";
 
 function Section({
@@ -261,6 +266,23 @@ export function DevDaClient() {
               </code>
             </div>
           </div>
+        </Section>
+
+        <Section
+          title="Palette catégories (shared tokens)"
+          description="Prototype des 8 familles partagées pour les catégories, avec 3 niveaux par thème: background, surface, card."
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            {CATEGORY_THEME_KEYS.map((key) => (
+              <CategoryThemeLevelsPreview key={key} themeKey={key} />
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Source des tokens:{" "}
+            <code className="rounded bg-muted px-1">src/lib/categoryThemeTokens.ts</code>.
+            Ils seront ensuite réutilisés dans les formulaires catégories et les cartes
+            vitrine.
+          </p>
         </Section>
 
         <Section
@@ -598,5 +620,75 @@ function TokenRow({
       <td className="p-2">{dark}</td>
       <td className="p-2">{merch}</td>
     </tr>
+  );
+}
+
+function CategoryThemeLevelsPreview({ themeKey }: { themeKey: CategoryThemeKey }) {
+  const theme = CATEGORY_THEME_TOKENS[themeKey];
+  return (
+    <div className="space-y-3 rounded-xl border border-border bg-card p-4">
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-heading text-sm font-semibold">{theme.label}</p>
+        <code className="text-[10px] text-muted-foreground">{themeKey}</code>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <ThemeModeScale
+          title="Light / texte noir"
+          levels={theme.light}
+          titleClassName="text-foreground"
+        />
+        <ThemeModeScale
+          title="Dark / texte blanc"
+          levels={theme.dark}
+          titleClassName="text-foreground"
+        />
+      </div>
+    </div>
+  );
+}
+
+function ThemeModeScale({
+  title,
+  levels,
+  titleClassName,
+}: {
+  title: string;
+  levels: {
+    background: string;
+    surface: string;
+    card: string;
+    text: string;
+  };
+  titleClassName?: string;
+}) {
+  return (
+    <div className="space-y-2 rounded-lg border border-border/70 p-2">
+      <p className={cn("text-[11px] font-medium", titleClassName)}>{title}</p>
+      <div
+        className="rounded-md p-2"
+        style={{ backgroundColor: levels.background, color: levels.text }}
+      >
+        <div
+          className="rounded-md p-2"
+          style={{ backgroundColor: levels.surface, color: levels.text }}
+        >
+          <div
+            className="rounded-md p-2 text-[11px] font-semibold"
+            style={{ backgroundColor: levels.card, color: levels.text }}
+          >
+            card
+          </div>
+          <p className="mt-2 text-[10px] font-medium">
+            background / surface / card
+          </p>
+        </div>
+      </div>
+      <div className="space-y-1 font-mono text-[10px] text-muted-foreground">
+        <p>bg: {levels.background}</p>
+        <p>surface: {levels.surface}</p>
+        <p>card: {levels.card}</p>
+      </div>
+    </div>
   );
 }
