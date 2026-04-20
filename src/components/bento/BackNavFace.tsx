@@ -1,0 +1,90 @@
+"use client";
+
+import type { CSSProperties } from "react";
+import { ChevronLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+/** Fond dégradé discret aligné sur `BentoCardBack` (couche opacity-10). */
+export const backNavAccentGradientStyle: CSSProperties = {
+  background:
+    "linear-gradient(135deg, var(--color-bento-accent) 0%, var(--color-bento-accent-dark) 100%)",
+};
+
+export interface BackNavFaceProps {
+  categoryName: string;
+  categoryEmoji: string;
+  description?: string | null;
+  density: "full" | "compact";
+  className?: string;
+}
+
+export function BackNavFace({
+  categoryName,
+  categoryEmoji,
+  description,
+  density,
+  className,
+}: BackNavFaceProps) {
+  const compact = density === "compact";
+
+  return (
+    <div
+      className={cn(
+        "relative flex min-h-0 items-center",
+        compact ? "gap-2.5 px-3 py-2" : "h-full gap-4 px-5",
+        className
+      )}
+    >
+      <div
+        className={cn(
+          "flex shrink-0 items-center justify-center rounded-full",
+          compact ? "h-8 w-8" : "h-10 w-10"
+        )}
+        style={{ backgroundColor: "var(--color-bento-accent)/15" }}
+      >
+        <ChevronLeft
+          className={compact ? "h-5 w-5" : "h-6 w-6"}
+          style={{ color: "var(--color-bento-accent)" }}
+          aria-hidden
+        />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className={compact ? "text-xl leading-none" : "text-2xl"}>
+            {categoryEmoji}
+          </span>
+          <p
+            className={cn(
+              "min-w-0 truncate font-bold",
+              compact ? "text-base" : "text-lg"
+            )}
+            style={{ fontFamily: "var(--font-onest)" }}
+          >
+            {categoryName}
+          </p>
+        </div>
+        {description && (
+          <p
+            className={cn(
+              "line-clamp-1 text-muted-foreground",
+              compact ? "mt-0.5 text-xs" : "mt-0.5 text-sm"
+            )}
+          >
+            {description}
+          </p>
+        )}
+        {!description && (
+          <p
+            className={cn(
+              "line-clamp-1 text-muted-foreground",
+              compact ? "mt-0.5 text-[10px] leading-tight" : "mt-0.5 text-xs"
+            )}
+          >
+            Retour aux catégories
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
