@@ -78,12 +78,10 @@ export function BentoCardProduct({
         </button>
       )}
 
-      {/* Bottom info */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 bg-white/85 p-3 [--p:0.75rem] [--inner-r:max(0px,calc(var(--outer-r)-var(--p)))] rounded-b-[var(--outer-r)] rounded-t-[var(--inner-r)] dark:bg-black/85">
-        <p className="text-sm font-semibold text-black line-clamp-2 leading-tight mb-1 dark:text-white">
-          {name}
-        </p>
-        <PriceTag price={price} size="sm" className="text-black dark:text-white" />
+      {/* Bottom info — fond blanc 85 %, hauteur au contenu (max. largeur carte) */}
+      <div className="absolute bottom-2 left-2 z-10 flex w-fit max-w-[calc(100%-1rem)] flex-col gap-0.5 rounded-lg bg-white/85 px-2.5 py-1.5 shadow-sm dark:bg-black/65 dark:shadow-none">
+        <p className="text-sm font-semibold leading-snug text-foreground line-clamp-2 dark:text-white">{name}</p>
+        <PriceTag price={price} size="sm" className="text-foreground dark:text-white" />
       </div>
     </BentoCard>
   );

@@ -96,9 +96,13 @@ function HeroDemoPreview({ hero }: { hero: LandingDemoHeroData }) {
                       </span>
                     </div>
                   )}
-                  <div className="absolute inset-x-0 bottom-0 bg-black/65 pt-10 pb-2 px-2">
-                    <p className="text-[11px] font-semibold text-white leading-snug line-clamp-2">{tile.label}</p>
-                    <p className="text-[11px] text-white/90 font-medium tabular-nums">{tile.price}</p>
+                  <div className="absolute bottom-2 left-2 z-10 flex w-fit max-w-[calc(100%-1rem)] flex-col gap-0.5 rounded-lg bg-white/85 px-2 py-1.5 shadow-sm dark:bg-black/65 dark:shadow-none">
+                    <p className="text-[11px] font-semibold text-foreground leading-snug line-clamp-2 dark:text-white">
+                      {tile.label}
+                    </p>
+                    <p className="text-[11px] text-foreground/90 font-medium tabular-nums dark:text-white/90">
+                      {tile.price}
+                    </p>
                   </div>
                 </div>
               ))}

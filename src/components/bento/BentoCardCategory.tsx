@@ -33,7 +33,7 @@ export function BentoCardCategory({
       onClick={onClick}
       className={cn(omitSizeClasses && "h-full min-h-0", className)}
     >
-      {/* Background image */}
+      {/* Background image ou fond carte */}
       {coverImageUrl ? (
         <Image
           src={coverImageUrl}
@@ -49,24 +49,37 @@ export function BentoCardCategory({
         />
       )}
 
-      {/* Solid overlay on image for legibility */}
-      {coverImageUrl && (
-        <div className="absolute inset-0 bg-black/50" />
+      {coverImageUrl ? (
+        <div className="absolute bottom-2 left-1/2 z-10 flex w-fit max-w-[calc(100%-1rem)] -translate-x-1/2 flex-col items-center gap-1 rounded-lg bg-white/85 px-3 py-2 text-center shadow-sm dark:bg-black/65 dark:shadow-none">
+          <span className="text-3xl leading-none" aria-hidden>
+            {iconEmoji}
+          </span>
+          <p
+            className="font-semibold leading-tight text-foreground line-clamp-2 dark:text-white"
+            style={{ fontFamily: "var(--font-onest)" }}
+          >
+            {name}
+          </p>
+          <p className="text-xs text-muted-foreground dark:text-white/80">
+            {productCount} produit{productCount !== 1 ? "s" : ""}
+          </p>
+        </div>
+      ) : (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
+          <span className="text-4xl leading-none" aria-hidden>
+            {iconEmoji}
+          </span>
+          <p
+            className="font-semibold text-foreground line-clamp-2 leading-tight"
+            style={{ fontFamily: "var(--font-onest)" }}
+          >
+            {name}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {productCount} produit{productCount !== 1 ? "s" : ""}
+          </p>
+        </div>
       )}
-
-      {/* Content — dark text on muted bg, white text on image+overlay */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
-        <span className="text-4xl leading-none">{iconEmoji}</span>
-        <p
-          className={`font-semibold line-clamp-2 leading-tight ${coverImageUrl ? "text-white" : "text-foreground"}`}
-          style={{ fontFamily: "var(--font-onest)" }}
-        >
-          {name}
-        </p>
-        <p className={`text-xs ${coverImageUrl ? "text-white/80" : "text-muted-foreground"}`}>
-          {productCount} produit{productCount !== 1 ? "s" : ""}
-        </p>
-      </div>
     </BentoCard>
   );
 }
