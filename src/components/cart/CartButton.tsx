@@ -4,76 +4,67 @@ import { ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/lib/stores/cartStore";
 import { useCartDrawer } from "./CartDrawerContext";
+import { usePublicShop } from "@/components/shop/PublicShopContext";
+import { ACCENT_CTA_HOVER_OVERLAY_CLASS } from "@/lib/constants";
 import { cn, formatPrice } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/useIsMobile";
 
 export function CartButton() {
-  const isMobile = useIsMobile();
+  const { isDemoMode } = usePublicShop();
   const count = useCartStore((s) => s.getCount());
   const total = useCartStore((s) => s.getTotal());
   const { openDrawer } = useCartDrawer();
+
+  const label = `Voir le panier, ${count} article${count > 1 ? "s" : ""}`;
 
   const buttonInner = (
     <>
       <div className="relative shrink-0">
         <ShoppingCart className="h-5 w-5" />
         <span
-          className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-background text-[10px] font-bold text-foreground ring-1 ring-border"
+          className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white/20 text-[10px] font-bold text-white ring-1 ring-white/35"
         >
           {count > 9 ? "9+" : count}
         </span>
       </div>
-      <span className="font-semibold text-sm">Voir le panier</span>
-      <span className="ml-1 font-bold tabular-nums text-sm opacity-90">
+      <span className="font-semibold text-sm text-white">Voir le panier</span>
+      <span className="ml-1 font-bold tabular-nums text-sm text-white/90">
         — {formatPrice(total)}
       </span>
     </>
   );
 
-  const label = `Voir le panier, ${count} article${count > 1 ? "s" : ""}`;
-
   return (
     <AnimatePresence>
       {count > 0 && (
         <motion.div
-          className={cn(
-            "fixed z-50",
-            isMobile
-              ? "inset-x-0 bottom-0 border-t border-border/80 bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur-md"
-              : "bottom-4 right-4"
-          )}
+          className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: "spring", stiffness: 380, damping: 28 }}
         >
-          {isMobile ? (
-            <div className="mx-auto flex w-full max-w-md justify-center">
-              <button
-                onClick={openDrawer}
-                className="flex w-full max-w-md items-center justify-center gap-3 rounded-2xl px-5 py-3 shadow-lg transition-opacity hover:opacity-90 active:scale-[0.98]"
-                style={{
-                  backgroundColor: "var(--primary)",
-                  color: "var(--primary-foreground)",
-                }}
-                aria-label={label}
-              >
-                {buttonInner}
-              </button>
-            </div>
-          ) : (
+          <div className="pointer-events-auto w-full max-w-[416px]">
             <button
+              type="button"
               onClick={openDrawer}
-              className="flex items-center gap-3 rounded-2xl px-5 py-3 shadow-xl transition-opacity hover:opacity-90 active:scale-95"
-              style={{
-                backgroundColor: "var(--primary)",
-                color: "var(--primary-foreground)",
-              }}
+              className={cn(
+                "relative flex min-h-[44px] w-full items-center justify-center gap-3 overflow-hidden rounded-lg px-5 py-3 text-sm font-medium text-white shadow-xl active:scale-[0.98]",
+                isDemoMode
+                  ? "bg-primary transition-opacity hover:opacity-90 dark:bg-[#111111]"
+                  : "group bg-[var(--color-bento-accent)] transition-transform"
+              )}
               aria-label={label}
             >
-              {buttonInner}
+              {!isDemoMode && <span aria-hidden className={ACCENT_CTA_HOVER_OVERLAY_CLASS} />}
+              {isDemoMode ? (
+                buttonInner
+              ) : (
+                <span className="relative z-[2] flex items-center justify-center gap-3">
+                  {buttonInner}
+                </span>
+              )}
             </button>
-          )}
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
