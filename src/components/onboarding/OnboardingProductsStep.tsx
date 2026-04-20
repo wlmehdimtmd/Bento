@@ -2,16 +2,31 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Loader2, Camera, X, Check } from "lucide-react";
+import Image from "next/image";
+import { Plus, Trash2, Loader2, Camera, X, ChevronRight, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { OnboardingStepTitle } from "@/components/onboarding/OnboardingStepTitle";
 import { ImageUploader } from "@/components/product/ImageUploader";
 import { TagSelector } from "@/components/product/TagSelector";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { MenuImportButton } from "@/components/onboarding/MenuImportButton";
 import { cn } from "@/lib/utils";
@@ -69,10 +84,12 @@ export function OnboardingProductsStep({
   const [activeTab, setActiveTab] = useState(categories[0]?.id ?? "");
   const [products, setProducts] = useState<ProductItem[]>(initialProducts);
   const [showForm, setShowForm] = useState(false);
+  const [formPresentation, setFormPresentation] = useState<"drawer" | "sheet">("sheet");
   const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
   const [form, setForm] = useState<ProductFormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [subView, setSubView] = useState<"main" | "photo" | "tags">("main");
+  const isMobile = useIsMobile(640);
 
   const supabase = createClient();
 
@@ -93,11 +110,20 @@ export function OnboardingProductsStep({
 
   const activeProducts = products.filter((p) => p.category_id === activeTab);
   const activeCategory = categories.find((c) => c.id === activeTab);
+  const parentUsesDrawer = formPresentation === "drawer";
+
+  function closeForm() {
+    setShowForm(false);
+    setEditingProduct(null);
+    setSubView("main");
+    setForm(EMPTY_FORM);
+  }
 
   function openNewForm() {
     setEditingProduct(null);
     setForm(EMPTY_FORM);
-    setShowPreview(false);
+    setFormPresentation(isMobile ? "drawer" : "sheet");
+    setSubView("main");
     setShowForm(true);
   }
 
@@ -110,7 +136,8 @@ export function OnboardingProductsStep({
       imageUrl: product.image_url,
       tags: product.tags,
     });
-    setShowPreview(false);
+    setFormPresentation(isMobile ? "drawer" : "sheet");
+    setSubView("main");
     setShowForm(true);
   }
 
@@ -168,10 +195,7 @@ export function OnboardingProductsStep({
       toast.success(
         editingProduct ? "Produit mis à jour (simulation) !" : "Produit ajouté (simulation) !"
       );
-      setShowForm(false);
-      setEditingProduct(null);
-      setForm(EMPTY_FORM);
-      setShowPreview(false);
+      closeForm();
       notify();
       return;
     }
@@ -215,10 +239,7 @@ export function OnboardingProductsStep({
     toast.success(
       editingProduct ? "Produit mis à jour !" : "Produit ajouté ! Top votre carte prend forme !"
     );
-    setShowForm(false);
-    setEditingProduct(null);
-    setForm(EMPTY_FORM);
-    setShowPreview(false);
+    closeForm();
     notify();
   }
 
@@ -238,173 +259,166 @@ export function OnboardingProductsStep({
   }
 
   const formFooter = (
-    <div className="flex items-center justify-between gap-3 pt-4 border-t border-border">
-      <Button
-        variant="outline"
-        type="button"
-        onClick={() => {
-          setShowForm(false);
-          setShowPreview(false);
-        }}
-        className="flex-1"
-      >
-        Annuler
-      </Button>
-      {showPreview ? (
-        <>
-          <Button variant="outline" type="button" onClick={() => setShowPreview(false)} className="flex-1">
-            Modifier
-          </Button>
-          <Button
-            type="button"
-            onClick={() => void saveProduct()}
-            disabled={saving}
-            style={{ backgroundColor: "var(--color-bento-accent)" }}
-            className="text-white hover:opacity-90 flex-1"
-          >
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <Check className="h-4 w-4 mr-1" />
-                Confirmer
-              </>
-            )}
-          </Button>
-        </>
-      ) : (
+    <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-3">
+      <div className="flex items-center justify-between gap-3">
+        <Button variant="outline" type="button" onClick={closeForm} className="flex-1">
+          Annuler
+        </Button>
         <Button
           type="button"
-          onClick={() => {
-            if (!form.name.trim()) {
-              toast.error("Le nom est requis");
-              return;
-            }
-            if (!form.price || isNaN(parseFloat(form.price))) {
-              toast.error("Le prix est requis");
-              return;
-            }
-            setShowPreview(true);
-          }}
+          onClick={() => void saveProduct()}
+          disabled={saving}
           style={{ backgroundColor: "var(--color-bento-accent)" }}
           className="text-white hover:opacity-90 flex-1"
         >
-          Prévisualiser
+          {saving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : editingProduct ? (
+            "Enregistrer"
+          ) : (
+            "Ajouter"
+          )}
         </Button>
-      )}
+      </div>
     </div>
   );
 
-  if (showForm) {
-    return (
-      <div className="space-y-5 pt-2">
-        <div className="space-y-1">
-          <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-onest)" }}>
-            {editingProduct ? "Modifier le plat" : "Nouveau plat"}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Catégorie : {activeCategory?.icon_emoji} {activeCategory?.name}
-          </p>
+  const allergensPanel = (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 pb-3">
+        <TagSelector selected={form.tags} onChange={(tags) => setForm((f) => ({ ...f, tags }))} />
+      </div>
+      <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-3">
+        <Button
+          type="button"
+          onClick={() => setSubView("main")}
+          style={{ backgroundColor: "var(--color-bento-accent)" }}
+          className="w-full text-white hover:opacity-90"
+        >
+          Valider
+        </Button>
+      </div>
+    </div>
+  );
+
+  const photoPanel = (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 pb-4">
+        <ImageUploader
+          bucket="product-images"
+          label="Photo du produit"
+          currentUrl={form.imageUrl}
+          onUpload={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
+          onRemove={() => setForm((f) => ({ ...f, imageUrl: null }))}
+          simulationDisabled={isPreview}
+        />
+      </div>
+      <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-3">
+        <Button
+          type="button"
+          onClick={() => setSubView("main")}
+          style={{ backgroundColor: "var(--color-bento-accent)" }}
+          className="w-full text-white hover:opacity-90"
+        >
+          Valider
+        </Button>
+      </div>
+    </div>
+  );
+
+  const productFormPanel = (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 space-y-4 pb-4">
+        <p className="text-sm text-muted-foreground">
+          Catégorie : {activeCategory?.icon_emoji} {activeCategory?.name}
+        </p>
+
+        <div className="space-y-1.5">
+          <Label>
+            Nom du produit <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            placeholder="Ex: Ramen tonkotsu"
+            autoFocus
+          />
         </div>
 
-        {showPreview ? (
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="space-y-1.5">
+          <Label>
+            Prix (€) <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            type="number"
+            step="0.01"
+            min="0"
+            value={form.price}
+            onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+            placeholder="0,00"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Description</Label>
+          <Textarea
+            value={form.description}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            placeholder="Décrivez brièvement votre produit"
+            rows={2}
+          />
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setSubView("photo")}
+          className="h-12 w-full justify-between rounded-xl px-3 text-base"
+        >
+          <span className="flex items-center gap-2">
             {form.imageUrl ? (
-              <img src={form.imageUrl} alt={form.name} className="w-full h-40 object-cover" />
+              <span className="relative h-7 w-7 overflow-hidden rounded-md border border-border shrink-0">
+                <Image src={form.imageUrl} alt="Aperçu photo produit" fill className="object-cover" sizes="28px" />
+              </span>
             ) : (
-              <div className="w-full h-40 bg-muted flex items-center justify-center">
-                <Camera className="h-8 w-8 text-muted-foreground" />
-              </div>
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-muted shrink-0">
+                <Camera className="h-4 w-4 text-muted-foreground" />
+              </span>
             )}
-            <div className="p-4 space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold text-base">{form.name}</h3>
-                <span
-                  className="text-base font-bold shrink-0"
-                  style={{ color: "var(--color-bento-accent)" }}
-                >
-                  {parseFloat(form.price || "0").toFixed(2)}&nbsp;€
-                </span>
-              </div>
-              {form.description && (
-                <p className="text-sm text-muted-foreground">{form.description}</p>
-              )}
-              {form.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 pt-1">
-                  {form.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="text-xs rounded-full px-2 py-0.5 bg-muted text-muted-foreground"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <ImageUploader
-              bucket="product-images"
-              label="Photo du produit"
-              currentUrl={form.imageUrl}
-              onUpload={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
-              onRemove={() => setForm((f) => ({ ...f, imageUrl: null }))}
-              simulationDisabled={isPreview}
-            />
+            {form.imageUrl ? "Modifier la photo du produit" : "Ajouter une photo du produit"}
+          </span>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
 
-            <div className="space-y-1.5">
-              <Label>
-                Nom du produit <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="Croque-Monsieur"
-                autoFocus
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label>
-                Prix (€) <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                value={form.price}
-                onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-                placeholder="0,00"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label>Description</Label>
-              <Textarea
-                value={form.description}
-                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                placeholder="4 nigiri, 4 maki, 4 california"
-                rows={2}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Allergènes</Label>
-              <div className="rounded-lg border border-border p-3">
-                <TagSelector
-                  selected={form.tags}
-                  onChange={(tags) => setForm((f) => ({ ...f, tags }))}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-        {formFooter}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setSubView("tags")}
+          className="h-12 w-full justify-between rounded-xl px-3 text-base"
+        >
+          <span>Allergènes et labels</span>
+          <span className="flex items-center gap-2">
+            <Badge variant="secondary" className="h-7 min-w-7 rounded-full px-2 text-xs tabular-nums">
+              {form.tags.length}
+            </Badge>
+            <ChevronRight className="h-4 w-4" />
+          </span>
+        </Button>
       </div>
-    );
-  }
+      {formFooter}
+    </div>
+  );
+
+  const panelTitle =
+    subView === "photo"
+      ? "Photo du produit"
+      : subView === "tags"
+        ? "Allergènes et labels"
+        : editingProduct
+          ? "Modifier le produit"
+          : "Nouveau produit";
+
+  const panelBody = subView === "photo" ? photoPanel : subView === "tags" ? allergensPanel : productFormPanel;
 
   return (
     <div className="space-y-5 pt-2">
@@ -503,6 +517,66 @@ export function OnboardingProductsStep({
         <p className="text-xs text-muted-foreground text-center">
           Import menu masqué en mode simulation.
         </p>
+      )}
+
+      {parentUsesDrawer ? (
+        <Drawer
+          open={showForm}
+          onOpenChange={(open) => {
+            if (open) {
+              setShowForm(true);
+              return;
+            }
+            closeForm();
+          }}
+        >
+          <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden">
+            <DrawerHeader className={subView !== "main" ? "flex-row items-center gap-2" : undefined}>
+              {subView !== "main" ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setSubView("main")}
+                  aria-label="Retour"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              ) : null}
+              <DrawerTitle>{panelTitle}</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">{panelBody}</div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Sheet
+          open={showForm}
+          onOpenChange={(open) => {
+            if (open) {
+              setShowForm(true);
+              return;
+            }
+            closeForm();
+          }}
+        >
+          <SheetContent side="right" className="w-full sm:max-w-2xl h-full overflow-hidden">
+            <SheetHeader className={subView !== "main" ? "flex-row items-center gap-2" : undefined}>
+              {subView !== "main" ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setSubView("main")}
+                  aria-label="Retour"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              ) : null}
+              <SheetTitle>{panelTitle}</SheetTitle>
+            </SheetHeader>
+            <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">{panelBody}</div>
+          </SheetContent>
+        </Sheet>
       )}
     </div>
   );

@@ -19,17 +19,16 @@ export function TagSelector({ selected, onChange, disabled }: TagSelectorProps) 
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Allergens */}
-      <div className="space-y-2" role="group" aria-labelledby="tagselector-allergens-title">
+      <div className="space-y-1.5" role="group" aria-labelledby="tagselector-allergens-title">
         <p
           id="tagselector-allergens-title"
-          className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+          className="text-xs font-medium text-muted-foreground"
         >
-          <span aria-hidden="true">⚠️ </span>
           Allergènes
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {ALLERGENS.map((a) => {
             const active = selected.includes(a.value);
             return (
@@ -40,7 +39,7 @@ export function TagSelector({ selected, onChange, disabled }: TagSelectorProps) 
                 aria-pressed={active}
                 onClick={() => toggle(a.value)}
                 className={cn(
-                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  "rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors",
                   active
                     ? "bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700"
                     : "bg-transparent text-muted-foreground border-border hover:border-red-300 hover:bg-red-50 dark:hover:bg-red-900/10",
@@ -55,15 +54,14 @@ export function TagSelector({ selected, onChange, disabled }: TagSelectorProps) 
       </div>
 
       {/* Labels */}
-      <div className="space-y-2" role="group" aria-labelledby="tagselector-labels-title">
+      <div className="space-y-1.5" role="group" aria-labelledby="tagselector-labels-title">
         <p
           id="tagselector-labels-title"
-          className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+          className="text-xs font-medium text-muted-foreground"
         >
-          <span aria-hidden="true">🏷️ </span>
           Labels
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {LABELS.map((l) => {
             const active = selected.includes(l.value);
             return (
@@ -74,7 +72,7 @@ export function TagSelector({ selected, onChange, disabled }: TagSelectorProps) 
                 aria-pressed={active}
                 onClick={() => toggle(l.value)}
                 className={cn(
-                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  "rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors",
                   disabled && "pointer-events-none opacity-50"
                 )}
                 style={

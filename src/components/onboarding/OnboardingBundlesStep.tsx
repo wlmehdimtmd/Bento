@@ -1,22 +1,27 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { Plus, Trash2, GripVertical, Loader2 } from "lucide-react";
+import { Plus, Trash2, GripVertical, Loader2, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
 import { OnboardingStepTitle } from "@/components/onboarding/OnboardingStepTitle";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 
 interface CategoryItem {
@@ -68,9 +73,11 @@ export function OnboardingBundlesStep({
 }: OnboardingBundlesStepProps) {
   const [bundles, setBundles] = useState<BundleItem[]>(initialBundles);
   const [showForm, setShowForm] = useState(false);
+  const [formPresentation, setFormPresentation] = useState<"drawer" | "sheet">("sheet");
+  const [subView, setSubView] = useState<"main" | "composition">("main");
   const [form, setForm] = useState<BundleFormState>(EMPTY_FORM);
-  const [slotCategories, setSlotCategories] = useState<string[]>([""]);
   const [saving, setSaving] = useState(false);
+  const isMobile = useIsMobile(640);
 
   const supabase = createClient();
 
@@ -82,17 +89,11 @@ export function OnboardingBundlesStep({
     onCatalogChanged?.();
   }
 
-  const categorySelectItems = useMemo(
-    () => Object.fromEntries(categories.map((c) => [c.id, `${c.icon_emoji} ${c.name}`])),
-    [categories]
-  );
-
   function addSlot() {
     setForm((f) => ({
       ...f,
       slots: [...f.slots, { category_id: "", quantity: 1 }],
     }));
-    setSlotCategories((prev) => [...prev, ""]);
   }
 
   function removeSlot(i: number) {
@@ -100,7 +101,6 @@ export function OnboardingBundlesStep({
       ...f,
       slots: f.slots.filter((_, idx) => idx !== i),
     }));
-    setSlotCategories((prev) => prev.filter((_, idx) => idx !== i));
   }
 
   function updateSlot(i: number, field: keyof SlotState, value: string | number) {
@@ -111,8 +111,13 @@ export function OnboardingBundlesStep({
   }
 
   function setSlotCategory(i: number, val: string) {
-    setSlotCategories((prev) => prev.map((v, idx) => (idx === i ? val : v)));
     updateSlot(i, "category_id", val);
+  }
+
+  function closeForm() {
+    setShowForm(false);
+    setSubView("main");
+    setForm(EMPTY_FORM);
   }
 
   async function saveBundle() {
@@ -144,9 +149,7 @@ export function OnboardingBundlesStep({
       setBundles((prev) => [...prev, row]);
       setSaving(false);
       toast.success("Formule créée (simulation) !");
-      setShowForm(false);
-      setForm(EMPTY_FORM);
-      setSlotCategories([""]);
+      closeForm();
       notify();
       return;
     }
@@ -189,9 +192,7 @@ export function OnboardingBundlesStep({
 
     toast.success("Formule créée !");
     setBundles((prev) => [...prev, bundle as BundleItem]);
-    setShowForm(false);
-    setForm(EMPTY_FORM);
-    setSlotCategories([""]);
+    closeForm();
     notify();
   }
 
@@ -211,15 +212,12 @@ export function OnboardingBundlesStep({
   }
 
   const formFooter = (
-    <div className="flex items-center justify-between gap-3 pt-4 border-t border-border">
+    <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-3">
+      <div className="flex items-center justify-between gap-3">
       <Button
         variant="outline"
         type="button"
-        onClick={() => {
-          setShowForm(false);
-          setForm(EMPTY_FORM);
-          setSlotCategories([""]);
-        }}
+          onClick={closeForm}
         className="flex-1"
       >
         Annuler
@@ -233,16 +231,93 @@ export function OnboardingBundlesStep({
       >
         {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Créer la formule"}
       </Button>
+      </div>
     </div>
   );
 
-  if (showForm) {
-    return (
-      <div className="space-y-5 pt-2">
-        <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-onest)" }}>
-          Nouvelle formule
-        </h2>
+  const compositionPanel = (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 space-y-4 pb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold">Composition *</p>
+            <p className="text-xs text-muted-foreground">
+              Pour chaque étape, choisissez une catégorie : l’intitulé sera son nom.
+            </p>
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={addSlot}>
+            <Plus className="h-3.5 w-3.5 mr-1" />
+            Ajouter un choix
+          </Button>
+        </div>
 
+        {form.slots.map((slot, i) => (
+          <div key={i} className="rounded-lg border border-border bg-muted/30 p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <GripVertical className="h-3.5 w-3.5" />
+                Choix {i + 1}
+              </div>
+              {form.slots.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeSlot(i)}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-1.5">
+                {categories.map((c) => {
+                  const active = slot.category_id === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setSlotCategory(i, c.id)}
+                      className={
+                        active
+                          ? "rounded-full border border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/10 px-2.5 py-1 text-xs font-medium text-foreground"
+                          : "rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-muted-foreground"
+                      }
+                    >
+                      {c.icon_emoji} {c.name}
+                    </button>
+                  );
+                })}
+              </div>
+              {slot.category_id ? (
+                <button
+                  type="button"
+                  onClick={() => setSlotCategory(i, "")}
+                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Désélectionner la catégorie
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="sticky bottom-0 mt-auto border-t border-border bg-background py-3">
+        <Button
+          type="button"
+          onClick={() => setSubView("main")}
+          style={{ backgroundColor: "var(--color-bento-accent)" }}
+          className="w-full text-white hover:opacity-90"
+        >
+          Valider
+        </Button>
+      </div>
+    </div>
+  );
+
+  const bundleFormPanel = (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 space-y-4 pb-4">
         <div className="space-y-1.5">
           <Label>Nom de la formule *</Label>
           <Input
@@ -275,64 +350,22 @@ export function OnboardingBundlesStep({
           />
         </div>
 
-        <Separator />
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold">Composition *</p>
-              <p className="text-xs text-muted-foreground">
-                Pour chaque étape, choisissez une catégorie : l’intitulé sera son nom.
-              </p>
-            </div>
-            <Button type="button" variant="outline" size="sm" onClick={addSlot}>
-              <Plus className="h-3.5 w-3.5 mr-1" />
-              Ajouter un choix
-            </Button>
-          </div>
-
-          {form.slots.map((slot, i) => (
-            <div key={i} className="rounded-lg border border-border bg-muted/30 p-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <GripVertical className="h-3.5 w-3.5" />
-                  Choix {i + 1}
-                </div>
-                {form.slots.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeSlot(i)}
-                    className="text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-              <Select
-                value={slotCategories[i] ?? ""}
-                items={categorySelectItems}
-                onValueChange={(val) => {
-                  if (val) setSlotCategory(i, val);
-                }}
-              >
-                <SelectTrigger className="h-8">
-                  <SelectValue placeholder="Catégorie de produits" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.icon_emoji} {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
-        </div>
-        {formFooter}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setSubView("composition")}
+          className="h-12 w-full justify-between rounded-xl px-3 text-base"
+        >
+          <span>Composition du menu</span>
+          <span className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">{form.slots.length} choix</span>
+            <ChevronRight className="h-4 w-4" />
+          </span>
+        </Button>
       </div>
-    );
-  }
+      {formFooter}
+    </div>
+  );
 
   return (
     <div className="space-y-5 pt-2">
@@ -366,13 +399,81 @@ export function OnboardingBundlesStep({
 
         <button
           type="button"
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setFormPresentation(isMobile ? "drawer" : "sheet");
+            setSubView("main");
+            setShowForm(true);
+          }}
           className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm text-muted-foreground hover:border-[var(--color-bento-accent)] hover:text-[var(--color-bento-accent)] transition-colors"
         >
           <Plus className="h-4 w-4" />
           Créer une formule
         </button>
       </div>
+
+      {formPresentation === "drawer" ? (
+        <Drawer
+          open={showForm}
+          onOpenChange={(open) => {
+            if (open) {
+              setShowForm(true);
+              return;
+            }
+            closeForm();
+          }}
+        >
+          <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden">
+            <DrawerHeader className={subView !== "main" ? "flex-row items-center gap-2" : undefined}>
+              {subView !== "main" ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setSubView("main")}
+                  aria-label="Retour"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              ) : null}
+              <DrawerTitle>{subView === "composition" ? "Composition du menu" : "Nouvelle formule"}</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
+              {subView === "composition" ? compositionPanel : bundleFormPanel}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Sheet
+          open={showForm}
+          onOpenChange={(open) => {
+            if (open) {
+              setShowForm(true);
+              return;
+            }
+            closeForm();
+          }}
+        >
+          <SheetContent side="right" className="w-full sm:max-w-2xl h-full overflow-hidden">
+            <SheetHeader className={subView !== "main" ? "flex-row items-center gap-2" : undefined}>
+              {subView !== "main" ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setSubView("main")}
+                  aria-label="Retour"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              ) : null}
+              <SheetTitle>{subView === "composition" ? "Composition du menu" : "Nouvelle formule"}</SheetTitle>
+            </SheetHeader>
+            <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
+              {subView === "composition" ? compositionPanel : bundleFormPanel}
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
     </div>
   );
 }

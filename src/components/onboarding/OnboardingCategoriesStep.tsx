@@ -1,18 +1,37 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { GripVertical, Pencil, Trash2, Plus, Check, X, Loader2 } from "lucide-react";
+import { GripVertical, Pencil, Trash2, Plus, Check, X, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
+import { ImageUploader } from "@/components/product/ImageUploader";
 import { OnboardingStepTitle } from "@/components/onboarding/OnboardingStepTitle";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 interface CategoryItem {
   id: string;
   name: string;
+  description: string | null;
   icon_emoji: string;
+  cover_image_url?: string | null;
+  is_active?: boolean;
   display_order: number;
 }
 
@@ -34,9 +53,15 @@ export function OnboardingCategoriesStep({
   const [editName, setEditName] = useState("");
   const [editEmoji, setEditEmoji] = useState("");
   const [newName, setNewName] = useState("");
-  const [newEmoji, setNewEmoji] = useState("📦");
-  const [showNewInput, setShowNewInput] = useState(false);
+  const [newEmoji, setNewEmoji] = useState("🍱");
+  const [newDescription, setNewDescription] = useState("");
+  const [newCoverUrl, setNewCoverUrl] = useState<string | null>(null);
+  const [newIsActive, setNewIsActive] = useState(true);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [formPresentation, setFormPresentation] = useState<"drawer" | "sheet">("sheet");
+  const [subView, setSubView] = useState<"main" | "icon" | "cover">("main");
   const [saving, setSaving] = useState(false);
+  const isMobile = useIsMobile(640);
 
   const dragIndex = useRef<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
@@ -46,6 +71,27 @@ export function OnboardingCategoriesStep({
   useEffect(() => {
     setCategories(initialCategories);
   }, [initialCategories]);
+
+  const CATEGORY_ICON_OPTIONS = [
+    "🥗",
+    "🍽️",
+    "🍰",
+    "🥤",
+    "🍕",
+    "🍔",
+    "🍜",
+    "🥩",
+    "🐟",
+    "🌮",
+    "🍣",
+    "🧁",
+    "🍷",
+    "🍺",
+    "☕",
+    "🌿",
+    "🔥",
+    "⭐",
+  ] as const;
 
   function notify() {
     onCatalogChanged?.();
@@ -66,7 +112,7 @@ export function OnboardingCategoriesStep({
     if (isPreview) {
       setCategories((prev) =>
         prev.map((c) =>
-          c.id === id ? { ...c, name: editName.trim(), icon_emoji: editEmoji || "📦" } : c
+          c.id === id ? { ...c, name: editName.trim(), icon_emoji: editEmoji || "🍱" } : c
         )
       );
       setEditingId(null);
@@ -76,7 +122,7 @@ export function OnboardingCategoriesStep({
     setSaving(true);
     const { error } = await supabase
       .from("categories")
-      .update({ name: editName.trim(), icon_emoji: editEmoji || "📦" })
+      .update({ name: editName.trim(), icon_emoji: editEmoji || "🍱" })
       .eq("id", id);
     setSaving(false);
     if (error) {
@@ -85,7 +131,7 @@ export function OnboardingCategoriesStep({
     }
     setCategories((prev) =>
       prev.map((c) =>
-        c.id === id ? { ...c, name: editName.trim(), icon_emoji: editEmoji || "📦" } : c
+        c.id === id ? { ...c, name: editName.trim(), icon_emoji: editEmoji || "🍱" } : c
       )
     );
     setEditingId(null);
@@ -109,6 +155,7 @@ export function OnboardingCategoriesStep({
 
   async function addCategory() {
     if (!newName.trim()) return;
+    const description = newDescription.trim().slice(0, 32);
     if (isPreview) {
       const order = categories.length;
       setCategories((prev) => [
@@ -116,13 +163,19 @@ export function OnboardingCategoriesStep({
         {
           id: previewId(),
           name: newName.trim(),
-          icon_emoji: newEmoji || "📦",
+          description: description || null,
+          icon_emoji: newEmoji || "🍱",
+          cover_image_url: newCoverUrl,
+          is_active: newIsActive,
           display_order: order,
         },
       ]);
       setNewName("");
-      setNewEmoji("📦");
-      setShowNewInput(false);
+      setNewEmoji("🍱");
+      setNewDescription("");
+      setNewCoverUrl(null);
+      setNewIsActive(true);
+      setCreateOpen(false);
       notify();
       return;
     }
@@ -133,9 +186,11 @@ export function OnboardingCategoriesStep({
       .insert({
         shop_id: shopId,
         name: newName.trim(),
-        icon_emoji: newEmoji || "📦",
+        description: description || null,
+        icon_emoji: newEmoji || "🍱",
+        cover_image_url: newCoverUrl,
         display_order: order,
-        is_active: true,
+        is_active: newIsActive,
       })
       .select()
       .single();
@@ -146,9 +201,22 @@ export function OnboardingCategoriesStep({
     }
     setCategories((prev) => [...prev, data as CategoryItem]);
     setNewName("");
-    setNewEmoji("📦");
-    setShowNewInput(false);
+    setNewEmoji("🍱");
+    setNewDescription("");
+    setNewCoverUrl(null);
+    setNewIsActive(true);
+    setCreateOpen(false);
     notify();
+  }
+
+  function closeCreatePanel() {
+    setCreateOpen(false);
+    setSubView("main");
+    setNewName("");
+    setNewEmoji("🍱");
+    setNewDescription("");
+    setNewCoverUrl(null);
+    setNewIsActive(true);
   }
 
   async function reorder(newOrder: CategoryItem[]) {
@@ -187,6 +255,151 @@ export function OnboardingCategoriesStep({
     dragIndex.current = null;
     setDragOver(null);
   }
+
+  const iconPanel = (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 px-1 pb-4">
+        <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-9">
+          {CATEGORY_ICON_OPTIONS.map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              onClick={() => setNewEmoji(emoji)}
+              className={cn(
+                "flex h-10 w-full items-center justify-center rounded-lg border text-xl transition-colors",
+                newEmoji === emoji
+                  ? "border-[var(--color-bento-accent)] bg-[var(--color-bento-accent)]/10"
+                  : "border-border hover:border-muted-foreground"
+              )}
+              aria-label={`Icône ${emoji}`}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="sticky bottom-0 mt-auto border-t border-border bg-background px-1 py-3">
+        <Button
+          type="button"
+          onClick={() => setSubView("main")}
+          style={{ backgroundColor: "var(--color-bento-accent)" }}
+          className="w-full text-white hover:opacity-90"
+        >
+          Valider
+        </Button>
+      </div>
+    </div>
+  );
+
+  const coverPanel = (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 px-1 pb-4">
+        <ImageUploader
+          bucket="shop-assets"
+          label="Image de couverture"
+          currentUrl={newCoverUrl}
+          onUpload={setNewCoverUrl}
+          onRemove={() => setNewCoverUrl(null)}
+          simulationDisabled={isPreview}
+        />
+      </div>
+      <div className="sticky bottom-0 mt-auto border-t border-border bg-background px-1 py-3">
+        <Button
+          type="button"
+          onClick={() => setSubView("main")}
+          style={{ backgroundColor: "var(--color-bento-accent)" }}
+          className="w-full text-white hover:opacity-90"
+        >
+          Valider
+        </Button>
+      </div>
+    </div>
+  );
+
+  const createCategoryForm = (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 space-y-4 px-1 pb-4">
+        <div className="space-y-1.5">
+          <p className="text-sm font-medium">Nom</p>
+          <Input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void addCategory();
+              if (e.key === "Escape") closeCreatePanel();
+            }}
+            placeholder="Nom de la catégorie"
+            autoFocus
+          />
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setSubView("icon")}
+          className="h-12 w-full justify-between rounded-xl px-3 text-base"
+        >
+          <span className="flex items-center gap-2">
+            <span>Icône</span>
+            <span className="text-xl leading-none">{newEmoji}</span>
+          </span>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">Descriptif</p>
+            <span className="text-xs text-muted-foreground">{newDescription.length}/32</span>
+          </div>
+          <Input
+            value={newDescription}
+            onChange={(e) => setNewDescription(e.target.value.slice(0, 32))}
+            placeholder="Ex: Nos meilleures spécialités"
+            maxLength={32}
+          />
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setSubView("cover")}
+          className="h-12 w-full justify-between rounded-xl px-3 text-base"
+        >
+          <span>{newCoverUrl ? "Modifier l'image de couverture" : "Ajouter une image de couverture"}</span>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+
+        <div className="flex items-center justify-between rounded-lg border border-border p-3">
+          <div>
+            <p className="text-sm font-medium">Catégorie active</p>
+            <p className="text-xs text-muted-foreground">Visible sur la vitrine publique</p>
+          </div>
+          <Switch
+            checked={newIsActive}
+            onCheckedChange={setNewIsActive}
+            aria-label={newIsActive ? "Désactiver la catégorie" : "Activer la catégorie"}
+          />
+        </div>
+      </div>
+
+      <div className="sticky bottom-0 mt-auto border-t border-border bg-background px-1 py-3">
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={closeCreatePanel} className="flex-1">
+            Annuler
+          </Button>
+          <Button
+            type="button"
+            onClick={() => void addCategory()}
+            disabled={saving || !newName.trim()}
+            style={{ backgroundColor: "var(--color-bento-accent)" }}
+            className="flex-1 text-white hover:opacity-90"
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Ajouter"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 pt-2">
@@ -250,7 +463,12 @@ export function OnboardingCategoriesStep({
             ) : (
               <>
                 <span className="text-xl shrink-0">{cat.icon_emoji}</span>
-                <span className="flex-1 text-sm font-medium">{cat.name}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{cat.name}</p>
+                  {cat.description ? (
+                    <p className="text-xs text-muted-foreground truncate">{cat.description}</p>
+                  ) : null}
+                </div>
                 <button
                   type="button"
                   onClick={() => void startEdit(cat)}
@@ -273,59 +491,93 @@ export function OnboardingCategoriesStep({
         ))}
       </ul>
 
-      {showNewInput ? (
-        <div className="flex items-center gap-2 rounded-lg border border-[var(--color-bento-accent)] bg-card px-3 py-2.5">
-          <Input
-            value={newEmoji}
-            onChange={(e) => setNewEmoji(e.target.value)}
-            className="w-12 text-center text-lg px-1 h-8 shrink-0"
-            maxLength={4}
-            placeholder="📦"
-          />
-          <Input
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") void addCategory();
-              if (e.key === "Escape") {
-                setShowNewInput(false);
-                setNewName("");
-              }
-            }}
-            placeholder="Nom de la catégorie"
-            className="flex-1 h-8"
-            autoFocus
-          />
-          <button
-            type="button"
-            onClick={() => void addCategory()}
-            disabled={saving || !newName.trim()}
-            className="shrink-0 text-green-600 hover:text-green-700 disabled:opacity-40"
-            aria-label="Ajouter"
-          >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setShowNewInput(false);
-              setNewName("");
-            }}
-            className="shrink-0 text-muted-foreground hover:text-foreground"
-            aria-label="Annuler"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setShowNewInput(true)}
-          className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm text-muted-foreground hover:border-[var(--color-bento-accent)] hover:text-[var(--color-bento-accent)] transition-colors"
+      <button
+        type="button"
+        onClick={() => {
+          setFormPresentation(isMobile ? "drawer" : "sheet");
+          setSubView("main");
+          setCreateOpen(true);
+        }}
+        className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm text-muted-foreground hover:border-[var(--color-bento-accent)] hover:text-[var(--color-bento-accent)] transition-colors"
+      >
+        <Plus className="h-4 w-4" />
+        Nouvelle catégorie
+      </button>
+
+      {formPresentation === "drawer" ? (
+        <Drawer
+          open={createOpen}
+          onOpenChange={(open) => {
+            if (open) {
+              setCreateOpen(true);
+              return;
+            }
+            closeCreatePanel();
+          }}
         >
-          <Plus className="h-4 w-4" />
-          Nouvelle catégorie
-        </button>
+          <DrawerContent className="flex max-h-[90vh] flex-col overflow-hidden">
+            <DrawerHeader className={subView !== "main" ? "flex-row items-center gap-2" : undefined}>
+              {subView !== "main" ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setSubView("main")}
+                  aria-label="Retour"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              ) : null}
+              <DrawerTitle>
+                {subView === "icon"
+                  ? "Icône de la catégorie"
+                  : subView === "cover"
+                    ? "Image de couverture"
+                    : "Nouvelle catégorie"}
+              </DrawerTitle>
+            </DrawerHeader>
+            <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
+              {subView === "icon" ? iconPanel : subView === "cover" ? coverPanel : createCategoryForm}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Sheet
+          open={createOpen}
+          onOpenChange={(open) => {
+            if (open) {
+              setCreateOpen(true);
+              return;
+            }
+            closeCreatePanel();
+          }}
+        >
+          <SheetContent side="right" className="w-full sm:max-w-md h-full overflow-hidden">
+            <SheetHeader className={subView !== "main" ? "flex-row items-center gap-2" : undefined}>
+              {subView !== "main" ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setSubView("main")}
+                  aria-label="Retour"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              ) : null}
+              <SheetTitle>
+                {subView === "icon"
+                  ? "Icône de la catégorie"
+                  : subView === "cover"
+                    ? "Image de couverture"
+                    : "Nouvelle catégorie"}
+              </SheetTitle>
+            </SheetHeader>
+            <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
+              {subView === "icon" ? iconPanel : subView === "cover" ? coverPanel : createCategoryForm}
+            </div>
+          </SheetContent>
+        </Sheet>
       )}
     </div>
   );

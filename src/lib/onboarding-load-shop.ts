@@ -75,7 +75,8 @@ export function redirectIfVitrineDoneToCatalog(shopId: string, socialLinks: unkn
  */
 export async function backfillLegacyVitrineThenRedirectToCatalog(
   supabase: SupabaseClient<Database>,
-  shop: OnboardingShopRow
+  shop: OnboardingShopRow,
+  options?: { skipRedirect?: boolean }
 ): Promise<void> {
   if (isVitrineOnboardingComplete(shop.social_links)) return;
   if (!isShopProfileBasicsComplete({ name: shop.name, slug: shop.slug })) return;
@@ -89,5 +90,7 @@ export async function backfillLegacyVitrineThenRedirectToCatalog(
   const social_links = { ...prev, _ob_vitrine: 1 } as Json;
 
   await supabase.from("shops").update({ social_links }).eq("id", shop.id);
-  redirect(buildOnboardingPath("catalog", shop.id));
+  if (!options?.skipRedirect) {
+    redirect(buildOnboardingPath("catalog", shop.id));
+  }
 }

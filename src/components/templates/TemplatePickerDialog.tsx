@@ -8,7 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { cn } from "@/lib/utils";
 import type {
   BusinessType,
@@ -77,6 +89,7 @@ export function TemplatePickerDialog({
   open,
   onOpenChange,
 }: TemplatePickerDialogProps) {
+  const isMobile = useIsMobile(640);
   const [data, setData] = useState<BusinessTypeWithData[]>([]);
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -356,18 +369,14 @@ export function TemplatePickerDialog({
     return parts.length > 0 ? `Sélection : ${parts.join(", ")}` : "Aucune sélection";
   }, [showProducts, showBundles, selectedProductCount, selectedCategoryCount, selectedBundleCount]);
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        showCloseButton={false}
-        className="max-w-3xl max-h-[90vh] flex flex-col gap-0 p-0"
-      >
-        {/* Header */}
-        <div className="flex items-center px-6 py-4 border-b border-border shrink-0">
-          <DialogTitle className="text-lg font-semibold" style={{ fontFamily: "var(--font-onest)" }}>
-            {mode === "bundles" ? "Ajouter des formules depuis un modèle" : "Ajouter depuis un modèle"}
-          </DialogTitle>
-        </div>
+  const panelContent = (
+    <>
+      {/* Header */}
+      <div className="flex items-center px-6 py-4 border-b border-border shrink-0">
+        <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-onest)" }}>
+          {mode === "bundles" ? "Ajouter des formules depuis un modèle" : "Ajouter depuis un modèle"}
+        </h2>
+      </div>
 
         {/* Search + Type filter */}
         <div className="px-6 pt-3 pb-2 space-y-3 border-b border-border shrink-0">
@@ -595,8 +604,37 @@ export function TemplatePickerDialog({
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[92vh] p-0">
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>
+              {mode === "bundles"
+                ? "Ajouter des formules depuis un modèle"
+                : "Ajouter depuis un modèle"}
+            </DrawerTitle>
+          </DrawerHeader>
+          {panelContent}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full sm:max-w-3xl h-full p-0">
+        <SheetHeader className="sr-only">
+          <SheetTitle>
+            {mode === "bundles" ? "Ajouter des formules depuis un modèle" : "Ajouter depuis un modèle"}
+          </SheetTitle>
+        </SheetHeader>
+        {panelContent}
+      </SheetContent>
+    </Sheet>
   );
 }
 

@@ -12,12 +12,14 @@ import {
 export const metadata = { title: "Configurer ma vitrine — Bento Resto" };
 
 interface Props {
-  searchParams: Promise<{ shopId?: string }>;
+  searchParams: Promise<{ shopId?: string; subStep?: string }>;
 }
 
 export default async function OnboardingShopPage({ searchParams }: Props) {
-  const { shopId } = await searchParams;
+  const { shopId, subStep } = await searchParams;
   const supabase = await createClient();
+  const requestedSubStep = Number(subStep);
+  const initialSubStep = requestedSubStep >= 1 && requestedSubStep <= 4 ? requestedSubStep : 1;
 
   const {
     data: { user },
@@ -28,9 +30,13 @@ export default async function OnboardingShopPage({ searchParams }: Props) {
 
   redirectIfOnboardingFinished(shop.social_links);
 
-  await backfillLegacyVitrineThenRedirectToCatalog(supabase, shop);
+  await backfillLegacyVitrineThenRedirectToCatalog(supabase, shop, {
+    skipRedirect: initialSubStep > 1,
+  });
 
-  if (isVitrineOnboardingComplete(shop.social_links)) {
+  const shouldForceCatalog = isVitrineOnboardingComplete(shop.social_links) && initialSubStep === 1;
+
+  if (shouldForceCatalog) {
     redirect(buildOnboardingPath("catalog", shop.id));
   }
 
@@ -46,6 +52,7 @@ export default async function OnboardingShopPage({ searchParams }: Props) {
   return (
     <OnboardingShopStep
       shopId={shop.id}
+      initialSubStep={initialSubStep}
       initialData={{
         name: shop.name,
         slug: shop.slug,

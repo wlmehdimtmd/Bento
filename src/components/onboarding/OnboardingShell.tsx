@@ -13,6 +13,8 @@ interface OnboardingShellProps {
   subSteps?: { total: number; current: number };
   /** `wide` : aperçu Bento pleine largeur (onboarding catalogue). */
   contentVariant?: "narrow" | "wide";
+  /** Permet d'aligner le footer sur une largeur différente du contenu. */
+  footerContentVariant?: "narrow" | "wide";
   /** Classes additionnelles sur le conteneur scrollable interne (ex. `pb-28` pour le panier flottant). */
   contentInnerClassName?: string;
 }
@@ -24,8 +26,11 @@ export function OnboardingShell({
   backAction,
   subSteps,
   contentVariant = "narrow",
+  footerContentVariant,
   contentInnerClassName,
 }: OnboardingShellProps) {
+  const resolvedFooterVariant = footerContentVariant ?? contentVariant;
+
   return (
     <div className="h-dvh overflow-hidden flex flex-col bg-background">
       {/* Header */}
@@ -102,7 +107,7 @@ export function OnboardingShell({
         <div className="shrink-0 border-t border-border bg-background/95 backdrop-blur-sm">
           <div
             className={
-              contentVariant === "wide"
+              resolvedFooterVariant === "wide"
                 ? "max-w-6xl w-full mx-auto px-3 sm:px-4 py-3"
                 : "max-w-md mx-auto px-4 py-3"
             }

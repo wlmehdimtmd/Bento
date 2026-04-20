@@ -82,14 +82,16 @@ const SUB_STEP_FIELDS: Record<number, (keyof FormValues)[]> = {
 export function OnboardingShopStep({
   shopId,
   initialData,
+  initialSubStep = 1,
 }: {
   shopId: string;
   initialData: InitialData;
+  initialSubStep?: number;
 }) {
   const { mode } = useOnboardingRuntime();
   const goStep = useOnboardingStepNav(shopId);
   const isPreview = mode === "preview";
-  const [subStep, setSubStep] = useState(1);
+  const [subStep, setSubStep] = useState(initialSubStep);
   const [logoUrl, setLogoUrl] = useState<string | null>(initialData.logo_url ?? null);
   const [coverUrl, setCoverUrl] = useState<string | null>(initialData.cover_image_url ?? null);
   const [chefPhotoUrl, setChefPhotoUrl] = useState<string | null>(initialData.owner_photo_url ?? null);
@@ -487,7 +489,7 @@ export function OnboardingShopStep({
   return (
     <OnboardingShell
       currentStep={mainStepIndex("shop")}
-      subSteps={{ total: 4, current: subStep }}
+      subSteps={{ total: 5, current: subStep }}
       footer={footer}
     >
       {contentByStep[subStep]}

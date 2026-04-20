@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Sparkles, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -24,7 +24,7 @@ import {
   type ImportData,
 } from "@/components/templates/TemplatePickerDialog";
 import { createClient } from "@/lib/supabase/client";
-import { mainStepIndex } from "@/lib/onboarding-flow";
+import { buildOnboardingPath, mainStepIndex } from "@/lib/onboarding-flow";
 import type { PublicShopPagePayload } from "@/lib/fetchPublicShopPagePayload";
 import {
   useOnboardingRuntime,
@@ -68,8 +68,6 @@ export function OnboardingCatalogWorkspace({
   const goStep = useOnboardingStepNav(shopId);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [editingSection, setEditingSection] = useState<EditingSection>("categories");
-  /** Sous md : aperçu replié par défaut pour libérer l’écran d’édition. */
-  const [mobilePreviewExpanded, setMobilePreviewExpanded] = useState(false);
 
   const refresh = useCallback(() => {
     if (!isPreview) router.refresh();
@@ -80,7 +78,10 @@ export function OnboardingCatalogWorkspace({
       payload.categories.map((c, i) => ({
         id: c.id,
         name: c.name,
+        description: c.description,
         icon_emoji: c.icon_emoji,
+        cover_image_url: c.cover_image_url,
+        is_active: true,
         display_order: i,
       })),
     [payload.categories]
@@ -138,38 +139,20 @@ export function OnboardingCatalogWorkspace({
 
   const fulfillmentModes = payload.shop.fulfillment_modes ?? [];
 
+  function goBackToServiceMode() {
+    if (isPreview) {
+      goStep("shop");
+      return;
+    }
+    router.push(`${buildOnboardingPath("shop", shopId)}&subStep=4`);
+  }
+
   const previewBlock = (
     <div className="rounded-2xl border border-border bg-card/40 overflow-hidden">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2 bg-muted/30 md:py-2">
+      <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2 bg-muted/30">
         <span className="text-xs font-medium text-muted-foreground">Aperçu vitrine</span>
-        <button
-          type="button"
-          className="md:hidden flex items-center gap-1 text-xs font-medium text-[var(--color-bento-accent)] py-1"
-          onClick={() => setMobilePreviewExpanded((v) => !v)}
-          aria-expanded={mobilePreviewExpanded}
-        >
-          {mobilePreviewExpanded ? (
-            <>
-              <ChevronUp className="h-4 w-4" />
-              Réduire
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-4 w-4" />
-              Agrandir
-            </>
-          )}
-        </button>
       </div>
-      <div
-        className={cn(
-          "p-2 sm:p-4",
-          "max-md:transition-[max-height] max-md:duration-300 max-md:ease-out",
-          mobilePreviewExpanded
-            ? "max-md:max-h-none max-md:overflow-visible"
-            : "max-md:max-h-[160px] max-md:overflow-hidden"
-        )}
-      >
+      <div className="p-2 sm:p-4">
         <div className="mx-auto max-w-5xl">
           <StoreView
             shop={payload.shop}
@@ -246,11 +229,11 @@ export function OnboardingCatalogWorkspace({
   );
 
   const footer = (
-    <div className="flex gap-2 items-stretch sm:justify-between">
+    <div className="mx-auto flex w-full max-w-[416px] gap-2 items-stretch sm:justify-between">
       <Button
         type="button"
         variant="outline"
-        onClick={() => goStep("shop")}
+        onClick={goBackToServiceMode}
         className="flex-1 sm:flex-initial gap-1.5"
       >
         <ChevronLeft className="h-4 w-4" />
@@ -262,7 +245,7 @@ export function OnboardingCatalogWorkspace({
         style={{ backgroundColor: "var(--color-bento-accent)" }}
         className="flex-1 sm:flex-initial text-white hover:opacity-90 gap-1.5"
       >
-        Continuer
+        Suivant
         <ChevronRight className="h-4 w-4" />
       </Button>
     </div>
@@ -284,17 +267,21 @@ export function OnboardingCatalogWorkspace({
           <CartDrawerProvider>
             <OnboardingShell
               currentStep={mainStepIndex("catalog")}
+              subSteps={{ total: 5, current: 5 }}
               contentVariant="wide"
+              footerContentVariant="narrow"
               contentInnerClassName="pb-28"
               footer={footer}
             >
-              <div className="space-y-5 pb-4">
-                <OnboardingStepTitle
-                  title="Votre catalogue"
-                  subtitle="Un seul défilement : aperçu à jour au fil de vos ajouts. Modèle ou saisie manuelle."
-                />
+              <div className="space-y-5 pt-2 pb-4">
+                <div className="mx-auto w-full max-w-[416px]">
+                  <OnboardingStepTitle
+                    title="Votre catalogue"
+                    subtitle="Un seul défilement : aperçu à jour au fil de vos ajouts. Modèle ou saisie manuelle."
+                  />
+                </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="mx-auto flex w-full max-w-[416px] flex-wrap items-center gap-2">
                   <Button
                     type="button"
                     variant="outline"
@@ -313,11 +300,11 @@ export function OnboardingCatalogWorkspace({
                   </Button>
                 </div>
 
-                {/* Mobile : aperçu puis édition ; desktop : grille édition + aperçu sticky (un scroll shell) */}
-                <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_min(360px,38vw)] lg:items-start lg:gap-8">
-                  <div className="order-2 min-w-0 lg:order-1 lg:min-h-0">{editingPanel}</div>
+                <div className="mx-auto w-full max-w-[416px] min-w-0 lg:hidden">{editingPanel}</div>
 
-                  <div className="order-1 lg:order-2 lg:sticky lg:top-2 lg:self-start w-full shrink-0">
+                <div className="hidden lg:grid lg:grid-cols-[416px_minmax(0,1fr)] lg:items-start lg:gap-8">
+                  <div className="w-full max-w-[416px] min-w-0">{editingPanel}</div>
+                  <div className="lg:sticky lg:top-2 lg:self-start w-full shrink-0">
                     {previewBlock}
                   </div>
                 </div>
