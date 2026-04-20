@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { AUTH_CALLBACK_RELATIVE, joinAppOrigin } from "@/lib/authRedirectUrls";
 import type { Database } from "@/lib/supabase/database.types";
 import { slugify } from "@/lib/utils";
 
@@ -15,7 +16,7 @@ export function resolvePublicAppOrigin(request: Request): string {
 /** URL absolue utilisée comme `emailRedirectTo` après inscription (PKCE → callback). */
 export function buildAuthEmailConfirmationRedirectUrl(request: Request): string {
   const base = resolvePublicAppOrigin(request);
-  const u = new URL("/api/auth/callback", base);
+  const u = new URL(joinAppOrigin(base, AUTH_CALLBACK_RELATIVE));
   u.searchParams.set("next", "/onboarding/shop");
   return u.toString();
 }
