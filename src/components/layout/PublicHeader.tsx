@@ -36,13 +36,13 @@ export function PublicHeader({
   }
 
   return (
-    <header className="sticky top-0 z-40 h-16 w-full border-b border-border/60 bg-white/85 backdrop-blur-md dark:bg-black/85">
-      <div className="mx-auto flex h-full max-w-5xl items-center justify-between px-4">
+    <header className="sticky top-0 z-40 flex w-full justify-center px-4 py-2 text-foreground">
+      <div className="inline-flex h-12 max-w-[416px] min-w-0 items-center gap-2 rounded-[999px] bg-card/90 px-2 py-1 shadow-sm backdrop-blur-[4px] sm:gap-3 sm:px-3 md:max-w-[512px]">
         {/* Logo + Shop name — même URL : retour grille catégories (StoreView écoute l’événement). */}
         <Link
           href={href}
           onClick={handleLogoClick}
-          className="flex min-w-0 items-center gap-3"
+          className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden text-foreground transition-colors hover:text-foreground/80 sm:gap-3"
         >
           {shopLogo ? (
             <Image
@@ -58,7 +58,7 @@ export function PublicHeader({
             </span>
           )}
           <span
-            className="truncate text-lg font-semibold"
+            className="truncate text-lg font-semibold text-foreground"
             style={{ fontFamily: "var(--font-onest)" }}
           >
             {shopName ?? "Bento Resto"}
@@ -66,7 +66,7 @@ export function PublicHeader({
         </Link>
 
         {/* Actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-0.5">
           <CartBadge />
           <ThemeToggle />
         </div>

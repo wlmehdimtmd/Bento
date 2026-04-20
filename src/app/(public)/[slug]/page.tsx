@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { StoreView } from "@/components/bento/StoreView";
-import { StorefrontThemeScope } from "@/components/bento/StorefrontThemeScope";
 import { fetchPublicShopPagePayload } from "@/lib/fetchPublicShopPagePayload";
 import { OrderConfirmation } from "@/components/checkout/OrderConfirmation";
 
@@ -83,32 +82,26 @@ export default async function ShopPage({
   } = payload;
 
   return (
-    <StorefrontThemeScope
-      themeKey={storefrontThemeKey}
-      themeOverrides={storefrontThemeOverrides}
-      className="min-h-screen"
-    >
-      <div className="mx-auto max-w-5xl px-4 py-8">
-        <StoreView
-          shop={shop}
-          categories={categories}
-          bundles={bundles}
-          bundlesMenuGrouped={bundlesMenuGrouped}
-          reviews={reviews}
-          storefrontPhotos={storefrontPhotos}
-          savedStorefrontLayout={savedStorefrontLayout}
-          storefrontThemeKey={storefrontThemeKey}
-          storefrontThemeOverrides={storefrontThemeOverrides}
-          shopLabels={shopLabels}
-        />
+    <div className="mx-auto max-w-5xl px-4 py-8">
+      <StoreView
+        shop={shop}
+        categories={categories}
+        bundles={bundles}
+        bundlesMenuGrouped={bundlesMenuGrouped}
+        reviews={reviews}
+        storefrontPhotos={storefrontPhotos}
+        savedStorefrontLayout={savedStorefrontLayout}
+        storefrontThemeKey={storefrontThemeKey}
+        storefrontThemeOverrides={storefrontThemeOverrides}
+        shopLabels={shopLabels}
+      />
 
-        {categories.length === 0 && bundles.length === 0 && (
-          <div className="mt-16 text-center text-muted-foreground">
-            <p className="text-lg">Ce restaurant n&apos;a pas encore de carte.</p>
-            <p className="text-sm mt-1">Revenez bientôt !</p>
-          </div>
-        )}
-      </div>
-    </StorefrontThemeScope>
+      {categories.length === 0 && bundles.length === 0 && (
+        <div className="mt-16 text-center text-muted-foreground">
+          <p className="text-lg">Ce restaurant n&apos;a pas encore de carte.</p>
+          <p className="text-sm mt-1">Revenez bientôt !</p>
+        </div>
+      )}
+    </div>
   );
 }

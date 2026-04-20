@@ -1,11 +1,10 @@
 "use client";
 
-import { ShoppingCart } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/lib/stores/cartStore";
 import { useCartDrawer } from "./CartDrawerContext";
 import { usePublicShop } from "@/components/shop/PublicShopContext";
-import { ACCENT_CTA_HOVER_OVERLAY_CLASS } from "@/lib/constants";
 import { cn, formatPrice } from "@/lib/utils";
 
 export function CartButton() {
@@ -14,24 +13,11 @@ export function CartButton() {
   const total = useCartStore((s) => s.getTotal());
   const { openDrawer } = useCartDrawer();
 
-  const label = `Voir le panier, ${count} article${count > 1 ? "s" : ""}`;
+  const label = `Voir le panier, ${count} article${count > 1 ? "s" : ""}, total ${formatPrice(total)}`;
 
-  const buttonInner = (
-    <>
-      <div className="relative shrink-0">
-        <ShoppingCart className="h-5 w-5" />
-        <span
-          className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white/20 text-[10px] font-bold text-white ring-1 ring-white/35"
-        >
-          {count > 9 ? "9+" : count}
-        </span>
-      </div>
-      <span className="font-semibold text-sm text-white">Voir le panier</span>
-      <span className="ml-1 font-bold tabular-nums text-sm text-white/90">
-        — {formatPrice(total)}
-      </span>
-    </>
-  );
+  const countBadgeClass = isDemoMode
+    ? "bg-white text-[10px] font-bold text-neutral-950 ring-1 ring-black/10"
+    : "bg-white text-[10px] font-bold text-neutral-950 ring-1 ring-black/10 dark:bg-neutral-900 dark:text-white dark:ring-white/25";
 
   return (
     <AnimatePresence>
@@ -43,27 +29,39 @@ export function CartButton() {
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: "spring", stiffness: 380, damping: 28 }}
         >
-          <div className="pointer-events-auto w-full max-w-[416px]">
-            <button
-              type="button"
-              onClick={openDrawer}
+          <div className="pointer-events-auto w-max max-w-[min(100%,416px)]">
+            <div
               className={cn(
-                "relative flex min-h-[44px] w-full items-center justify-center gap-3 overflow-hidden rounded-lg px-5 py-3 text-sm font-medium text-white shadow-xl active:scale-[0.98]",
-                isDemoMode
-                  ? "bg-primary transition-opacity hover:opacity-90 dark:bg-[#111111]"
-                  : "group bg-[var(--color-bento-accent)] transition-transform"
+                "flex items-center gap-4 rounded-full bg-white/90 p-1 pr-4 shadow-xl backdrop-blur-[4px]",
+                "active:scale-[0.98] motion-safe:transition-transform"
               )}
-              aria-label={label}
             >
-              {!isDemoMode && <span aria-hidden className={ACCENT_CTA_HOVER_OVERLAY_CLASS} />}
-              {isDemoMode ? (
-                buttonInner
-              ) : (
-                <span className="relative z-[2] flex items-center justify-center gap-3">
-                  {buttonInner}
-                </span>
-              )}
-            </button>
+              <button
+                type="button"
+                onClick={openDrawer}
+                className={cn(
+                  "inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-[#376CD5] px-4 py-2 text-sm font-medium text-white shadow-none",
+                  "transition-colors hover:bg-[#0071E3] focus-visible:bg-[#0071E3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                )}
+                aria-label={label}
+              >
+                <div className="relative shrink-0">
+                  <ShoppingBag className="h-5 w-5" />
+                  <span
+                    className={cn(
+                      "absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full",
+                      countBadgeClass
+                    )}
+                  >
+                    {count > 9 ? "9+" : count}
+                  </span>
+                </div>
+                <span className="font-semibold whitespace-nowrap">Voir le panier</span>
+              </button>
+              <span className="flex min-h-11 items-center text-sm font-bold tabular-nums text-neutral-900">
+                {formatPrice(total)}
+              </span>
+            </div>
           </div>
         </motion.div>
       )}

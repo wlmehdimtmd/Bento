@@ -72,7 +72,3 @@ export const FULFILLMENT_MODES: {
 
 /** Fond du bandeau sticky vitrine démo (#111111 à 70 % d’opacité). */
 export const DEMO_PUBLIC_HEADER_BACKGROUND = "#111111b3";
-
-/** Calque hover des CTA accent vitrine (#08327C à 80 %). */
-export const ACCENT_CTA_HOVER_OVERLAY_CLASS =
-  "pointer-events-none absolute inset-0 z-[1] rounded-lg bg-[rgba(8,50,124,0.8)] opacity-0 transition-opacity duration-200 group-hover:opacity-100";

@@ -5,7 +5,6 @@ import { ArrowLeft } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
-import { ACCENT_CTA_HOVER_OVERLAY_CLASS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 /**
@@ -52,17 +51,14 @@ export function DemoUnifiedTopBar() {
           <Link
             href="/register"
             className={cn(
-              buttonVariants({ variant: "default", size: "sm" }),
-              "group relative inline-flex max-w-full overflow-hidden border-transparent bg-bento-accent text-white shadow-none",
+              buttonVariants({ variant: "secondary", size: "sm" }),
+              "inline-flex max-w-full transition-colors hover:bg-[#376cd5] hover:text-white dark:hover:bg-[#6fa0ff] dark:hover:text-[#111111]",
               "focus-visible:ring-bento-accent/45",
               "max-sm:min-h-10 max-sm:min-w-10 max-sm:px-3 max-sm:text-xs"
             )}
           >
-            <span aria-hidden className={ACCENT_CTA_HOVER_OVERLAY_CLASS} />
-            <span className="relative z-[2] inline-flex items-center">
-              <span className="hidden sm:inline">Créer ma vitrine →</span>
-              <span className="sm:hidden">Créer ma vitrine</span>
-            </span>
+            <span className="hidden sm:inline">Créer ma vitrine →</span>
+            <span className="sm:hidden">Créer ma vitrine</span>
           </Link>
         </div>
       </div>
@@ -78,12 +74,11 @@ export function DemoUnifiedTopBar() {
           <Link
             href="/register"
             className={cn(
-              "group relative inline-flex items-center overflow-hidden rounded-lg bg-bento-accent px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm sm:text-xs",
+              "inline-flex items-center rounded-lg bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground transition-colors hover:bg-[#376cd5] hover:text-white sm:text-xs dark:hover:bg-[#6fa0ff] dark:hover:text-[#111111]",
               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
             )}
           >
-            <span aria-hidden className={ACCENT_CTA_HOVER_OVERLAY_CLASS} />
-            <span className="relative z-[2]">Créez la vôtre</span>
+            Créez la vôtre
           </Link>{" "}
           en quelques minutes.
         </p>

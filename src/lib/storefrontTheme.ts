@@ -75,7 +75,7 @@ export function getStorefrontThemePreviewStyle(
   const buttonScale = isDark ? scale.buttons.dark : scale.buttons.light;
   const lightestLevelColor = pickLightestHexColor(level.background, level.surface, level.card);
   const globalAccent = isDark ? STOREFRONT_GLOBAL_ACCENT_HEX.dark : STOREFRONT_GLOBAL_ACCENT_HEX.light;
-  const globalAccentFg = isDark ? "#111111" : "#ffffff";
+  const globalAccentFg = isDark ? "#ffffff" : "#111111";
 
   return {
     "--background": level.background,

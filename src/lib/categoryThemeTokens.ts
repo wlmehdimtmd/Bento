@@ -3,10 +3,10 @@
  * Texte des niveaux : #111111 (clair) / #ffffff (sombre) pour tous les thèmes.
  */
 
-/** Accent vitrine commun à tous les thèmes (usage futur : CTA, liens, focus, etc.). */
+/** Accent vitrine commun à tous les thèmes (clair = bleu plus vif, sombre = bleu plus soutenu). */
 export const STOREFRONT_GLOBAL_ACCENT_HEX = {
-  light: "#376cd5",
-  dark: "#6fa0ff",
+  light: "#6fa0ff",
+  dark: "#376cd5",
 } as const;
 
 /** Carte mode clair : blanc à 70 % d’opacité (tous les thèmes). */

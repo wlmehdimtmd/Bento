@@ -50,9 +50,9 @@
   /* Accent vitrine global (tous les thèmes) — CTA, liens, focus ; pas le bouton primaire mono vitrine */
   --color-cream: #f7f7f7;
   --color-charcoal: #111111;
-  --color-bento-accent: #376cd5;
-  --color-bento-accent-foreground: #ffffff;
-  --color-bento-accent-dark: #2b5cb8;
+  --color-bento-accent: #6fa0ff;
+  --color-bento-accent-foreground: #111111;
+  --color-bento-accent-dark: #5590e6;
 }
 
 :root {
@@ -94,9 +94,9 @@
 }
 
 .dark {
-  --color-bento-accent: #6fa0ff;
-  --color-bento-accent-foreground: #111111;
-  --color-bento-accent-dark: #5590e6;
+  --color-bento-accent: #376cd5;
+  --color-bento-accent-foreground: #ffffff;
+  --color-bento-accent-dark: #2b5cb8;
   /* Canvas plus bas que les surfaces (cartes) pour une hiérarchie lisible */
   --background: #0f0f0f;
   --foreground: oklch(0.985 0 0);
