@@ -11,15 +11,18 @@ import { createClient } from "@/lib/supabase/client";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ExternalLink, RotateCcw } from "lucide-react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 import { BentoCardInfo } from "@/components/bento/BentoCardInfo";
 import { BentoCardCategory } from "@/components/bento/BentoCardCategory";
 import { BentoCardBundle } from "@/components/bento/BentoCardBundle";
+import { BentoCardGallery } from "@/components/bento/BentoCardGallery";
 import type { BundleInfo, CategoryInfo, ShopInfo } from "@/components/bento/StoreView";
-import type { ShopReviews } from "@/lib/types";
+import type { ShopReviews, StorefrontPhoto } from "@/lib/types";
 import type { BentoSize } from "@/components/bento/BentoCard";
 import {
   BUNDLES_MENU_TILE_ID,
+  GALLERY_TILE_ID,
   buildDefaultStorefrontLayout,
   mergeStorefrontLayout,
   parseStorefrontBentoLayout,
@@ -91,6 +94,7 @@ export interface StorefrontBentoEditorProps {
   bundles: BundleInfo[];
   bundlesMenuGrouped?: boolean;
   reviews?: ShopReviews | null;
+  storefrontPhotos?: StorefrontPhoto[];
   initialLayout: unknown;
   backHref?: string;
   /** `admin` : enregistrement via server action (requireAdmin). */
@@ -105,18 +109,21 @@ export function StorefrontBentoEditor({
   bundles,
   bundlesMenuGrouped = false,
   reviews,
+  storefrontPhotos = [],
   initialLayout,
   backHref,
   layoutSaveMode = "owner",
 }: StorefrontBentoEditorProps) {
+  const isMobile = useIsMobile();
+
   const defaults = useMemo(
     () =>
       buildDefaultStorefrontLayout(
         categories.map((c) => c.id),
         bundles.map((b) => b.id),
-        { bundlesMenuGrouped }
+        { bundlesMenuGrouped, includeGallery: storefrontPhotos.some((p) => p.is_visible) }
       ),
-    [categories, bundles, bundlesMenuGrouped]
+    [categories, bundles, bundlesMenuGrouped, storefrontPhotos]
   );
 
   const initialMerged = useMemo(() => {
@@ -204,6 +211,16 @@ export function StorefrontBentoEditor({
           price={b.price}
           imageUrl={b.image_url}
           slots={b.slots}
+          size={size}
+          omitSizeClasses
+        />
+      );
+    }
+
+    if (i === GALLERY_TILE_ID) {
+      return (
+        <BentoCardGallery
+          photos={storefrontPhotos.filter((p) => p.is_visible)}
           size={size}
           omitSizeClasses
         />
@@ -314,59 +331,76 @@ export function StorefrontBentoEditor({
             <ExternalLink className="h-4 w-4" />
             Voir la vitrine
           </Link>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleResetToDefault}
-            title="Rétablit la grille automatique (fiche + catégories + formules), comme avant toute personnalisation."
-          >
-            <RotateCcw className="h-4 w-4" />
-            Réinitialiser la grille
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            style={{ backgroundColor: "var(--color-bento-accent)" }}
-            className="text-white hover:opacity-90"
-          >
-            {saving ? "Enregistrement…" : "Enregistrer"}
-          </Button>
+          {!isMobile ? (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleResetToDefault}
+                title="Rétablit la grille automatique (fiche + catégories + formules), comme avant toute personnalisation."
+              >
+                <RotateCcw className="h-4 w-4" />
+                Réinitialiser la grille
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                style={{ backgroundColor: "var(--color-bento-accent)" }}
+                className="text-white hover:opacity-90"
+              >
+                {saving ? "Enregistrement…" : "Enregistrer"}
+              </Button>
+            </>
+          ) : null}
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-5xl">
-        <div className="rounded-xl border border-border bg-card/50 p-3 sm:p-4">
-          <GridLayoutWithWidth
-            className="layout"
-            cols={4}
-            rowHeight={ROW_HEIGHT_PX}
-            margin={[16, 16]}
-            containerPadding={[0, 0]}
-            layout={layout}
-            onLayoutChange={(l) => setLayout([...l] as Layout)}
-            compactType="vertical"
-            preventCollision={false}
-            isBounded
-            measureBeforeMount
-          >
-            {layout.map((it) => (
-              <div
-                key={it.i}
-                className="h-full overflow-hidden rounded-2xl border border-border/80 bg-background shadow-sm"
-              >
-                <motion.div
-                  variants={BENTO_STAGGER_CONTAINER_VARIANTS}
-                  initial="hidden"
-                  animate="show"
-                  className="pointer-events-none h-full w-full select-none"
-                >
-                  {renderPreview(it.i)}
-                </motion.div>
-              </div>
-            ))}
-          </GridLayoutWithWidth>
+      {isMobile ? (
+        <div className="mx-auto w-full max-w-2xl">
+          <div className="rounded-2xl border border-border bg-card/60 p-5 text-center sm:p-6">
+            <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-onest)" }}>
+              Mise en page disponible sur ecran large
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Pour modifier la grille, agrandissez cette fenetre ou utilisez un ordinateur.
+            </p>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="mx-auto w-full max-w-5xl">
+          <div className="rounded-xl border border-border bg-card/50 p-3 sm:p-4">
+            <GridLayoutWithWidth
+              className="layout"
+              cols={4}
+              rowHeight={ROW_HEIGHT_PX}
+              margin={[16, 16]}
+              containerPadding={[0, 0]}
+              layout={layout}
+              onLayoutChange={(l) => setLayout([...l] as Layout)}
+              compactType="vertical"
+              preventCollision={false}
+              isBounded
+              measureBeforeMount
+            >
+              {layout.map((it) => (
+                <div
+                  key={it.i}
+                  className="h-full overflow-hidden rounded-2xl border border-border/80 bg-background shadow-sm"
+                >
+                  <motion.div
+                    variants={BENTO_STAGGER_CONTAINER_VARIANTS}
+                    initial="hidden"
+                    animate="show"
+                    className="pointer-events-none h-full w-full select-none"
+                  >
+                    {renderPreview(it.i)}
+                  </motion.div>
+                </div>
+              ))}
+            </GridLayoutWithWidth>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

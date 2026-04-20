@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,9 +20,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImageUploader } from "@/components/product/ImageUploader";
 import { QRCodeDisplay } from "./QRCodeDisplay";
 import { ReviewsSettings } from "./ReviewsSettings";
+import { StorefrontPhotosManager } from "./StorefrontPhotosManager";
 import { createClient } from "@/lib/supabase/client";
 import type { Json } from "@/lib/supabase/database.types";
-import { SHOP_DESCRIPTION_MAX_LINES } from "@/lib/constants";
+import { SHOP_DESCRIPTION_MAX_CHARS } from "@/lib/constants";
 import {
   emptyOpeningHoursDoc,
   hasPhysicalFulfillment,
@@ -48,11 +50,10 @@ const shopSchema = z.object({
     .optional()
     .refine(
       (v) => {
-        if (!v || !v.trim()) return true;
-        const t = v.trimEnd();
-        return t.split("\n").length <= SHOP_DESCRIPTION_MAX_LINES;
+        if (!v) return true;
+        return v.length <= SHOP_DESCRIPTION_MAX_CHARS;
       },
-      { message: `Maximum ${SHOP_DESCRIPTION_MAX_LINES} lignes dans la carte vitrine.` }
+      { message: `Maximum ${SHOP_DESCRIPTION_MAX_CHARS} caractères dans la carte vitrine.` }
     ),
   address: z.string().optional(),
   phone: z.string().optional(),
@@ -178,8 +179,6 @@ export function ShopForm({
   const nameValue = watch("name");
   const fulfillmentModes = watch("fulfillment_modes") ?? [];
   const descriptionValue = watch("description") ?? "";
-  const descriptionLineCount =
-    descriptionValue.trim() === "" ? 0 : descriptionValue.trimEnd().split("\n").length;
 
   useEffect(() => {
     if (!slugEdited && nameValue) {
@@ -352,16 +351,16 @@ export function ShopForm({
         <div className="flex items-center justify-between">
           <Label htmlFor="description">Description</Label>
           <span className="text-xs text-muted-foreground">
-            {descriptionLineCount} / {SHOP_DESCRIPTION_MAX_LINES} lignes
+            {descriptionValue.length} / {SHOP_DESCRIPTION_MAX_CHARS}
           </span>
         </div>
         <Textarea
           id="description"
           {...register("description", {
             onChange: (e) => {
-              const lines = e.target.value.split("\n");
-              if (lines.length > SHOP_DESCRIPTION_MAX_LINES) {
-                const clamped = lines.slice(0, SHOP_DESCRIPTION_MAX_LINES).join("\n");
+              const value = e.target.value;
+              if (value.length > SHOP_DESCRIPTION_MAX_CHARS) {
+                const clamped = value.slice(0, SHOP_DESCRIPTION_MAX_CHARS);
                 e.target.value = clamped;
                 setValue("description", clamped);
               }
@@ -372,7 +371,7 @@ export function ShopForm({
           disabled={isSubmitting}
         />
         <p className="text-xs text-muted-foreground">
-          Maximum {SHOP_DESCRIPTION_MAX_LINES} lignes dans la carte vitrine.
+          Maximum {SHOP_DESCRIPTION_MAX_CHARS} caractères dans la carte vitrine.
         </p>
         {errors.description && (
           <p className="text-xs text-destructive">{errors.description.message}</p>
@@ -384,14 +383,33 @@ export function ShopForm({
   const imagesSection = (
     <div className="space-y-4">
       {sectionChrome("Images")}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px] md:items-end">
         <ImageUploader
           bucket="shop-assets"
           label="Logo"
+          hint="Format carré recommandé"
           currentUrl={logoUrl}
           onUpload={setLogoUrl}
           onRemove={() => setLogoUrl(null)}
         />
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">Prévisualisation avatar</p>
+          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
+            {logoUrl ? (
+              <Image
+                src={logoUrl}
+                alt="Aperçu avatar de la vitrine"
+                width={36}
+                height={36}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="text-2xl">🍱</span>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
         <ImageUploader
           bucket="shop-assets"
           label="Photo de couverture"
@@ -576,6 +594,9 @@ export function ShopForm({
               <TabsTrigger value="images" className="h-full shrink-0 grow-0 basis-auto whitespace-nowrap sm:flex-1">
                 Image
               </TabsTrigger>
+              <TabsTrigger value="photos" className="h-full shrink-0 grow-0 basis-auto whitespace-nowrap sm:flex-1">
+                Photos
+              </TabsTrigger>
               <TabsTrigger value="contact" className="h-full shrink-0 grow-0 basis-auto whitespace-nowrap sm:flex-1">
                 Contact
               </TabsTrigger>
@@ -608,6 +629,10 @@ export function ShopForm({
 
           <TabsContent value="images" keepMounted className="min-h-0 flex-1 pt-1 outline-none">
             {imagesSection}
+          </TabsContent>
+
+          <TabsContent value="photos" keepMounted className="min-h-0 flex-1 pt-1 outline-none">
+            <StorefrontPhotosManager shopId={shopId!} />
           </TabsContent>
 
           <TabsContent value="contact" keepMounted className="min-h-0 flex-1 pt-1 outline-none">

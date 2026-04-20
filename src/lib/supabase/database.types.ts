@@ -146,6 +146,44 @@ export interface Database {
           }
         ];
       };
+      shop_storefront_photos: {
+        Row: {
+          id: string;
+          shop_id: string;
+          image_url: string;
+          caption: string | null;
+          is_visible: boolean;
+          display_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          shop_id: string;
+          image_url: string;
+          caption?: string | null;
+          is_visible?: boolean;
+          display_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          shop_id?: string;
+          image_url?: string;
+          caption?: string | null;
+          is_visible?: boolean;
+          display_order?: number;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "shop_storefront_photos_shop_id_fkey";
+            columns: ["shop_id"];
+            isOneToOne: false;
+            referencedRelation: "shops";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       categories: {
         Row: {
           id: string;

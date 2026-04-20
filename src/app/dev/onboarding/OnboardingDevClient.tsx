@@ -73,6 +73,7 @@ const MOCK_CATALOG_PAYLOAD: PublicShopPagePayload = {
   bundles: [],
   bundlesMenuGrouped: false,
   reviews: null,
+  storefrontPhotos: [],
   savedStorefrontLayout: null,
   stripeAccountId: null,
 };

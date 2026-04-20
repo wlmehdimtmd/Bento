@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -27,14 +28,22 @@ import {
 import { BentoCardInfo } from "./BentoCardInfo";
 import { BentoCardCategory } from "./BentoCardCategory";
 import { BentoCardBundle } from "./BentoCardBundle";
+import { BentoCardGallery } from "./BentoCardGallery";
 import { BentoCardBack } from "./BentoCardBack";
 import { BentoCardBackFloating } from "./BentoCardBackFloating";
 import { BentoCardProduct } from "./BentoCardProduct";
 import { BundleDetail } from "./BundleDetail";
 import { ProductDetail, type PublicProduct } from "@/components/product/ProductDetail";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { BentoSize } from "@/components/bento/BentoCard";
 import {
   BUNDLES_MENU_TILE_ID,
+  GALLERY_TILE_ID,
   buildDefaultStorefrontLayout,
   mergeStorefrontLayout,
   mobileTileOrder,
@@ -42,6 +51,7 @@ import {
   type StorefrontBentoLayoutItem,
 } from "@/lib/storefrontBentoLayout";
 import { STOREFRONT_NAVIGATE_HOME } from "@/lib/storefrontNav";
+import type { StorefrontPhoto } from "@/lib/types";
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -97,6 +107,7 @@ interface StoreViewProps {
   /** Si vrai, une tuile « Menu » regroupe les formules (niveau 1) au lieu d’une tuile par formule. */
   bundlesMenuGrouped?: boolean;
   reviews?: ShopReviews | null;
+  storefrontPhotos?: StorefrontPhoto[];
   /** JSON `storefront_bento_layout` depuis Supabase (fusionné avec la carte courante). */
   savedStorefrontLayout?: unknown | null;
   /** Si fourni, remplace le chargement Supabase pour les produits d’une catégorie (ex. démo statique `/demo`). */
@@ -164,6 +175,7 @@ export function StoreView({
   bundles,
   bundlesMenuGrouped = false,
   reviews,
+  storefrontPhotos = [],
   savedStorefrontLayout,
   loadCategoryProducts: loadCategoryProductsProp,
 }: StoreViewProps) {
@@ -174,15 +186,20 @@ export function StoreView({
   /** Après l’anim d’entrée L2 : évite FAB pendant le slide / le chargement (IO instable sans tuile retour). */
   const [l2ScrollFabEnabled, setL2ScrollFabEnabled] = useState(false);
 
+  const visibleStorefrontPhotos = useMemo(
+    () => storefrontPhotos.filter((photo) => photo.is_visible),
+    [storefrontPhotos]
+  );
+
   const level1Layout = useMemo(() => {
     const built = buildDefaultStorefrontLayout(
       categories.map((c) => c.id),
       bundles.map((b) => b.id),
-      { bundlesMenuGrouped }
+      { bundlesMenuGrouped, includeGallery: visibleStorefrontPhotos.length > 0 }
     );
     const parsed = parseStorefrontBentoLayout(savedStorefrontLayout);
     return mergeStorefrontLayout(parsed?.lg, built);
-  }, [categories, bundles, bundlesMenuGrouped, savedStorefrontLayout]);
+  }, [categories, bundles, bundlesMenuGrouped, savedStorefrontLayout, visibleStorefrontPhotos.length]);
 
   const level1Map = useMemo(() => new Map(level1Layout.map((l) => [l.i, l])), [level1Layout]);
 
@@ -198,6 +215,7 @@ export function StoreView({
 
   const [detailProduct, setDetailProduct] = useState<PublicProduct | null>(null);
   const [selectedBundle, setSelectedBundle] = useState<BundleInfo | null>(null);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   // ── Product loader (shared by category nav and bundle detail) ──
 
@@ -432,6 +450,18 @@ export function StoreView({
       );
     }
 
+    if (item.i === GALLERY_TILE_ID) {
+      return (
+        <BentoCardGallery
+          photos={visibleStorefrontPhotos}
+          size={size}
+          omitSizeClasses={omitSizeClasses}
+          className={!omitSizeClasses ? "col-span-2 row-span-1" : undefined}
+          onClick={() => setGalleryOpen(true)}
+        />
+      );
+    }
+
     return null;
   }
 
@@ -590,6 +620,37 @@ export function StoreView({
         }
         onBack={goBack}
       />
+
+      <Dialog open={galleryOpen} onOpenChange={setGalleryOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogTitle>Galerie photos</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            Découvrez les photos de la vitrine.
+          </DialogDescription>
+          {visibleStorefrontPhotos.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-border bg-muted/20 p-8 text-center text-sm text-muted-foreground">
+              Aucune photo disponible pour le moment.
+            </div>
+          ) : (
+            <div className="grid max-h-[70vh] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
+              {visibleStorefrontPhotos.map((photo, index) => (
+                <div
+                  key={photo.id}
+                  className="relative aspect-[4/3] overflow-hidden rounded-xl border border-border bg-muted"
+                >
+                  <Image
+                    src={photo.image_url}
+                    alt={photo.caption ?? `Photo vitrine ${index + 1}`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 50vw"
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

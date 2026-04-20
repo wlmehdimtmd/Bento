@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { ShopInfo, CategoryInfo, BundleInfo, SlotSummary } from "@/components/bento/StoreView";
-import type { SocialLinks, ShopReviews } from "@/lib/types";
+import type { SocialLinks, ShopReviews, StorefrontPhoto } from "@/lib/types";
 
 export type PublicShopPagePayload = {
   shop: ShopInfo;
@@ -9,6 +9,7 @@ export type PublicShopPagePayload = {
   bundles: BundleInfo[];
   bundlesMenuGrouped: boolean;
   reviews: ShopReviews | null;
+  storefrontPhotos: StorefrontPhoto[];
   savedStorefrontLayout: unknown | null;
   stripeAccountId: string | null;
 };
@@ -187,6 +188,14 @@ export async function fetchPublicShopPagePayload(
     .eq("shop_id", s.id)
     .single();
 
+  const { data: storefrontPhotos } = await supabase
+    .from("shop_storefront_photos")
+    .select("id, image_url, caption, is_visible, display_order")
+    .eq("shop_id", s.id)
+    .eq("is_visible", true)
+    .order("display_order", { ascending: true })
+    .order("created_at", { ascending: true });
+
   const fulfillmentModes = Array.isArray(s.fulfillment_modes)
     ? (s.fulfillment_modes as string[])
     : [];
@@ -215,6 +224,7 @@ export async function fetchPublicShopPagePayload(
     bundles,
     bundlesMenuGrouped,
     reviews: (shopReviews ?? null) as ShopReviews | null,
+    storefrontPhotos: (storefrontPhotos ?? []) as StorefrontPhoto[],
     savedStorefrontLayout,
     stripeAccountId: s.stripe_account_id,
   };

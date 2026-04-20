@@ -40,6 +40,7 @@ export function bundleTileId(id: string) {
 export const BUNDLES_MENU_TILE_ID = "bundles:menu" as const;
 
 export const INFO_TILE_ID = "info";
+export const GALLERY_TILE_ID = "gallery";
 
 /**
  * Disposition par défaut (proche du rendu historique) : fiche 2×2 à gauche,
@@ -49,7 +50,7 @@ export const INFO_TILE_ID = "info";
 export function buildDefaultStorefrontLayout(
   categoryIds: string[],
   bundleIds: string[],
-  options?: { bundlesMenuGrouped?: boolean }
+  options?: { bundlesMenuGrouped?: boolean; includeGallery?: boolean }
 ): StorefrontBentoLayoutItem[] {
   const items: StorefrontBentoLayoutItem[] = [
     {
@@ -84,6 +85,7 @@ export function buildDefaultStorefrontLayout(
   const startY = Math.max(2, catRows);
 
   const menuGrouped = Boolean(options?.bundlesMenuGrouped) && bundleIds.length > 0;
+  const includeGallery = Boolean(options?.includeGallery);
 
   if (menuGrouped) {
     items.push({
@@ -114,6 +116,21 @@ export function buildDefaultStorefrontLayout(
         maxH: 8,
       });
     }
+  }
+
+  if (includeGallery) {
+    const maxY = items.reduce((acc, item) => Math.max(acc, item.y + item.h), 0);
+    items.push({
+      i: GALLERY_TILE_ID,
+      x: 0,
+      y: maxY,
+      w: 2,
+      h: 1,
+      minW: 1,
+      minH: 1,
+      maxW: STOREFRONT_BENTO_COLS,
+      maxH: 8,
+    });
   }
 
   return items;

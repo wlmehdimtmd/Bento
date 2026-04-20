@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { BundleInfo, CategoryInfo, ShopInfo, SlotSummary } from "@/components/bento/StoreView";
-import type { SocialLinks, ShopReviews } from "@/lib/types";
+import type { SocialLinks, ShopReviews, StorefrontPhoto } from "@/lib/types";
 
 export type ShopStorefrontEditorPayload = {
   shopId: string;
@@ -10,6 +10,7 @@ export type ShopStorefrontEditorPayload = {
   bundles: BundleInfo[];
   bundlesMenuGrouped: boolean;
   reviews: ShopReviews | null;
+  storefrontPhotos: StorefrontPhoto[];
   storefrontBentoLayout: unknown | null;
 };
 
@@ -144,6 +145,13 @@ export async function fetchShopStorefrontEditorPayload(
     .eq("shop_id", shop.id)
     .single();
 
+  const { data: storefrontPhotos } = await supabase
+    .from("shop_storefront_photos")
+    .select("id, image_url, caption, is_visible, display_order")
+    .eq("shop_id", shop.id)
+    .order("display_order", { ascending: true })
+    .order("created_at", { ascending: true });
+
   const fulfillmentModes = Array.isArray(shop.fulfillment_modes)
     ? (shop.fulfillment_modes as string[])
     : [];
@@ -173,6 +181,7 @@ export async function fetchShopStorefrontEditorPayload(
     bundles,
     bundlesMenuGrouped,
     reviews: (shopReviews ?? null) as ShopReviews | null,
+    storefrontPhotos: (storefrontPhotos ?? []) as StorefrontPhoto[],
     storefrontBentoLayout,
   };
 }

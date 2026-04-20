@@ -66,6 +66,7 @@ function emptyPayloadFromShop(shop: {
     bundles: [],
     bundlesMenuGrouped: false,
     reviews: null,
+    storefrontPhotos: [],
     savedStorefrontLayout: null,
     stripeAccountId: shop.stripe_account_id,
   };

@@ -36,6 +36,7 @@ export default async function VitrineMiseEnPagePage() {
         bundles={payload.bundles}
         bundlesMenuGrouped={payload.bundlesMenuGrouped}
         reviews={payload.reviews}
+        storefrontPhotos={payload.storefrontPhotos}
         initialLayout={payload.storefrontBentoLayout}
       />
     </div>

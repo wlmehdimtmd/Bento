@@ -68,7 +68,15 @@ export default async function ShopPage({
 
   if (!payload) notFound();
 
-  const { shop, categories, bundles, bundlesMenuGrouped, reviews, savedStorefrontLayout } = payload;
+  const {
+    shop,
+    categories,
+    bundles,
+    bundlesMenuGrouped,
+    reviews,
+    storefrontPhotos,
+    savedStorefrontLayout,
+  } = payload;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -78,6 +86,7 @@ export default async function ShopPage({
         bundles={bundles}
         bundlesMenuGrouped={bundlesMenuGrouped}
         reviews={reviews}
+        storefrontPhotos={storefrontPhotos}
         savedStorefrontLayout={savedStorefrontLayout}
       />
 

@@ -201,6 +201,14 @@ export interface ShopReviews {
   updated_at: string;
 }
 
+export interface StorefrontPhoto {
+  id: string;
+  image_url: string;
+  caption: string | null;
+  is_visible: boolean;
+  display_order: number;
+}
+
 // ─── Template System ──────────────────────────────────────────────────────────
 
 export interface BusinessType {
