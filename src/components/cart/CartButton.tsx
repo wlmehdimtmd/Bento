@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/lib/stores/cartStore";
 import { useCartDrawer } from "./CartDrawerContext";
 import { usePublicShop } from "@/components/shop/PublicShopContext";
+import { STOREFRONT_CART_CTA_CLASSNAME } from "@/lib/constants";
 import { cn, formatPrice } from "@/lib/utils";
 
 export function CartButton() {
@@ -39,10 +40,7 @@ export function CartButton() {
               <button
                 type="button"
                 onClick={openDrawer}
-                className={cn(
-                  "inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-[#376CD5] px-4 py-2 text-sm font-medium text-white shadow-none",
-                  "transition-colors hover:bg-[#0071E3] focus-visible:bg-[#0071E3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-                )}
+                className={cn(STOREFRONT_CART_CTA_CLASSNAME, "shrink-0")}
                 aria-label={label}
               >
                 <div className="relative shrink-0">

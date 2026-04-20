@@ -64,7 +64,7 @@ export default async function ShopPublicLayout({
           <StorefrontThemeScope
             themeKey={storefrontThemeKey}
             themeOverrides={storefrontThemeOverrides}
-            className="min-h-screen"
+            className="min-h-screen bg-transparent"
           >
             <div className="flex min-h-screen flex-col">
               <PublicHeader

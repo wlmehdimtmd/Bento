@@ -27,7 +27,7 @@ export function authRedirectOriginFromBrowser(): string {
   return window.location.origin;
 }
 
-/** Valeur de `redirectTo` pour `resetPasswordForEmail`. */
+/** Valeur de `redirectTo` pour `resetPasswordForEmail` (voir `recoveryEmailClient.ts`). */
 export function buildResetPasswordRedirectTo(): string {
   return joinAppOrigin(authRedirectOriginFromBrowser(), AUTH_RESET_PASSWORD_RELATIVE);
 }

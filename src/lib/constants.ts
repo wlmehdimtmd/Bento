@@ -70,5 +70,8 @@ export const FULFILLMENT_MODES: {
   { value: "delivery", label: "Livraison", icon: "Truck" },
 ];
 
-/** Fond du bandeau sticky vitrine démo (#111111 à 70 % d’opacité). */
-export const DEMO_PUBLIC_HEADER_BACKGROUND = "#111111b3";
+/**
+ * CTA vitrine panier / checkout : aligné sur « Voir le panier » (fond #376CD5, hover #0071E3, texte blanc, pill).
+ */
+export const STOREFRONT_CART_CTA_CLASSNAME =
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#376CD5] px-4 py-2 text-sm font-medium text-white shadow-none transition-colors hover:bg-[#0071E3] focus-visible:bg-[#0071E3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:pointer-events-none disabled:opacity-50";

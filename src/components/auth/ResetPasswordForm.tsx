@@ -13,6 +13,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { AuthError, User } from "@supabase/supabase-js";
+
 import { createClient } from "@/lib/supabase/client";
 
 const resetSchema = z
@@ -50,10 +52,23 @@ export function ResetPasswordForm() {
     let cancelled = false;
     void (async () => {
       const supabase = createClient();
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
+      const waitForRecovery =
+        typeof window !== "undefined" &&
+        (window.location.hash.includes("type=recovery") ||
+          window.location.hash.includes("access_token") ||
+          new URLSearchParams(window.location.search).has("code"));
+
+      let user: User | null = null;
+      let error: AuthError | null = null;
+      const maxAttempts = waitForRecovery ? 10 : 1;
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const res = await supabase.auth.getUser();
+        user = res.data.user;
+        error = res.error;
+        if (user || !waitForRecovery) break;
+        await new Promise((r) => setTimeout(r, 80));
+      }
+
       if (cancelled) return;
       if (error) {
         console.error("[reset-password] getUser:", error.message);

@@ -14,7 +14,8 @@ import { Separator } from "@/components/ui/separator";
 import { useCartStore } from "@/lib/stores/cartStore";
 import { usePublicShop } from "@/components/shop/PublicShopContext";
 import { createClient } from "@/lib/supabase/client";
-import { formatPrice } from "@/lib/utils";
+import { STOREFRONT_CART_CTA_CLASSNAME } from "@/lib/constants";
+import { cn, formatPrice } from "@/lib/utils";
 
 // ── Fulfillment labels ─────────────────────────────────────────
 
@@ -320,29 +321,24 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
         </div>
       </div>
 
-      {/* Submit */}
       <div className="pt-4 mt-2 border-t border-border">
-        <Button
+        <button
           type="submit"
           disabled={isSubmitting || items.length === 0}
-          className="w-full font-semibold gap-2 hover:opacity-90"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "var(--primary-foreground)",
-          }}
+          className={cn(STOREFRONT_CART_CTA_CLASSNAME, "w-full")}
         >
           {isSubmitting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Redirection vers Stripe…
+              <span className="font-semibold">Redirection vers Stripe…</span>
             </>
           ) : (
             <>
               <CreditCard className="h-4 w-4" />
-              Payer {formatPrice(total)}
+              <span className="font-semibold">Payer {formatPrice(total)}</span>
             </>
           )}
-        </Button>
+        </button>
       </div>
     </form>
   );

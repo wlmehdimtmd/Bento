@@ -7,6 +7,7 @@ import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { BENTO_TILE_ELEVATION_SHADOW_CLASS } from "@/components/bento/bentoGridConstants";
 import { StoreView } from "@/components/bento/StoreView";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { CartDrawerProvider } from "@/components/cart/CartDrawerContext";
@@ -148,8 +149,13 @@ export function OnboardingCatalogWorkspace({
   }
 
   const previewBlock = (
-    <div className="rounded-2xl border border-border bg-card/40 overflow-hidden">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2 bg-muted/30">
+    <div
+      className={cn(
+        "overflow-hidden rounded-2xl bg-background",
+        BENTO_TILE_ELEVATION_SHADOW_CLASS
+      )}
+    >
+      <div className="flex items-center justify-between gap-2 border-b border-border/60 bg-muted/20 px-3 py-2">
         <span className="text-xs font-medium text-muted-foreground">Aperçu vitrine</span>
       </div>
       <div className="p-2 sm:p-4">
@@ -160,8 +166,11 @@ export function OnboardingCatalogWorkspace({
             bundles={payload.bundles}
             bundlesMenuGrouped={payload.bundlesMenuGrouped}
             reviews={payload.reviews}
+            storefrontPhotos={payload.storefrontPhotos}
             savedStorefrontLayout={payload.savedStorefrontLayout}
             storefrontThemeKey={payload.storefrontThemeKey}
+            storefrontThemeOverrides={payload.storefrontThemeOverrides}
+            shopLabels={payload.shopLabels}
           />
         </div>
       </div>

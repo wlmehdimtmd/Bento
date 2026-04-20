@@ -29,6 +29,7 @@ import {
   parseStorefrontBentoLayout,
 } from "@/lib/storefrontBentoLayout";
 import { BENTO_STAGGER_CONTAINER_VARIANTS } from "@/components/bento/BentoGrid";
+import { BENTO_TILE_ELEVATION_SHADOW_CLASS } from "@/components/bento/bentoGridConstants";
 import { saveStorefrontBentoLayoutAdmin } from "@/app/admin/actions";
 import type { Json } from "@/lib/supabase/database.types";
 import {
@@ -480,7 +481,10 @@ export function StorefrontBentoEditor({
               {layout.map((it) => (
                 <div
                   key={it.i}
-                  className="h-full overflow-hidden rounded-2xl border border-border/80 bg-background shadow-sm"
+                  className={cn(
+                    "h-full overflow-hidden rounded-[var(--bento-outer-r)]",
+                    BENTO_TILE_ELEVATION_SHADOW_CLASS
+                  )}
                 >
                   <motion.div
                     variants={BENTO_STAGGER_CONTAINER_VARIANTS}

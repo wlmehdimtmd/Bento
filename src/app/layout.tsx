@@ -56,9 +56,10 @@ export default function RootLayout({
           Aller au contenu
         </a>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {/* Avant le contenu : session recovery (hash / PKCE) avant les useEffect des pages. */}
+          <RecoveryHashHandler />
           {children}
           <Toaster richColors closeButton />
-          <RecoveryHashHandler />
         </ThemeProvider>
       </body>
     </html>

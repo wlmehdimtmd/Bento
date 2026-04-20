@@ -7,9 +7,9 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
 /**
- * Les emails Supabase « recovery » redirigent souvent vers le Site URL avec
- * `#access_token=…&type=recovery`. Le serveur ne voit jamais ce hash : il faut
- * un client qui appelle `setSession` puis redirige vers `/reset-password`.
+ * Flux « mot de passe oublié » Supabase :
+ * - PKCE (défaut @supabase/ssr) : `?code=…` sur `/` (Site URL) ou `/reset-password`.
+ * - Ancien flux : `#access_token=…&type=recovery` sur le Site URL.
  */
 export function RecoveryHashHandler() {
   const router = useRouter();
@@ -17,7 +17,34 @@ export function RecoveryHashHandler() {
 
   useEffect(() => {
     if (started.current) return;
-    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    if (typeof window === "undefined") return;
+
+    const url = new URL(window.location.href);
+    const pathname = url.pathname === "" ? "/" : url.pathname;
+    const code = url.searchParams.get("code");
+
+    // PKCE : échange client si le lien pointe encore vers la page (sans passer par /api/auth/callback).
+    if (code && (pathname === "/" || pathname === "/reset-password")) {
+      started.current = true;
+      void (async () => {
+        const supabase = createClient();
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        window.history.replaceState(null, "", pathname);
+        if (error) {
+          console.error("[recovery] exchangeCodeForSession:", error.message);
+          toast.error("Lien invalide ou expiré. Demandez un nouveau lien depuis la connexion.");
+          started.current = false;
+          return;
+        }
+        if (pathname === "/") {
+          router.replace("/reset-password");
+        }
+        router.refresh();
+      })();
+      return;
+    }
+
+    const hash = window.location.hash;
     if (!hash || hash.length < 2) return;
 
     const params = new URLSearchParams(hash.slice(1));

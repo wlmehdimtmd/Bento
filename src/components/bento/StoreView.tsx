@@ -492,7 +492,7 @@ export function StoreView({
   const slideVars = makeSlideVariants(direction);
 
   return (
-    <div className="bg-background" style={storefrontThemeStyle}>
+    <div className="bg-transparent" style={storefrontThemeStyle}>
       <AnimatePresence mode="wait">
         {level === "l1" ? (
           <motion.div
@@ -500,7 +500,7 @@ export function StoreView({
             initial={slideVars.initial}
             animate={slideVars.animate}
             exit={slideVars.exit}
-            className="bg-background"
+            className="bg-transparent"
           >
             <>
               {/* Conteneur variants : sans lui, les BentoCard restent en `itemVariant.hidden` (opacité 0). */}
@@ -541,7 +541,7 @@ export function StoreView({
             initial={slideVars.initial}
             animate={slideVars.animate}
             exit={slideVars.exit}
-            className="bg-background"
+            className="bg-transparent"
             onAnimationComplete={() => {
               scheduleScrollStorefrontToTop();
               if (levelRef.current === "l2") {

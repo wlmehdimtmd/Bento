@@ -46,7 +46,7 @@ export function StorefrontThemeScope({
       <div className="relative z-[1]">{children}</div>
       <div
         aria-hidden
-        className="pointer-events-none absolute top-0 right-0 z-[2] h-[320px] w-[320px] rounded-full"
+        className="pointer-events-none absolute top-0 right-0 z-0 h-[320px] w-[320px] rounded-full"
         style={{
           backgroundColor: "var(--storefront-orb-color)",
           filter: "blur(320px)",

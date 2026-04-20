@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { buildResetPasswordRedirectTo } from "@/lib/authRedirectUrls";
 import { createClient } from "@/lib/supabase/client";
+import { createImplicitEmailAuthClient } from "@/lib/supabase/recoveryEmailClient";
 
 const loginSchema = z.object({
   email: z.string().email("Adresse email invalide"),
@@ -40,6 +41,14 @@ type LoginResponse = {
   error?: string;
   code?: string;
 };
+
+function forgotPasswordToastMessage(raw: string): string {
+  const lower = raw.toLowerCase();
+  if (lower.includes("rate limit") || lower.includes("email rate limit")) {
+    return "Trop de demandes d’email récemment (limite Supabase). Patientez une heure ou vérifiez Auth → Logs dans le dashboard Supabase.";
+  }
+  return raw;
+}
 
 export function LoginForm() {
   const router = useRouter();
@@ -112,13 +121,15 @@ export function LoginForm() {
 
   async function onForgotSubmit(values: ForgotValues) {
     try {
-      const supabase = createClient();
+      const supabase = createImplicitEmailAuthClient();
       const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
         redirectTo: buildResetPasswordRedirectTo(),
       });
       if (error) {
         console.error("[login] resetPasswordForEmail:", error.message);
-        toast.error(error.message || "Impossible d'envoyer l'email.");
+        toast.error(
+          forgotPasswordToastMessage(error.message) || "Impossible d'envoyer l'email."
+        );
         return;
       }
       toast.success("Si cette adresse est valide, un lien vous a été envoyé.");

@@ -28,8 +28,8 @@ import { CartSummary } from "./CartSummary";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { TagBadge } from "@/components/product/TagBadge";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { formatPrice } from "@/lib/utils";
-import { ALLERGENS } from "@/lib/constants";
+import { ALLERGENS, STOREFRONT_CART_CTA_CLASSNAME } from "@/lib/constants";
+import { cn, formatPrice } from "@/lib/utils";
 
 // ── Item review panel ──────────────────────────────────────────
 
@@ -309,17 +309,14 @@ function CartView({ onClose, onCheckout }: CartViewProps) {
           )}
         </div>
 
-        <Button
-          className="w-full font-semibold gap-2 hover:opacity-90"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "var(--primary-foreground)",
-          }}
+        <button
+          type="button"
+          className={cn(STOREFRONT_CART_CTA_CLASSNAME, "w-full")}
           onClick={onCheckout}
         >
-          Passer la commande
+          <span className="font-semibold">Passer la commande</span>
           <ArrowRight className="h-4 w-4" />
-        </Button>
+        </button>
       </div>
     </>
   );

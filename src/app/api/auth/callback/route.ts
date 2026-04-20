@@ -21,6 +21,11 @@ export async function GET(request: Request) {
     if (!error && data.user) {
       await logAuthEvent("login", data.user.id, meta);
 
+      // Réinitialisation mot de passe : ne pas détourner vers l'onboarding si `shops` vient d'être créé.
+      if (safeNext === "/reset-password") {
+        return NextResponse.redirect(new URL("/reset-password", origin).toString());
+      }
+
       const fullName =
         typeof data.user.user_metadata?.full_name === "string"
           ? data.user.user_metadata.full_name
