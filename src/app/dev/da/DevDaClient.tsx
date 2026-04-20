@@ -584,9 +584,10 @@ export function DevDaClient() {
             </div>
             <div className="space-y-2">
               <div className="h-16 w-28 rounded-xl border border-border bg-bento-accent shadow-sm" />
-              <p className="text-xs font-medium text-white">bento-accent</p>
+              <p className="text-xs font-medium text-bento-accent-foreground">bento-accent</p>
               <code className="text-[10px] text-muted-foreground">
-                bg-bento-accent · #e85d04
+                bg-bento-accent · {STOREFRONT_GLOBAL_ACCENT_HEX.light} (clair) /{" "}
+                {STOREFRONT_GLOBAL_ACCENT_HEX.dark} (sombre)
               </code>
             </div>
             <div className="space-y-2">

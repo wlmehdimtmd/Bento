@@ -32,8 +32,9 @@
 ## 3. Design system & règles visuelles
 
 - **Fonts** : Inter (body), Onest (h1–h4 et tout élément titre)
-- **Light** : fond `#faf9f6`, texte `#1a1a1a`, accent `#e85d04`
-- **Dark** : fond `#1a1a1a`, texte `#faf9f6`, accent `#f4a261`
+- **Light** : fond `#faf9f6`, texte `#1a1a1a`, accent vitrine global `#376cd5` (CTA / liens / focus)
+- **Dark** : fond `#1a1a1a`, texte `#faf9f6`, accent vitrine global `#6fa0ff`
+- **Vitrine** : boutons primaires restent **monochromes** (noir / blanc) — variables `--primary`, pas l’accent bleu
 - **Contraste** : WCAG AA minimum partout
 - **Style** : minimaliste, japonisant, compartimenté, whitespace généreux
 - **Border-radius** : `rounded-2xl` sur les cartes bento

@@ -261,8 +261,8 @@ export function DevUiClient() {
             Référence documentaire (CLAUDE.md) : fond clair type{" "}
             <code className="rounded bg-muted px-1">#faf9f6</code>, texte{" "}
             <code className="rounded bg-muted px-1">#1a1a1a</code>, accents{" "}
-            <code className="rounded bg-muted px-1">#e85d04</code> /{" "}
-            <code className="rounded bg-muted px-1">#f4a261</code> (sombre) — portés en CSS
+            <code className="rounded bg-muted px-1">#376cd5</code> /{" "}
+            <code className="rounded bg-muted px-1">#6fa0ff</code> (sombre) — accent vitrine global, portés en CSS
             via <code className="rounded bg-muted px-1">--color-cream</code>,{" "}
             <code className="rounded bg-muted px-1">--color-bento-accent</code>, etc.
           </p>

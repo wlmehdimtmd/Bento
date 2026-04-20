@@ -6,6 +6,7 @@ import {
   CATEGORY_THEME_TOKENS,
   DEFAULT_CATEGORY_THEME_KEY,
   getCategoryThemeScale,
+  STOREFRONT_GLOBAL_ACCENT_HEX,
   type CategoryThemeLevels,
   type CategoryThemeKey,
 } from "@/lib/categoryThemeTokens";
@@ -73,6 +74,8 @@ export function getStorefrontThemePreviewStyle(
   const level = isDark ? scale.dark : scale.light;
   const buttonScale = isDark ? scale.buttons.dark : scale.buttons.light;
   const lightestLevelColor = pickLightestHexColor(level.background, level.surface, level.card);
+  const globalAccent = isDark ? STOREFRONT_GLOBAL_ACCENT_HEX.dark : STOREFRONT_GLOBAL_ACCENT_HEX.light;
+  const globalAccentFg = isDark ? "#111111" : "#ffffff";
 
   return {
     "--background": level.background,
@@ -89,11 +92,11 @@ export function getStorefrontThemePreviewStyle(
     "--accent-foreground": level.text,
     "--border": isDark ? "rgba(255,255,255,0.12)" : "#d4d4d8",
     "--input": isDark ? "rgba(255,255,255,0.16)" : "#d4d4d8",
-    "--ring": buttonScale.primaryBg,
+    "--ring": globalAccent,
     "--primary": buttonScale.primaryBg,
     "--primary-foreground": buttonScale.primaryText,
-    "--color-bento-accent": buttonScale.primaryBg,
-    "--color-bento-accent-foreground": buttonScale.primaryText,
+    "--color-bento-accent": globalAccent,
+    "--color-bento-accent-foreground": globalAccentFg,
     "--color-bento-card-bg": lightestLevelColor,
     "--storefront-orb-color": STOREFRONT_ORB_COLORS[themeKey][isDark ? "dark" : "light"],
   } as CSSProperties;
