@@ -45,27 +45,28 @@ async function refreshSupabaseSession(request: NextRequest): Promise<NextRespons
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Rate limiting sur les routes auth — fail-closed si Redis indisponible
+  // Rate limiting sur les routes auth.
+  // Si Upstash est mal configuré/indisponible, on n'empêche pas l'auth (fail-open).
   if (RATE_LIMITED_PATHS.some((p) => pathname.startsWith(p))) {
-    try {
-      const ip =
-        request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-        "anonymous";
+    if (authRatelimit) {
+      try {
+        const ip =
+          request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+          "anonymous";
 
-      const { success } = await authRatelimit.limit(ip);
+        const { success } = await authRatelimit.limit(ip);
 
-      if (!success) {
-        return NextResponse.json(
-          { error: "Trop de tentatives, réessayez plus tard." },
-          { status: 429 }
-        );
+        if (!success) {
+          return NextResponse.json(
+            { error: "Trop de tentatives, réessayez plus tard." },
+            { status: 429 }
+          );
+        }
+      } catch (err) {
+        console.error("[proxy] Rate limiter error (fail-open):", err);
       }
-    } catch (err) {
-      console.error("[proxy] Rate limiter error (fail-closed):", err);
-      return NextResponse.json(
-        { error: "Service temporairement indisponible. Réessayez plus tard." },
-        { status: 503 }
-      );
+    } else {
+      console.warn("[proxy] Rate limiter disabled: invalid or missing Upstash env vars.");
     }
   }
 
