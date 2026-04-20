@@ -17,12 +17,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   Table,
   TableBody,
@@ -34,6 +46,7 @@ import {
 import { CategoryForm, type CategoryRow, type CategorySavePayload } from "./CategoryForm";
 import { ImportMenuDropdown } from "./ImportMenuDropdown";
 import { TemplatePickerDialog, importTemplatesIntoShop, type ImportData } from "@/components/templates/TemplatePickerDialog";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 
 interface AdminCategoryActions {
@@ -71,6 +84,7 @@ export function CategoriesClient({
   // Template picker
   const [templateOpen, setTemplateOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const isMobile = useIsMobile(768);
 
   async function handleTemplateImport(data: ImportData) {
     const supabase = createClient();
@@ -438,22 +452,48 @@ export function CategoriesClient({
         onImport={handleTemplateImport}
       />
 
-      {/* Create / Edit dialog */}
-      <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogTitle>
-            {editingCategory ? "Modifier la catégorie" : "Nouvelle catégorie"}
-          </DialogTitle>
-          <CategoryForm
-            shopId={shopId}
-            nextOrder={nextOrder}
-            initialData={editingCategory ?? undefined}
-            onSuccess={handleFormSuccess}
-            onCancel={() => setFormOpen(false)}
-            onSave={adminActions?.onSave}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Create / Edit panel */}
+      {isMobile ? (
+        <Drawer open={formOpen} onOpenChange={setFormOpen}>
+          <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden">
+            <DrawerHeader>
+              <DrawerTitle>
+                {editingCategory ? "Modifier la catégorie" : "Nouvelle catégorie"}
+              </DrawerTitle>
+            </DrawerHeader>
+            <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
+              <CategoryForm
+                shopId={shopId}
+                nextOrder={nextOrder}
+                initialData={editingCategory ?? undefined}
+                onSuccess={handleFormSuccess}
+                onCancel={() => setFormOpen(false)}
+                onSave={adminActions?.onSave}
+              />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Sheet open={formOpen} onOpenChange={setFormOpen}>
+          <SheetContent side="right" className="w-full sm:max-w-lg h-full overflow-hidden">
+            <SheetHeader>
+              <SheetTitle>
+                {editingCategory ? "Modifier la catégorie" : "Nouvelle catégorie"}
+              </SheetTitle>
+            </SheetHeader>
+            <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
+              <CategoryForm
+                shopId={shopId}
+                nextOrder={nextOrder}
+                initialData={editingCategory ?? undefined}
+                onSuccess={handleFormSuccess}
+                onCancel={() => setFormOpen(false)}
+                onSave={adminActions?.onSave}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
 
       {/* Delete confirmation dialog */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>

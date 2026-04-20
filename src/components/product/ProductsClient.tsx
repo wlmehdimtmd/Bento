@@ -17,6 +17,12 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -31,6 +37,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
   Table,
   TableBody,
   TableCell,
@@ -42,6 +54,7 @@ import { ProductForm, type ProductRow, type ProductSavePayload } from "./Product
 import { TagBadge } from "./TagBadge";
 import { ImportMenuDropdown } from "./ImportMenuDropdown";
 import { TemplatePickerDialog, importTemplatesIntoShop, type ImportData } from "@/components/templates/TemplatePickerDialog";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
 
@@ -92,6 +105,7 @@ export function ProductsClient({
 
   // Template picker
   const [templateOpen, setTemplateOpen] = useState(false);
+  const isMobile = useIsMobile(768);
 
   async function handleTemplateImport(data: ImportData) {
     const supabase = createClient();
@@ -467,23 +481,50 @@ export function ProductsClient({
         onImport={handleTemplateImport}
       />
 
-      {/* Create / Edit dialog */}
-      <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="sm:max-w-2xl overflow-y-auto max-h-[90vh]">
-          <DialogTitle>
-            {editingProduct ? "Modifier le produit" : "Nouveau produit"}
-          </DialogTitle>
-          <ProductForm
-            categories={categories}
-            nextOrder={nextOrder}
-            defaultCategoryId={defaultCatId}
-            initialData={editingProduct ?? undefined}
-            onSuccess={handleFormSuccess}
-            onCancel={() => setFormOpen(false)}
-            onSave={adminActions?.onSave}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Create / Edit panel */}
+      {isMobile ? (
+        <Drawer open={formOpen} onOpenChange={setFormOpen}>
+          <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden">
+            <DrawerHeader>
+              <DrawerTitle>
+                {editingProduct ? "Modifier le produit" : "Nouveau produit"}
+              </DrawerTitle>
+            </DrawerHeader>
+            <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
+              <ProductForm
+                categories={categories}
+                nextOrder={nextOrder}
+                defaultCategoryId={defaultCatId}
+                initialData={editingProduct ?? undefined}
+                onSuccess={handleFormSuccess}
+                onCancel={() => setFormOpen(false)}
+                onSave={adminActions?.onSave}
+              />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Sheet open={formOpen} onOpenChange={setFormOpen}>
+          <SheetContent side="right" className="w-full sm:max-w-2xl h-full overflow-hidden">
+            <SheetHeader>
+              <SheetTitle>
+                {editingProduct ? "Modifier le produit" : "Nouveau produit"}
+              </SheetTitle>
+            </SheetHeader>
+            <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
+              <ProductForm
+                categories={categories}
+                nextOrder={nextOrder}
+                defaultCategoryId={defaultCatId}
+                initialData={editingProduct ?? undefined}
+                onSuccess={handleFormSuccess}
+                onCancel={() => setFormOpen(false)}
+                onSave={adminActions?.onSave}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
 
       {/* Delete confirmation */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>

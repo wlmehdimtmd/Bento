@@ -11,12 +11,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   Table,
   TableBody,
@@ -28,6 +40,7 @@ import {
 import { BundleForm, type BundleRow, type BundleSavePayload } from "./BundleForm";
 import { ImportMenuDropdown } from "./ImportMenuDropdown";
 import { TemplatePickerDialog, importTemplatesIntoShop, type ImportData } from "@/components/templates/TemplatePickerDialog";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
 
@@ -78,6 +91,7 @@ export function BundlesClient({
 
   const [templateOpen, setTemplateOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const isMobile = useIsMobile(768);
 
   const displayedBundles = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -418,22 +432,48 @@ export function BundlesClient({
         onImport={handleTemplateImport}
       />
 
-      {/* Create / Edit dialog */}
-      <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="sm:max-w-2xl overflow-y-auto max-h-[90vh]">
-          <DialogTitle>
-            {editingBundle ? "Modifier la formule" : "Nouvelle formule"}
-          </DialogTitle>
-          <BundleForm
-            shopId={shopId}
-            categories={categories}
-            initialData={editingBundle ?? undefined}
-            onSuccess={handleFormSuccess}
-            onCancel={() => setFormOpen(false)}
-            onSave={adminActions?.onSave}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Create / Edit panel */}
+      {isMobile ? (
+        <Drawer open={formOpen} onOpenChange={setFormOpen}>
+          <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden">
+            <DrawerHeader>
+              <DrawerTitle>
+                {editingBundle ? "Modifier la formule" : "Nouvelle formule"}
+              </DrawerTitle>
+            </DrawerHeader>
+            <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
+              <BundleForm
+                shopId={shopId}
+                categories={categories}
+                initialData={editingBundle ?? undefined}
+                onSuccess={handleFormSuccess}
+                onCancel={() => setFormOpen(false)}
+                onSave={adminActions?.onSave}
+              />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Sheet open={formOpen} onOpenChange={setFormOpen}>
+          <SheetContent side="right" className="w-full sm:max-w-2xl h-full overflow-hidden">
+            <SheetHeader>
+              <SheetTitle>
+                {editingBundle ? "Modifier la formule" : "Nouvelle formule"}
+              </SheetTitle>
+            </SheetHeader>
+            <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
+              <BundleForm
+                shopId={shopId}
+                categories={categories}
+                initialData={editingBundle ?? undefined}
+                onSuccess={handleFormSuccess}
+                onCancel={() => setFormOpen(false)}
+                onSave={adminActions?.onSave}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
 
       {/* Delete confirmation */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
