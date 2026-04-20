@@ -567,19 +567,19 @@ export function ShopForm({
         <Tabs defaultValue="identite" className="flex min-h-0 flex-1 flex-col gap-4">
           <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]">
             <TabsList
-              variant="line"
-              className="inline-flex h-10 min-h-10 w-max max-w-none flex-nowrap items-stretch justify-start gap-0.5 bg-transparent px-0 pt-0.5"
+              variant="segmented"
+              className="inline-flex h-11 min-h-11 w-max min-w-full max-w-none flex-nowrap items-stretch justify-start gap-1 sm:w-full sm:justify-between"
             >
-              <TabsTrigger value="identite" className="shrink-0 grow-0 basis-auto px-3 whitespace-nowrap">
+              <TabsTrigger value="identite" className="h-full shrink-0 grow-0 basis-auto whitespace-nowrap sm:flex-1">
                 Identité
               </TabsTrigger>
-              <TabsTrigger value="images" className="shrink-0 grow-0 basis-auto px-3 whitespace-nowrap">
+              <TabsTrigger value="images" className="h-full shrink-0 grow-0 basis-auto whitespace-nowrap sm:flex-1">
                 Image
               </TabsTrigger>
-              <TabsTrigger value="contact" className="shrink-0 grow-0 basis-auto px-3 whitespace-nowrap">
+              <TabsTrigger value="contact" className="h-full shrink-0 grow-0 basis-auto whitespace-nowrap sm:flex-1">
                 Contact
               </TabsTrigger>
-              <TabsTrigger value="horaires" className="shrink-0 grow-0 basis-auto px-3 whitespace-nowrap">
+              <TabsTrigger value="horaires" className="h-full shrink-0 grow-0 basis-auto whitespace-nowrap sm:flex-1">
                 Horaires
               </TabsTrigger>
             </TabsList>
