@@ -41,6 +41,10 @@ type ShopRow = {
   name_en?: string | null;
   description_fr?: string | null;
   description_en?: string | null;
+  storefront_bento_layout?: unknown | null;
+  storefront_theme_key?: unknown | null;
+  storefront_theme_overrides?: unknown | null;
+  bundles_menu_grouped?: unknown | null;
 };
 
 /**
@@ -59,7 +63,7 @@ export async function fetchPublicShopPagePayload(
   let q = supabase
     .from("shops")
     .select(
-      "id, name, slug, is_active, description, name_fr, name_en, description_fr, description_en, logo_url, cover_image_url, address, phone, email_contact, social_links, fulfillment_modes, opening_hours, opening_timezone, open_on_public_holidays, stripe_account_id"
+      "id, name, slug, is_active, description, name_fr, name_en, description_fr, description_en, logo_url, cover_image_url, address, phone, email_contact, social_links, fulfillment_modes, opening_hours, opening_timezone, open_on_public_holidays, stripe_account_id, storefront_bento_layout, storefront_theme_key, storefront_theme_overrides, bundles_menu_grouped"
     );
 
   if ("slug" in opts) {
@@ -81,46 +85,15 @@ export async function fetchPublicShopPagePayload(
 
   const s = shop as ShopRow;
 
-  const { data: layoutRow, error: layoutError } = await supabase
-    .from("shops")
-    .select("storefront_bento_layout")
-    .eq("id", s.id)
-    .maybeSingle();
+  const savedStorefrontLayout = s.storefront_bento_layout ?? null;
 
-  const savedStorefrontLayout =
-    !layoutError && layoutRow
-      ? (layoutRow as { storefront_bento_layout: unknown | null }).storefront_bento_layout
-      : null;
-
-  const { data: themeRow, error: themeError } = await supabase
-    .from("shops")
-    .select("storefront_theme_key, storefront_theme_overrides")
-    .eq("id", s.id)
-    .maybeSingle();
-
-  const storefrontThemeKey = coerceStorefrontThemeKey(
-    !themeError && themeRow
-      ? (themeRow as { storefront_theme_key?: unknown }).storefront_theme_key
-      : null
-  );
+  const storefrontThemeKey = coerceStorefrontThemeKey(s.storefront_theme_key ?? null);
   const storefrontThemeOverrides = coerceStorefrontThemeOverrides(
-    !themeError && themeRow
-      ? (themeRow as { storefront_theme_overrides?: unknown }).storefront_theme_overrides
-      : null
+    s.storefront_theme_overrides ?? null
   );
-
-  const { data: groupedRow, error: groupedError } = await supabase
-    .from("shops")
-    .select("bundles_menu_grouped")
-    .eq("id", s.id)
-    .maybeSingle();
 
   const bundlesMenuGrouped =
-    !groupedError &&
-    groupedRow &&
-    typeof (groupedRow as { bundles_menu_grouped?: unknown }).bundles_menu_grouped === "boolean"
-      ? (groupedRow as { bundles_menu_grouped: boolean }).bundles_menu_grouped
-      : false;
+    typeof s.bundles_menu_grouped === "boolean" ? s.bundles_menu_grouped : false;
 
   const { data: rawCategories } = await supabase
     .from("categories")
