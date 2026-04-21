@@ -80,8 +80,10 @@ export async function POST(req: Request) {
         .from("orders")
         .update({
           status: "confirmed",
+          stripe_checkout_session_id: session.id,
           stripe_payment_intent_id: paymentIntentId,
           stripe_payment_status: "paid",
+          paid_at: new Date().toISOString(),
         })
         .eq("id", orderId)
         .eq("status", "pending");

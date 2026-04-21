@@ -72,6 +72,26 @@ export async function POST(req: Request) {
       shop.stripe_account_id
     );
 
+    const { data: linkedRows, error: linkErr } = await admin
+      .from("orders")
+      .update({ stripe_checkout_session_id: session.id })
+      .eq("id", orderId)
+      .eq("status", "pending")
+      .select("id");
+
+    if (linkErr) {
+      console.error("[create-checkout] Failed to persist stripe_checkout_session_id:", linkErr.message);
+      return NextResponse.json({ error: "Failed to link checkout session" }, { status: 500 });
+    }
+
+    if (!linkedRows?.length) {
+      console.error("[create-checkout] No pending order updated for session id", {
+        orderId,
+        sessionId: session.id,
+      });
+      return NextResponse.json({ error: "Order state conflict" }, { status: 409 });
+    }
+
     return NextResponse.json({ url: session.url });
   } catch (err) {
     console.error("[create-checkout]", err);

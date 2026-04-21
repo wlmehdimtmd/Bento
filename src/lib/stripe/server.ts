@@ -15,7 +15,7 @@ export interface StripeLineItem {
 /**
  * Creates a Stripe Checkout session for an order.
  *
- * @param orderId        UUID of the Supabase order (stored in session metadata)
+ * @param orderId        UUID of the Supabase order (metadata + client_reference_id)
  * @param shopSlug       Shop slug for success/cancel redirect URLs
  * @param items          Cart items to display as Stripe line_items
  * @param successOrigin  Base URL of the app (e.g. https://bento.app)
@@ -39,7 +39,8 @@ export async function createCheckoutSession(
       },
     })),
     metadata: { orderId },
-    success_url: `${successOrigin}/${shopSlug}?order=success&id=${orderId}`,
+    client_reference_id: orderId,
+    success_url: `${successOrigin}/${shopSlug}?order=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${successOrigin}/${shopSlug}?order=cancelled`,
   });
 
