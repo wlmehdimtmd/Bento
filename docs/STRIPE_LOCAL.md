@@ -2,6 +2,8 @@
 
 Procédure **auto-suffisante** pour valider le flux paiement de bout en bout après clonage du dépôt : Next.js en local, Stripe en **mode test**, webhooks via **Stripe CLI**.
 
+La commande `pending` est créée côté serveur via **`POST /api/orders/create`** (service role, validation catalogue), puis la session Stripe via **`POST /api/stripe/create-checkout`**.
+
 ---
 
 ## 1. Prérequis

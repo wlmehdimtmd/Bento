@@ -13,7 +13,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { useCartStore } from "@/lib/stores/cartStore";
 import { usePublicShop } from "@/components/shop/PublicShopContext";
-import { createClient } from "@/lib/supabase/client";
 import { FULFILLMENT_MODES, STOREFRONT_CART_CTA_CLASSNAME } from "@/lib/constants";
 import { cn, formatPrice } from "@/lib/utils";
 import { useLocale } from "@/components/i18n/LocaleProvider";
@@ -99,62 +98,65 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
       return;
     }
 
-    const supabase = createClient();
-
-    // 1. Create order in Supabase
-    const { data: order, error: orderErr } = await supabase
-      .from("orders")
-      .insert({
-        shop_id: shop.id,
-        customer_name: values.customer_name,
-        customer_phone: values.customer_phone || null,
-        fulfillment_mode: values.fulfillment_mode,
-        table_number: values.table_number || null,
-        delivery_address: values.delivery_address || null,
-        notes: values.notes || null,
-        status: "pending",
-        total_amount: total,
-      })
-      .select("id")
-      .single();
-
-    if (orderErr || !order) {
-      toast.error(locale === "en" ? "Failed to create order." : "Erreur lors de la création de la commande.");
-      return;
-    }
-
-    // 2. Create order_items
-    const orderItems = items.map((item) => ({
-      order_id: order.id,
-      product_id: item.isBundle ? null : item.productId,
-      bundle_id: item.isBundle ? item.bundleId ?? null : null,
-      quantity: item.quantity,
-      unit_price: item.price,
-      option_value: item.optionValue ?? null,
-      special_note: item.specialNote ?? null,
-    }));
-
-    const { error: itemsErr } = await supabase
-      .from("order_items")
-      .insert(orderItems);
-
-    if (itemsErr) {
+    let createRes: Response;
+    try {
+      createRes = await fetch("/api/orders/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          shopId: shop.id,
+          customer_name: values.customer_name,
+          customer_phone: values.customer_phone?.trim() || null,
+          fulfillment_mode: values.fulfillment_mode,
+          table_number: values.table_number?.trim() || null,
+          delivery_address: values.delivery_address?.trim() || null,
+          notes: values.notes?.trim() || null,
+          items: items.map((item) => ({
+            isBundle: item.isBundle,
+            productId: item.productId,
+            bundleId: item.isBundle ? item.bundleId ?? null : null,
+            quantity: item.quantity,
+            optionValue: item.optionValue ?? null,
+            specialNote: item.specialNote ?? null,
+            unitPrice: item.price,
+          })),
+        }),
+      });
+    } catch {
       toast.error(
         locale === "en"
-          ? "Failed to save order items."
-          : "Erreur lors de l'enregistrement des articles."
+          ? "Network error. Please try again."
+          : "Erreur réseau. Réessayez."
       );
-      // Clean up the order
-      await supabase.from("orders").delete().eq("id", order.id);
       return;
     }
 
-    // 3. Create Stripe Checkout session (montants recalculés côté serveur depuis la commande)
-    const res = await fetch("/api/stripe/create-checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId: order.id }),
-    });
+    if (!createRes.ok) {
+      const body = await createRes.json().catch(() => ({}));
+      toast.error(
+        (body as { error?: string }).error ??
+          (locale === "en" ? "Failed to create order." : "Erreur lors de la création de la commande.")
+      );
+      return;
+    }
+
+    const { orderId } = (await createRes.json()) as { orderId: string };
+
+    let res: Response;
+    try {
+      res = await fetch("/api/stripe/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+    } catch {
+      toast.error(
+        locale === "en"
+          ? "Network error. Please try again."
+          : "Erreur réseau. Réessayez."
+      );
+      return;
+    }
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
