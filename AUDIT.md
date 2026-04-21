@@ -15,7 +15,7 @@ Ce fichier trace les **décisions structurantes** et l’avancement de l’audit
 | Authentification  | Rapport initial livré | Pas de correctif code mergé ; sujets ouverts (AuthGuard, `?error=`, etc.). |
 | Landing Page      | Rapport initial livré | Conversation du 2026-04-21 |
 | Dashboard Client  | Rapport initial livré | Conversation du 2026-04-21 |
-| Vitrine Client    | Non démarré  | Prochaine étape après validation |
+| Vitrine Client    | Rapport initial livré | Conversation du 2026-04-21 |
 
 ## Journal des décisions
 
@@ -33,6 +33,10 @@ Ce fichier trace les **décisions structurantes** et l’avancement de l’audit
 | 2026-04-21 | Dashboard | i18n : nombreuses chaînes via `tr(fr, en)` (cookies + `LocaleProvider`) en parallèle de `i18nMessages` / `getDashboardCatalogCopy`. | Refactor progressif possible |
 | 2026-04-21 | Dashboard | `DashboardSidebar` reçoit `user` mais ne l’utilise pas (`_user`). | Nettoyage API props possible |
 | 2026-04-21 | Dashboard | `StatsCard` : `toLocaleString("fr-FR")` pour les compteurs même si `locale === "en"`. | Cosmétique i18n |
+| 2026-04-21 | Vitrine | Chaîne FR vide carte : `n&apos;a` dans une string JS affichait l’entité HTML en clair — corrigé en `n'a`. | Corrigé (code) |
+| 2026-04-21 | Vitrine | `fetchPublicShopPagePayload` : plusieurs `select` successifs sur `shops` (layout, theme, bundles_grouped…) — candidat fusion en un select ou vue. | Perf / clarté |
+| 2026-04-21 | Vitrine | `CheckoutForm` : `FULFILLMENT_LABELS` local duplique partiellement `FULFILLMENT_MODES` dans `constants.ts`. | DRY possible |
+| 2026-04-21 | Vitrine | Métadonnées `alternates.canonical` utilisent le `slug` d’URL, pas forcément le slug canonique boutique si jamais redirection slug. | À surveiller |
 
 ---
 

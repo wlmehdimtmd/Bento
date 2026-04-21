@@ -146,7 +146,7 @@ export default async function ShopPage({
           <p className="text-lg">
             {locale === "en"
               ? "This shop does not have a menu yet."
-              : "Ce restaurant n&apos;a pas encore de carte."}
+              : "Ce restaurant n'a pas encore de carte."}
           </p>
           <p className="text-sm mt-1">{locale === "en" ? "Please check back soon!" : "Revenez bientôt !"}</p>
         </div>
