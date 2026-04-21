@@ -58,11 +58,6 @@ export const useCartStore = create<CartState>()(
 
       addItem(item) {
         set((state) => {
-          // Safety: clear if shop changed (e.g. deep-link without CartProvider)
-          if (state.shopSlug && item.bundleId === undefined) {
-            // no-op here — shop guard is in initCart
-          }
-
           // Merge duplicate: same productId + same optionValue (not bundles)
           if (!item.isBundle) {
             const existing = state.items.find(
