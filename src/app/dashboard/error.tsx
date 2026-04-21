@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -11,6 +12,8 @@ interface ErrorProps {
 }
 
 export default function DashboardError({ error, reset }: ErrorProps) {
+  const { t } = useLocale();
+
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -25,10 +28,10 @@ export default function DashboardError({ error, reset }: ErrorProps) {
           className="text-xl font-bold"
           style={{ fontFamily: "var(--font-onest)" }}
         >
-          Erreur du tableau de bord
+          {t("dashboard.error.title")}
         </h2>
         <p className="text-muted-foreground text-sm max-w-xs">
-          {error.message || "Une erreur inattendue s'est produite."}
+          {error.message || t("dashboard.error.defaultMessage")}
         </p>
         {error.digest && (
           <p className="font-mono text-xs text-muted-foreground/50">
@@ -43,10 +46,10 @@ export default function DashboardError({ error, reset }: ErrorProps) {
           style={{ backgroundColor: "var(--primary)", color: "white" }}
         >
           <RotateCcw className="mr-2 h-4 w-4" />
-          Réessayer
+          {t("dashboard.error.retry")}
         </button>
         <Link href="/dashboard" className={buttonVariants({ variant: "outline" })}>
-          Tableau de bord
+          {t("dashboard.error.back")}
         </Link>
       </div>
     </div>

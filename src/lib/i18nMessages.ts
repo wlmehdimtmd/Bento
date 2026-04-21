@@ -110,6 +110,10 @@ const fr: FlatMessages = {
   "dashboard.common.edit": "Modifier",
   "dashboard.common.create": "Créer",
   "dashboard.common.search": "Rechercher…",
+  "dashboard.error.title": "Erreur du tableau de bord",
+  "dashboard.error.defaultMessage": "Une erreur inattendue s'est produite.",
+  "dashboard.error.retry": "Réessayer",
+  "dashboard.error.back": "Tableau de bord",
   "dashboard.settings.metadataTitle": "Paramètres",
   "dashboard.settings.title": "Paramètres",
   "dashboard.settings.subtitle":
@@ -287,6 +291,10 @@ const en: FlatMessages = {
   "dashboard.common.edit": "Edit",
   "dashboard.common.create": "Create",
   "dashboard.common.search": "Search...",
+  "dashboard.error.title": "Dashboard error",
+  "dashboard.error.defaultMessage": "Something went wrong.",
+  "dashboard.error.retry": "Try again",
+  "dashboard.error.back": "Dashboard",
   "dashboard.settings.metadataTitle": "Settings",
   "dashboard.settings.title": "Settings",
   "dashboard.settings.subtitle":
