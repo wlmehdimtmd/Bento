@@ -16,17 +16,12 @@ import { Label } from "@/components/ui/label";
 import type { AuthError, User } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
+import { merchantPasswordSchema } from "@/lib/auth/merchantPasswordSchema";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
 const resetSchema = z
   .object({
-    password: z
-      .string()
-      .min(10, "At least 10 characters")
-      .regex(/[A-Z]/, "At least one uppercase letter")
-      .regex(/[a-z]/, "At least one lowercase letter")
-      .regex(/[0-9]/, "At least one number")
-      .regex(/[^A-Za-z0-9]/, "At least one special character (!@#$%…)"),
+    password: merchantPasswordSchema,
     confirm: z.string().min(1, "Confirm your password"),
   })
   .refine((v) => v.password === v.confirm, {

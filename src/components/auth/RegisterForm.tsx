@@ -13,18 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { ensureDefaultShopForOwner } from "@/lib/merchant-bootstrap";
+import { merchantPasswordSchema } from "@/lib/auth/merchantPasswordSchema";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
 const registerSchema = z.object({
   full_name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  password: z
-    .string()
-    .min(10, "At least 10 characters")
-    .regex(/[A-Z]/, "At least one uppercase letter")
-    .regex(/[a-z]/, "At least one lowercase letter")
-    .regex(/[0-9]/, "At least one number")
-    .regex(/[^A-Za-z0-9]/, "At least one special character (!@#$%…)"),
+  password: merchantPasswordSchema,
 });
 
 type RegisterValues = z.infer<typeof registerSchema>;
