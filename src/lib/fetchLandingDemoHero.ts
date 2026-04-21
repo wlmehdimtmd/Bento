@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { formatPrice } from "@/lib/utils";
 import { resolveDemoSourceShopId } from "@/lib/platformDemo";
 
 export type LandingDemoHeroTile = {
@@ -16,32 +17,32 @@ export type LandingDemoHeroData = {
   tiles: LandingDemoHeroTile[];
 };
 
+function formatHeroPriceEUR(n: number): string {
+  const int = Number.isInteger(n);
+  return formatPrice(n, "EUR", "fr-FR", {
+    minimumFractionDigits: int ? 0 : 2,
+    maximumFractionDigits: int ? 0 : 2,
+  });
+}
+
 /** Démo intégrée (sans boutique miroir) — mêmes visuels que l’ancien hero. */
 const STATIC_HERO: LandingDemoHeroData = {
   shopName: "Maison Kanpai",
   shopSlug: null,
   tiles: [
-    { id: "static-0", imageUrl: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600", label: "Gyoza", price: "8 €" },
-    { id: "static-1", imageUrl: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=600", label: "Tataki thon", price: "14 €" },
-    { id: "static-2", imageUrl: "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=600", label: "Ramen tonkotsu", price: "16 €" },
+    { id: "static-0", imageUrl: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600", label: "Gyoza", price: formatHeroPriceEUR(8) },
+    { id: "static-1", imageUrl: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=600", label: "Tataki thon", price: formatHeroPriceEUR(14) },
+    { id: "static-2", imageUrl: "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=600", label: "Ramen tonkotsu", price: formatHeroPriceEUR(16) },
     {
       id: "static-3",
       imageUrl: "https://images.unsplash.com/photo-1742349166781-70e38f10b7ed?w=600&q=80",
       label: "Chirashi saumon",
-      price: "19 €",
+      price: formatHeroPriceEUR(19),
     },
-    { id: "static-4", imageUrl: "https://images.unsplash.com/photo-1553621042-f6e147245754?w=600", label: "Assortiment sushis", price: "18 €" },
-    { id: "static-5", imageUrl: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=600", label: "Mochi glacé", price: "8 €" },
+    { id: "static-4", imageUrl: "https://images.unsplash.com/photo-1553621042-f6e147245754?w=600", label: "Assortiment sushis", price: formatHeroPriceEUR(18) },
+    { id: "static-5", imageUrl: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=600", label: "Mochi glacé", price: formatHeroPriceEUR(8) },
   ],
 };
-
-function formatPriceEUR(n: number): string {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: Number.isInteger(n) ? 0 : 2,
-  }).format(n);
-}
 
 function normalizeProductImageUrl(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
@@ -116,7 +117,7 @@ export async function fetchLandingDemoHero(supabase: SupabaseClient): Promise<La
     id: p.id as string,
     imageUrl: normalizeProductImageUrl(p.image_url),
     label: p.name,
-    price: formatPriceEUR(Number(p.price)),
+    price: formatHeroPriceEUR(Number(p.price)),
   }));
 
   if (tiles.length === 0) {

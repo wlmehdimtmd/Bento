@@ -5,16 +5,24 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export type FormatPriceFractionDigits = {
+  minimumFractionDigits?: number;
+  maximumFractionDigits?: number;
+};
+
 export function formatPrice(
   amount: number,
   currency = "EUR",
-  numberLocale: string = "fr-FR"
+  numberLocale: string = "fr-FR",
+  fractionDigits?: FormatPriceFractionDigits
 ): string {
+  const min = fractionDigits?.minimumFractionDigits ?? 2;
+  const max = fractionDigits?.maximumFractionDigits ?? 2;
   return new Intl.NumberFormat(numberLocale, {
     style: "currency",
     currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: min,
+    maximumFractionDigits: max,
   }).format(amount);
 }
 
