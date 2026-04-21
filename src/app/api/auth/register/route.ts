@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { ZodError } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { logAuthEvent } from "@/lib/auth-logger";
 import { buildAuthEmailConfirmationRedirectUrl } from "@/lib/merchant-bootstrap";
+import { registerBodySchema } from "@/lib/auth/registerBodySchema";
 
 function getClientMeta(request: Request) {
   return {
@@ -11,7 +13,19 @@ function getClientMeta(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { email, password, full_name } = await request.json();
+  let body: { email: string; password: string; full_name: string };
+  try {
+    const raw: unknown = await request.json();
+    body = registerBodySchema.parse(raw);
+  } catch (e) {
+    if (e instanceof ZodError) {
+      const first = e.issues[0]?.message ?? "Invalid payload";
+      return NextResponse.json({ error: first, code: "validation_error" }, { status: 400 });
+    }
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const { email, password, full_name } = body;
   const meta = getClientMeta(request);
 
   const emailRedirectTo = buildAuthEmailConfirmationRedirectUrl(request);
