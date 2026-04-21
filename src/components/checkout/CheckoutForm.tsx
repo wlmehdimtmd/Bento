@@ -26,7 +26,14 @@ const FULFILLMENT_LABELS: Record<string, Record<"fr" | "en", string>> = {
   delivery: { fr: "Livraison", en: "Delivery" },
 };
 
-type CheckoutValues = z.infer<typeof checkoutSchema>;
+type CheckoutValues = {
+  fulfillment_mode: string;
+  customer_name: string;
+  customer_phone?: string;
+  table_number?: string;
+  delivery_address?: string;
+  notes?: string;
+};
 
 // ── Component ──────────────────────────────────────────────────
 
