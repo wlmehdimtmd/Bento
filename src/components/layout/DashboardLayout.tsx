@@ -11,14 +11,13 @@ import { createClient } from "@/lib/supabase/client";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface DashboardLayoutProps {
-  user: { email: string; full_name?: string | null };
   shops: { id: string; name: string }[];
   /** Commandes à traiter (hors livrées / annulées), pour le badge « Commandes ». */
   activeOrdersCount?: number;
   children: React.ReactNode;
 }
 
-export function DashboardLayout({ user, shops, activeOrdersCount = 0, children }: DashboardLayoutProps) {
+export function DashboardLayout({ shops, activeOrdersCount = 0, children }: DashboardLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { locale } = useLocale();
   const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
@@ -45,7 +44,7 @@ export function DashboardLayout({ user, shops, activeOrdersCount = 0, children }
   return (
     <MerchantDashboardShell className="flex min-h-screen">
       {/* Desktop sidebar */}
-      <DashboardSidebar user={user} shops={shops} activeOrdersCount={activeOrdersCount} />
+      <DashboardSidebar shops={shops} activeOrdersCount={activeOrdersCount} />
 
       {/* Mobile sheet sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -54,7 +53,7 @@ export function DashboardLayout({ user, shops, activeOrdersCount = 0, children }
           className="p-0 w-[85%] min-w-[280px] max-w-none sm:max-w-none sm:w-[85%]"
         >
           <SheetTitle className="sr-only">Navigation</SheetTitle>
-          <DashboardSidebar user={user} shops={shops} activeOrdersCount={activeOrdersCount} forSheet />
+          <DashboardSidebar shops={shops} activeOrdersCount={activeOrdersCount} forSheet />
         </SheetContent>
       </Sheet>
 

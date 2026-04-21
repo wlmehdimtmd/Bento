@@ -24,13 +24,6 @@ export default async function Layout({
     redirect("/admin");
   }
 
-  // Fetch profile for display name
-  const { data: profile } = await supabase
-    .from("users")
-    .select("full_name")
-    .eq("id", user.id)
-    .single();
-
   // Onboarding guard: redirect new users who haven't completed onboarding
   const { data: primaryShop } = await supabase
     .from("shops")
@@ -77,10 +70,6 @@ export default async function Layout({
 
   return (
     <DashboardLayout
-      user={{
-        email: user.email ?? "",
-        full_name: profile?.full_name ?? null,
-      }}
       shops={(shopsForNav ?? []).map((s) => ({ id: s.id as string, name: s.name as string }))}
       activeOrdersCount={activeOrdersCount}
     >

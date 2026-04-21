@@ -21,7 +21,6 @@ import { cn } from "@/lib/utils";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface DashboardSidebarProps {
-  user: { email: string; full_name?: string | null };
   shops: { id: string; name: string }[];
   /** Commandes actives (pending → ready), toutes boutiques du compte. */
   activeOrdersCount?: number;
@@ -375,7 +374,6 @@ function SidebarColumn({
 }
 
 export function DashboardSidebar({
-  user: _user,
   shops,
   activeOrdersCount = 0,
   forSheet,
