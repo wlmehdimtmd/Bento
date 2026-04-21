@@ -274,6 +274,7 @@ export function StorefrontBentoEditor({
       try {
         await saveStorefrontBentoLayoutAdmin(
           shopId,
+          slug,
           payload as Json,
           storefrontThemeKey,
           storefrontThemeOverrides as Json

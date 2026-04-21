@@ -184,6 +184,7 @@ export async function setDemoShopId(shopId: string | null) {
 
 export async function saveStorefrontBentoLayoutAdmin(
   shopId: string,
+  shopSlug: string,
   payload: Json,
   storefrontThemeKey: string,
   storefrontThemeOverrides?: Json
@@ -205,6 +206,7 @@ export async function saveStorefrontBentoLayoutAdmin(
 
   revalidatePath("/demo");
   revalidatePath(`/admin/shops/${shopId}/vitrine/mise-en-page`);
+  revalidatePath(`/${shopSlug}`);
 }
 
 export async function updateShopProfileAdmin(

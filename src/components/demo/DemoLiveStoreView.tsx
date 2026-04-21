@@ -50,7 +50,7 @@ export function DemoLiveStoreView({
         }}
       >
         <CartDrawerProvider>
-          <StorefrontThemeScope themeKey={storefrontThemeKey} className="min-h-screen bg-transparent">
+          <StorefrontThemeScope themeKey={storefrontThemeKey} className="min-h-screen">
             <div className="flex min-h-screen flex-col bg-transparent">
               <div className="sticky top-0 z-50 bg-transparent p-[4px]">
                 <DemoUnifiedTopBar />
