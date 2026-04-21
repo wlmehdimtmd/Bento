@@ -10,13 +10,13 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentOrders } from "@/components/dashboard/RecentOrders";
 import { SHOP_TYPES } from "@/lib/constants";
-import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
+import { LOCALE_COOKIE_NAME, resolveLocale, type AppLocale } from "@/lib/i18n";
 
 type Params = Promise<{ shopId: string }>;
 
 export async function generateMetadata({ params }: { params: Params }) {
   const cookieStore = await cookies();
-  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value) as AppLocale;
   const { shopId } = await params;
   const supabase = await createClient();
   const { data } = await supabase.from("shops").select("name").eq("id", shopId).single();
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: Params }) {
 
 export default async function ShopDashboardPage({ params }: { params: Params }) {
   const cookieStore = await cookies();
-  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value) as AppLocale;
   const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const { shopId } = await params;
   const supabase = await createClient();
@@ -60,17 +60,22 @@ export default async function ShopDashboardPage({ params }: { params: Params }) 
     .select("*", { count: "exact", head: true })
     .eq("shop_id", shopId);
 
-  const { data: orders, count: orderCount } = await supabase
-    .from("orders")
-    .select("id, order_number, customer_name, total_amount, status, created_at", { count: "exact" })
-    .eq("shop_id", shopId)
-    .order("created_at", { ascending: false })
-    .limit(5);
+  const [{ data: orders, count }, { data: revenueRows }] = await Promise.all([
+    supabase
+      .from("orders")
+      .select("id, order_number, customer_name, total_amount, status, created_at", { count: "exact" })
+      .eq("shop_id", shopId)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("orders")
+      .select("total_amount")
+      .eq("shop_id", shopId)
+      .neq("status", "cancelled"),
+  ]);
 
-  const revenue = (orders ?? []).reduce(
-    (sum, o) => (o.status !== "cancelled" ? sum + Number(o.total_amount) : sum),
-    0
-  );
+  const orderCount = count ?? 0;
+  const revenue = (revenueRows ?? []).reduce((sum, o) => sum + Number(o.total_amount), 0);
 
   return (
     <div className="p-6 md:p-8 space-y-8">
@@ -111,10 +116,10 @@ export default async function ShopDashboardPage({ params }: { params: Params }) 
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard icon={<FolderOpen className="h-5 w-5" />} label={tr("Catégories", "Categories")} value={catCount ?? 0} iconColor="bg-amber-500 text-white" />
-        <StatsCard icon={<Package className="h-5 w-5" />} label={tr("Produits", "Products")} value={productCount} iconColor="bg-violet-500 text-white" />
-        <StatsCard icon={<ShoppingCart className="h-5 w-5" />} label={tr("Commandes", "Orders")} value={orderCount ?? 0} iconColor="bg-blue-500 text-white" />
-        <StatsCard icon={<TrendingUp className="h-5 w-5" />} label={tr("Chiffre d'affaires", "Revenue")} value={revenue} type="currency" iconColor="bg-primary text-primary-foreground dark:bg-[oklch(0.205_0_0)] dark:text-[oklch(0.985_0_0)]" />
+        <StatsCard icon={<FolderOpen className="h-5 w-5" />} label={tr("Catégories", "Categories")} value={catCount ?? 0} locale={locale} iconColor="bg-amber-500 text-white" />
+        <StatsCard icon={<Package className="h-5 w-5" />} label={tr("Produits", "Products")} value={productCount} locale={locale} iconColor="bg-violet-500 text-white" />
+        <StatsCard icon={<ShoppingCart className="h-5 w-5" />} label={tr("Commandes", "Orders")} value={orderCount} locale={locale} iconColor="bg-blue-500 text-white" />
+        <StatsCard icon={<TrendingUp className="h-5 w-5" />} label={tr("Chiffre d'affaires", "Revenue")} value={revenue} type="currency" locale={locale} iconColor="bg-primary text-primary-foreground dark:bg-[oklch(0.205_0_0)] dark:text-[oklch(0.985_0_0)]" />
       </div>
 
       {/* Quick actions */}
