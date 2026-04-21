@@ -554,10 +554,11 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
               variant="header"
               className="rounded-md bg-background px-1 py-0.5 ring-1 ring-border/70 dark:ring-border"
             />
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center sm:justify-start">
               <span>Mehdi Monteyremard</span>
               <span className="text-muted-foreground/50">©</span>
               <span>2026</span>
+              <span className="text-muted-foreground/70">· {t("landing.footer.rights")}</span>
             </div>
           </div>
           <div className="flex items-center gap-5">
