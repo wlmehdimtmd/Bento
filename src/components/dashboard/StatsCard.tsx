@@ -2,8 +2,8 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { formatPrice } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
+import type { AppLocale } from "@/lib/i18n";
 
 interface StatsCardProps {
   icon: ReactNode;
@@ -12,6 +12,8 @@ interface StatsCardProps {
   type?: "count" | "currency";
   trend?: { value: number; label: string };
   iconColor?: string;
+  /** Pour formatage nombre / monnaie (défaut : français). */
+  locale?: AppLocale;
 }
 
 function useCountAnimation(target: number, duration = 1200) {
@@ -43,11 +45,15 @@ export function StatsCard({
   type = "count",
   trend,
   iconColor = "bg-primary text-primary-foreground dark:bg-[oklch(0.205_0_0)] dark:text-[oklch(0.985_0_0)]",
+  locale = "fr",
 }: StatsCardProps) {
   const animated = useCountAnimation(value);
+  const numberLocale = locale === "en" ? "en-US" : "fr-FR";
 
   const display =
-    type === "currency" ? formatPrice(animated) : animated.toLocaleString("fr-FR");
+    type === "currency"
+      ? formatPrice(animated, "EUR", numberLocale)
+      : animated.toLocaleString(numberLocale);
 
   const trendPositive = (trend?.value ?? 0) >= 0;
 

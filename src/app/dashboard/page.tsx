@@ -119,12 +119,14 @@ export default async function DashboardPage() {
           icon={<Package className="h-5 w-5" />}
           label={tr("Produits actifs", "Active products")}
           value={productCount}
+          locale={locale}
           iconColor="bg-violet-500 text-white"
         />
         <StatsCard
           icon={<ShoppingCart className="h-5 w-5" />}
           label={tr("Commandes totales", "Total orders")}
           value={orderCount}
+          locale={locale}
           iconColor="bg-blue-500 text-white"
         />
         <StatsCard
@@ -132,6 +134,7 @@ export default async function DashboardPage() {
           label={tr("Chiffre d'affaires", "Revenue")}
           value={revenue}
           type="currency"
+          locale={locale}
           iconColor="bg-primary text-primary-foreground dark:bg-[oklch(0.205_0_0)] dark:text-[oklch(0.985_0_0)]"
         />
       </div>
