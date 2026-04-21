@@ -762,6 +762,7 @@ export async function importTemplatesIntoShop(
         label_en: seedEnglishText(catName || "Choix"),
         quantity: 1,
         display_order: si,
+        excluded_product_ids: [],
       });
     }
 

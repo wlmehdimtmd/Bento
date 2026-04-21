@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash2, Loader2, GripVertical, X } from "lucide-react";
+import { Plus, Trash2, Loader2, GripVertical, X, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 import { TranslatableTabs } from "@/components/catalog/TranslatableTabs";
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { ImageUploader } from "@/components/product/ImageUploader";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -26,10 +27,21 @@ import {
   type BundleCatalogFormValues,
 } from "@/lib/catalogFormAdapters";
 import { getDefaultCatalogLanguageCode } from "@/lib/catalogLanguages";
-import { cn } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
 // ─── Types ────────────────────────────────────────────────────
+export interface BundleFormProductOption {
+  id: string;
+  category_id: string;
+  name: string;
+  name_fr: string | null;
+  name_en: string | null;
+  price: number;
+  is_available: boolean;
+  display_order: number;
+}
+
 export interface BundleSlotData {
   id?: string;
   category_id: string;
@@ -38,6 +50,7 @@ export interface BundleSlotData {
   label_en?: string | null;
   quantity: number;
   display_order: number;
+  excluded_product_ids?: string[];
 }
 
 export interface BundleRow {
@@ -82,6 +95,7 @@ export type BundleSavePayload = {
     label_en: string | null;
     quantity: number;
     display_order: number;
+    excluded_product_ids: string[];
   }>;
 };
 
@@ -99,6 +113,8 @@ interface BundleFormProps {
   stickyMobileActions?: boolean;
   /** Sheet desktop catalogue : même layout (header/footer fixes, corps scrollable). */
   stickySheetActions?: boolean;
+  /** Produits du shop pour ajuster les plats proposés par slot (retirer de la formule). */
+  productsForBundlesForm?: BundleFormProductOption[];
 }
 
 /** Libellé FR du slot (aligné sur la catégorie catalogue). */
@@ -110,6 +126,27 @@ function categoryFrLabelForSlot(
   const c = categories.find((x) => x.id === categoryId);
   const n = (c?.name_fr?.trim() || c?.name?.trim()) ?? "";
   return n.length > 0 ? n : emptyLabel;
+}
+
+function productRowLabel(p: BundleFormProductOption, locale: string): string {
+  if (locale === "en") {
+    return (p.name_en?.trim() || p.name_fr?.trim() || p.name).trim();
+  }
+  return (p.name_fr?.trim() || p.name).trim();
+}
+
+function categoryProductIdSet(products: BundleFormProductOption[], categoryId: string): Set<string> {
+  return new Set(products.filter((x) => x.category_id === categoryId).map((x) => x.id));
+}
+
+function sanitizeExcludedForCategory(
+  categoryId: string,
+  excluded: string[] | undefined,
+  products: BundleFormProductOption[]
+): string[] {
+  if (!categoryId) return [];
+  const allow = categoryProductIdSet(products, categoryId);
+  return (excluded ?? []).filter((id) => allow.has(id));
 }
 
 // ─── Component ───────────────────────────────────────────────
@@ -125,6 +162,7 @@ export function BundleForm({
   sheetCtasFullWidth = false,
   stickyMobileActions = false,
   stickySheetActions = false,
+  productsForBundlesForm = [],
 }: BundleFormProps) {
   const { locale } = useLocale();
   const stickyLayout = stickyMobileActions || stickySheetActions;
@@ -139,6 +177,7 @@ export function BundleForm({
   );
   const [subView, setSubView] = useState<"main" | "photo" | "composition">("main");
   const [catalogTab, setCatalogTab] = useState(getDefaultCatalogLanguageCode());
+  const [slotDishSectionOpen, setSlotDishSectionOpen] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     if (subViewOverride && subViewOverride !== subView) {
@@ -179,6 +218,7 @@ export function BundleForm({
               quantity: s.quantity,
               display_order: i,
               label_en: s.label_en,
+              excluded_product_ids: s.excluded_product_ids ?? [],
             })),
           }
         : undefined
@@ -186,6 +226,7 @@ export function BundleForm({
   });
 
   const isActive = watch("is_active");
+  const watchedSlots = watch("slots");
   const watched = watch();
   const completionByLang = bundleMainCompletion({
     translations: watched.translations,
@@ -222,6 +263,7 @@ export function BundleForm({
       quantity: 1,
       display_order: fields.length,
       label_en: "",
+      excluded_product_ids: [],
     });
     setSlotCategoryValues((prev) => [...prev, ""]);
   }
@@ -232,14 +274,45 @@ export function BundleForm({
   }
 
   function setSlotCategory(idx: number, val: string) {
-    setSlotCategoryValues((prev) =>
-      prev.map((v, i) => (i === idx ? val : v))
-    );
+    const prevCat = slotCategoryValues[idx];
+    setSlotCategoryValues((prev) => prev.map((v, i) => (i === idx ? val : v)));
     setValue(`slots.${idx}.category_id`, val, { shouldValidate: true });
+    if (prevCat && prevCat !== val) {
+      setValue(`slots.${idx}.excluded_product_ids`, [], { shouldValidate: true });
+      toast.info(
+        tr(
+          "Les réglages des plats ont été réinitialisés (nouvelle catégorie).",
+          "Dish settings were reset because the category changed."
+        )
+      );
+    }
+    if (!val) {
+      setValue(`slots.${idx}.excluded_product_ids`, [], { shouldValidate: true });
+    }
   }
 
   async function onSubmit(values: BundleCatalogFormValues) {
     const emptyChoice = tr("Choix", "Choice");
+    const products = productsForBundlesForm;
+
+    for (const s of values.slots) {
+      const cat = s.category_id;
+      const excluded = sanitizeExcludedForCategory(cat, s.excluded_product_ids, products);
+      const anyAvailableInCat = products.some((p) => p.category_id === cat && p.is_available);
+      const remaining = products.filter(
+        (p) => p.category_id === cat && p.is_available && !excluded.includes(p.id)
+      );
+      if (anyAvailableInCat && remaining.length === 0) {
+        toast.error(
+          tr(
+            "Au moins un plat disponible doit rester proposé pour chaque choix. Vérifiez les plats retirés de la formule.",
+            "At least one available dish must remain offered for each step. Check which dishes are removed from this bundle."
+          )
+        );
+        return;
+      }
+    }
+
     const main = bundleMainToBundlePayloadPart(
       {
         translations: values.translations,
@@ -255,6 +328,11 @@ export function BundleForm({
       slots: values.slots.map((s, i) => {
         const labelFr = categoryFrLabelForSlot(s.category_id, categories, emptyChoice);
         const labelEn = s.label_en?.trim() || null;
+        const excluded_product_ids = sanitizeExcludedForCategory(
+          s.category_id,
+          s.excluded_product_ids,
+          products
+        );
         return {
           id: s.id,
           category_id: s.category_id,
@@ -263,6 +341,7 @@ export function BundleForm({
           label_en: labelEn,
           quantity: s.quantity,
           display_order: i,
+          excluded_product_ids,
         };
       }),
     };
@@ -320,6 +399,7 @@ export function BundleForm({
       label_en: s.label_en,
       quantity: s.quantity,
       display_order: s.display_order,
+      excluded_product_ids: s.excluded_product_ids,
     }));
 
     const { data: savedSlots, error: slotsError } = await supabase
@@ -347,6 +427,11 @@ export function BundleForm({
         label_en: s.label_en ?? null,
         quantity: s.quantity,
         display_order: s.display_order,
+        excluded_product_ids: Array.isArray(
+          (s as { excluded_product_ids?: string[] | null }).excluded_product_ids
+        )
+          ? ((s as { excluded_product_ids: string[] }).excluded_product_ids ?? [])
+          : [],
       })),
     });
   }
@@ -470,6 +555,131 @@ export function BundleForm({
                 </p>
               )}
             </div>
+
+            {slotCategoryValues[idx] ? (
+              (() => {
+                const catId = slotCategoryValues[idx];
+                const rowProducts = productsForBundlesForm
+                  .filter((p) => p.category_id === catId)
+                  .sort((a, b) => a.display_order - b.display_order);
+                const excluded = watchedSlots?.[idx]?.excluded_product_ids ?? [];
+                const excludedCount = excluded.length;
+                const expanded = slotDishSectionOpen[idx] ?? false;
+                return (
+                  <div className="space-y-2 rounded-md border border-border bg-background/50 p-3">
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() =>
+                        setSlotDishSectionOpen((m) => ({ ...m, [idx]: !m[idx] }))
+                      }
+                      className="flex w-full items-center justify-between gap-2 text-left"
+                    >
+                      <span className="text-sm font-medium">
+                        {tr("Plats proposés pour ce choix", "Dishes offered for this step")}
+                      </span>
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                          expanded && "rotate-180"
+                        )}
+                      />
+                    </button>
+                    {expanded ? (
+                      <>
+                        <p className="text-xs text-muted-foreground">
+                          {tr(
+                            "Tous les plats de la catégorie sont proposés aux clients. Retirez de la formule ceux qui ne conviennent pas (prix, carte…).",
+                            "All dishes in this category are offered to customers by default. Remove from this bundle any that shouldn’t apply (price, menu rules…)."
+                          )}
+                        </p>
+                        {rowProducts.length === 0 ? (
+                          <p className="text-xs text-muted-foreground">
+                            {tr("Aucun produit dans cette catégorie.", "No products in this category.")}
+                          </p>
+                        ) : (
+                          <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
+                            {rowProducts.map((product) => {
+                              const offered = !excluded.includes(product.id);
+                              const label = productRowLabel(product, locale);
+                              return (
+                                <div
+                                  key={product.id}
+                                  className={cn(
+                                    "flex items-center justify-between gap-3 rounded-md border border-border/60 px-2 py-2",
+                                    !product.is_available && "opacity-70"
+                                  )}
+                                >
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-medium">{label}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {formatPrice(product.price)}
+                                    </p>
+                                  </div>
+                                  <div className="flex shrink-0 items-center gap-2">
+                                    {!product.is_available ? (
+                                      <Badge variant="secondary" className="text-xs font-normal">
+                                        {tr("Indisponible", "Unavailable")}
+                                      </Badge>
+                                    ) : (
+                                      <>
+                                        <span className="hidden max-w-[6.5rem] text-right text-[10px] leading-tight text-muted-foreground sm:inline">
+                                          {offered
+                                            ? tr("Proposé pour ce choix", "Offered for this step")
+                                            : tr(
+                                                "Non proposé pour cette formule",
+                                                "Not offered for this bundle"
+                                              )}
+                                        </span>
+                                        <Switch
+                                          checked={offered}
+                                          disabled={isSubmitting}
+                                          onCheckedChange={(checked) => {
+                                            const cur =
+                                              getValues(`slots.${idx}.excluded_product_ids`) ?? [];
+                                            if (checked) {
+                                              setValue(
+                                                `slots.${idx}.excluded_product_ids`,
+                                                cur.filter((id) => id !== product.id),
+                                                { shouldDirty: true, shouldValidate: true }
+                                              );
+                                            } else {
+                                              setValue(
+                                                `slots.${idx}.excluded_product_ids`,
+                                                [...cur, product.id],
+                                                { shouldDirty: true, shouldValidate: true }
+                                              );
+                                            }
+                                          }}
+                                          aria-label={tr(
+                                            "Retirer de la formule",
+                                            "Remove from this bundle"
+                                          )}
+                                        />
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {excludedCount > 0 ? (
+                          <p className="text-xs text-muted-foreground">
+                            {excludedCount === 1
+                              ? tr("1 plat retiré de cette formule", "1 dish removed from this bundle")
+                              : tr(
+                                  `${excludedCount} plats retirés de cette formule`,
+                                  `${excludedCount} dishes removed from this bundle`
+                                )}
+                          </p>
+                        ) : null}
+                      </>
+                    ) : null}
+                  </div>
+                );
+              })()
+            ) : null}
 
             <div className="space-y-1.5 w-32">
               <Label htmlFor={`slot-qty-${idx}`}>{tr("Quantité", "Quantity")} *</Label>

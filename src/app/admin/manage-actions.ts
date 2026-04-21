@@ -193,6 +193,7 @@ export async function adminSaveBundle(
       label_en: string | null;
       quantity: number;
       display_order: number;
+      excluded_product_ids: string[];
     }>;
   },
   isEdit: boolean,
@@ -248,6 +249,7 @@ export async function adminSaveBundle(
     label_en: s.label_en,
     quantity: s.quantity,
     display_order: i,
+    excluded_product_ids: s.excluded_product_ids,
   }));
   const { data: savedSlots, error: slotsError } = await service
     .from("bundle_slots")
@@ -274,6 +276,11 @@ export async function adminSaveBundle(
       label_en: (s as { label_en?: string | null }).label_en ?? null,
       quantity: s.quantity,
       display_order: s.display_order,
+      excluded_product_ids: Array.isArray(
+        (s as { excluded_product_ids?: string[] | null }).excluded_product_ids
+      )
+        ? ((s as { excluded_product_ids: string[] }).excluded_product_ids ?? [])
+        : [],
     })),
   };
 }

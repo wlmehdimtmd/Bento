@@ -430,6 +430,7 @@ export interface Database {
           display_order: number;
           label_fr: string | null;
           label_en: string | null;
+          excluded_product_ids: string[];
         };
         Insert: {
           id?: string;
@@ -440,6 +441,7 @@ export interface Database {
           display_order?: number;
           label_fr?: string | null;
           label_en?: string | null;
+          excluded_product_ids?: string[];
         };
         Update: {
           id?: string;
@@ -450,6 +452,7 @@ export interface Database {
           display_order?: number;
           label_fr?: string | null;
           label_en?: string | null;
+          excluded_product_ids?: string[];
         };
         Relationships: [
           {

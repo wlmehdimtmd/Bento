@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getDashboardCatalogCopy } from "@/lib/dashboard-catalog-copy";
 import { buttonVariants } from "@/components/ui/button";
 import { BundlesClient } from "@/components/product/BundlesClient";
-import type { BundleRow, BundleSlotData } from "@/components/product/BundleForm";
+import type { BundleFormProductOption, BundleRow, BundleSlotData } from "@/components/product/BundleForm";
 import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 import { MESSAGES } from "@/lib/i18nMessages";
 
@@ -69,6 +69,27 @@ export default async function BundlesPage({ params }: { params: Params }) {
     .eq("shop_id", shopId)
     .order("display_order");
 
+  const categoryIds = (categories ?? []).map((c) => c.id);
+  const { data: rawProducts } =
+    categoryIds.length > 0
+      ? await supabase
+          .from("products")
+          .select("id, category_id, name, name_fr, name_en, price, is_available, display_order")
+          .in("category_id", categoryIds)
+          .order("display_order")
+      : { data: [] as never[] };
+
+  const productsForBundlesForm: BundleFormProductOption[] = (rawProducts ?? []).map((p) => ({
+    id: p.id,
+    category_id: p.category_id,
+    name: p.name,
+    name_fr: p.name_fr ?? null,
+    name_en: p.name_en ?? null,
+    price: Number(p.price),
+    is_available: p.is_available,
+    display_order: p.display_order,
+  }));
+
   // Fetch bundles
   const { data: bundles } = await supabase
     .from("bundles")
@@ -98,6 +119,11 @@ export default async function BundlesPage({ params }: { params: Params }) {
           label_en: (s as { label_en?: string | null }).label_en ?? null,
           quantity: s.quantity,
           display_order: s.display_order,
+          excluded_product_ids: Array.isArray(
+            (s as { excluded_product_ids?: string[] | null }).excluded_product_ids
+          )
+            ? ((s as { excluded_product_ids: string[] }).excluded_product_ids ?? [])
+            : [],
         });
         return acc;
       },
@@ -161,6 +187,7 @@ export default async function BundlesPage({ params }: { params: Params }) {
         <BundlesClient
           shopId={shopId}
           categories={categories ?? []}
+          productsForBundlesForm={productsForBundlesForm}
           initialBundles={initialBundles}
           initialBundlesMenuGrouped={initialBundlesMenuGrouped}
           catalogPageHeader={{

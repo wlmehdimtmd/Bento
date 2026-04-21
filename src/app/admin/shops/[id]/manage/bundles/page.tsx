@@ -9,7 +9,12 @@ import {
 } from "@/app/admin/manage-actions";
 import { BundlesClient } from "@/components/product/BundlesClient";
 import { buttonVariants } from "@/components/ui/button";
-import type { BundleSavePayload, BundleRow, BundleSlotData } from "@/components/product/BundleForm";
+import type {
+  BundleFormProductOption,
+  BundleSavePayload,
+  BundleRow,
+  BundleSlotData,
+} from "@/components/product/BundleForm";
 
 type Params = Promise<{ id: string }>;
 
@@ -39,6 +44,24 @@ export default async function AdminManageBundlesPage({ params }: { params: Param
     .select("id, name, name_fr, icon_emoji")
     .eq("shop_id", shopId)
     .order("display_order");
+
+  const categoryIds = (categories ?? []).map((c) => c.id);
+  const { data: rawProducts } = await service
+    .from("products")
+    .select("id, category_id, name, name_fr, name_en, price, is_available, display_order")
+    .in("category_id", categoryIds)
+    .order("display_order");
+
+  const productsForBundlesForm: BundleFormProductOption[] = (rawProducts ?? []).map((p) => ({
+    id: p.id,
+    category_id: p.category_id,
+    name: p.name,
+    name_fr: p.name_fr ?? null,
+    name_en: p.name_en ?? null,
+    price: Number(p.price),
+    is_available: p.is_available,
+    display_order: p.display_order,
+  }));
 
   if (!categories?.length) {
     return (
@@ -75,6 +98,11 @@ export default async function AdminManageBundlesPage({ params }: { params: Param
         label_en: (s as { label_en?: string | null }).label_en ?? null,
         quantity: s.quantity,
         display_order: s.display_order,
+        excluded_product_ids: Array.isArray(
+          (s as { excluded_product_ids?: string[] | null }).excluded_product_ids
+        )
+          ? ((s as { excluded_product_ids: string[] }).excluded_product_ids ?? [])
+          : [],
       });
       return acc;
     }, {});
@@ -123,6 +151,7 @@ export default async function AdminManageBundlesPage({ params }: { params: Param
     <BundlesClient
       shopId={shopId}
       categories={categories}
+      productsForBundlesForm={productsForBundlesForm}
       initialBundles={initialBundles}
       initialBundlesMenuGrouped={initialBundlesMenuGrouped}
       onBundlesMenuGroupedChange={onBundlesMenuGroupedChange}

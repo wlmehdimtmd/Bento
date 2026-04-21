@@ -204,6 +204,7 @@ export async function importJsonIntoShop(
           label: slot.label?.trim() || categoryNameToDisplayName.get(key) || slot.category_name.trim(),
           quantity: slot.quantity,
           display_order: index,
+          excluded_product_ids: [],
         };
       });
 

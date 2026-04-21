@@ -250,6 +250,7 @@ export const bundleSlotEnSchema = z.object({
   quantity: z.number().int().min(1, "Minimum 1"),
   display_order: z.number().int().min(0),
   label_en: z.string().max(200).optional(),
+  excluded_product_ids: z.array(z.string().uuid()),
 });
 
 export const bundleSlotsFormSchema = z.object({
@@ -298,6 +299,7 @@ export type BundleSlotInput = {
   quantity: number;
   display_order: number;
   label_en?: string | null;
+  excluded_product_ids?: string[];
 };
 
 export function bundleDefaultFormValues(initial?: {
@@ -321,8 +323,11 @@ export function bundleDefaultFormValues(initial?: {
             quantity: s.quantity,
             display_order: s.display_order ?? i,
             label_en: s.label_en ?? "",
+            excluded_product_ids: Array.isArray(s.excluded_product_ids)
+              ? s.excluded_product_ids
+              : [],
           }))
-        : [{ category_id: "", quantity: 1, display_order: 0, label_en: "" }],
+        : [{ category_id: "", quantity: 1, display_order: 0, label_en: "", excluded_product_ids: [] }],
   };
 }
 

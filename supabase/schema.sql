@@ -121,12 +121,13 @@ alter table public.bundles enable row level security;
 
 -- ─── public.bundle_slots ─────────────────────────────────────
 create table if not exists public.bundle_slots (
-  id            uuid primary key default gen_random_uuid(),
-  bundle_id     uuid not null references public.bundles on delete cascade,
-  category_id   uuid not null references public.categories,
-  label         text not null,   -- ex: "Choisir une entrée"
-  quantity      integer not null default 1 check (quantity >= 1),
-  display_order integer not null default 0
+  id                     uuid primary key default gen_random_uuid(),
+  bundle_id              uuid not null references public.bundles on delete cascade,
+  category_id            uuid not null references public.categories,
+  label                  text not null,   -- ex: "Choisir une entrée"
+  quantity               integer not null default 1 check (quantity >= 1),
+  display_order          integer not null default 0,
+  excluded_product_ids   uuid[] not null default '{}'
 );
 
 alter table public.bundle_slots enable row level security;

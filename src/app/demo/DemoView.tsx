@@ -117,25 +117,25 @@ const DEMO_BUNDLES: BundleInfo[] = [
   {
     id: "f1", name: "Formule Midi", description: "1 entrée + 1 plat", price: 19, image_url: null,
     slots: [
-      { label: "Entrée", quantity: 1, categoryName: "Entrées", categoryEmoji: "🥢", categoryId: "entrees" },
-      { label: "Plat", quantity: 1, categoryName: "Plats", categoryEmoji: "🍜", categoryId: "plats" },
+      { label: "Entrée", quantity: 1, categoryName: "Entrées", categoryEmoji: "🥢", categoryId: "entrees", excludedProductIds: [] },
+      { label: "Plat", quantity: 1, categoryName: "Plats", categoryEmoji: "🍜", categoryId: "plats", excludedProductIds: [] },
     ],
   },
   {
     id: "f2", name: "Formule Découverte", description: "1 entrée + 1 plat + 1 dessert", price: 28, image_url: null,
     slots: [
-      { label: "Entrée", quantity: 1, categoryName: "Entrées", categoryEmoji: "🥢", categoryId: "entrees" },
-      { label: "Plat", quantity: 1, categoryName: "Plats", categoryEmoji: "🍜", categoryId: "plats" },
-      { label: "Dessert", quantity: 1, categoryName: "Desserts", categoryEmoji: "🍰", categoryId: "desserts" },
+      { label: "Entrée", quantity: 1, categoryName: "Entrées", categoryEmoji: "🥢", categoryId: "entrees", excludedProductIds: [] },
+      { label: "Plat", quantity: 1, categoryName: "Plats", categoryEmoji: "🍜", categoryId: "plats", excludedProductIds: [] },
+      { label: "Dessert", quantity: 1, categoryName: "Desserts", categoryEmoji: "🍰", categoryId: "desserts", excludedProductIds: [] },
     ],
   },
   {
     id: "f3", name: "Formule Omakase", description: "Entrée + Plat + Dessert + Boisson", price: 45, image_url: null,
     slots: [
-      { label: "Entrée", quantity: 1, categoryName: "Entrées", categoryEmoji: "🥢", categoryId: "entrees" },
-      { label: "Plat", quantity: 1, categoryName: "Plats", categoryEmoji: "🍜", categoryId: "plats" },
-      { label: "Dessert", quantity: 1, categoryName: "Desserts", categoryEmoji: "🍰", categoryId: "desserts" },
-      { label: "Boisson", quantity: 1, categoryName: "Boissons", categoryEmoji: "🍶", categoryId: "boissons" },
+      { label: "Entrée", quantity: 1, categoryName: "Entrées", categoryEmoji: "🥢", categoryId: "entrees", excludedProductIds: [] },
+      { label: "Plat", quantity: 1, categoryName: "Plats", categoryEmoji: "🍜", categoryId: "plats", excludedProductIds: [] },
+      { label: "Dessert", quantity: 1, categoryName: "Desserts", categoryEmoji: "🍰", categoryId: "desserts", excludedProductIds: [] },
+      { label: "Boisson", quantity: 1, categoryName: "Boissons", categoryEmoji: "🍶", categoryId: "boissons", excludedProductIds: [] },
     ],
   },
 ];

@@ -122,13 +122,14 @@ export async function fetchShopStorefrontEditorPayload(
     label: string;
     quantity: number;
     category_id: string;
+    excluded_product_ids: string[] | null;
   };
   let slotsMap: Record<string, SlotRow[]> = {};
 
   if (bundleIds.length > 0) {
     const { data: slots } = await supabase
       .from("bundle_slots")
-      .select("bundle_id, label, quantity, category_id")
+      .select("bundle_id, label, quantity, category_id, excluded_product_ids")
       .in("bundle_id", bundleIds)
       .order("display_order");
 
@@ -155,6 +156,7 @@ export async function fetchShopStorefrontEditorPayload(
       categoryName: catMap[s.category_id]?.name ?? "",
       categoryEmoji: catMap[s.category_id]?.emoji ?? "🍽️",
       categoryId: s.category_id,
+      excludedProductIds: Array.isArray(s.excluded_product_ids) ? s.excluded_product_ids : [],
     })),
   }));
 

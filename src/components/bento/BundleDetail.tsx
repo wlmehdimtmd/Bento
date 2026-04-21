@@ -69,10 +69,11 @@ function BundleDetailContent({
     setProducts([]);
     setExpandedProductId(null);
     loadCategoryProducts(currentSlot.categoryId).then((p) => {
-      setProducts(p);
+      const hide = new Set(currentSlot.excludedProductIds ?? []);
+      setProducts(p.filter((x) => !hide.has(x.id)));
       setLoading(false);
     });
-  }, [step, currentSlot?.categoryId, loadCategoryProducts]);
+  }, [step, currentSlot?.categoryId, currentSlot?.excludedProductIds, loadCategoryProducts]);
 
   function toggleProduct(product: PublicProduct) {
     const current = selections[step] ?? [];

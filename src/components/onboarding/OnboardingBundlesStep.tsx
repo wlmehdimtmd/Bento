@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, GripVertical, Loader2, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Plus, Trash2, GripVertical, Loader2, ChevronLeft, ChevronRight, X, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { cn, formatPrice } from "@/lib/utils";
 import { OnboardingStepTitle } from "@/components/onboarding/OnboardingStepTitle";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
@@ -46,9 +49,21 @@ interface OnboardingBundlesStepProps {
   onCatalogChanged?: () => void;
 }
 
+interface ShopProductRow {
+  id: string;
+  category_id: string;
+  name: string;
+  name_fr: string | null;
+  name_en: string | null;
+  price: number;
+  is_available: boolean;
+  display_order: number;
+}
+
 interface SlotState {
   category_id: string;
   quantity: number;
+  excluded_product_ids: string[];
 }
 
 interface BundleFormState {
@@ -62,8 +77,29 @@ const EMPTY_FORM: BundleFormState = {
   name: "",
   description: "",
   price: "",
-  slots: [{ category_id: "", quantity: 1 }],
+  slots: [{ category_id: "", quantity: 1, excluded_product_ids: [] }],
 };
+
+function productRowLabel(p: ShopProductRow, locale: string): string {
+  if (locale === "en") {
+    return (p.name_en?.trim() || p.name_fr?.trim() || p.name).trim();
+  }
+  return (p.name_fr?.trim() || p.name).trim();
+}
+
+function categoryProductIdSet(products: ShopProductRow[], categoryId: string): Set<string> {
+  return new Set(products.filter((x) => x.category_id === categoryId).map((x) => x.id));
+}
+
+function sanitizeExcludedForCategory(
+  categoryId: string,
+  excluded: string[] | undefined,
+  products: ShopProductRow[]
+): string[] {
+  if (!categoryId) return [];
+  const allow = categoryProductIdSet(products, categoryId);
+  return (excluded ?? []).filter((id) => allow.has(id));
+}
 
 export function OnboardingBundlesStep({
   shopId,
@@ -80,6 +116,8 @@ export function OnboardingBundlesStep({
   const [subView, setSubView] = useState<"main" | "composition">("main");
   const [form, setForm] = useState<BundleFormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [shopProducts, setShopProducts] = useState<ShopProductRow[]>([]);
+  const [slotDishSectionOpen, setSlotDishSectionOpen] = useState<Record<number, boolean>>({});
   const isMobile = useIsMobile(640);
 
   const supabase = createClient();
@@ -88,6 +126,47 @@ export function OnboardingBundlesStep({
     setBundles(initialBundles);
   }, [initialBundles]);
 
+  useEffect(() => {
+    if (isPreview) {
+      setShopProducts([]);
+      return;
+    }
+    const catIds = categories.map((c) => c.id);
+    if (catIds.length === 0) {
+      setShopProducts([]);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, category_id, name, name_fr, name_en, price, is_available, display_order")
+        .in("category_id", catIds)
+        .order("display_order");
+      if (error) {
+        console.error(error);
+        return;
+      }
+      if (!cancelled && data) {
+        setShopProducts(
+          data.map((p) => ({
+            id: p.id,
+            category_id: p.category_id,
+            name: p.name,
+            name_fr: p.name_fr ?? null,
+            name_en: p.name_en ?? null,
+            price: Number(p.price),
+            is_available: p.is_available,
+            display_order: p.display_order,
+          }))
+        );
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [shopId, isPreview, supabase, categories]);
+
   function notify() {
     onCatalogChanged?.();
   }
@@ -95,7 +174,7 @@ export function OnboardingBundlesStep({
   function addSlot() {
     setForm((f) => ({
       ...f,
-      slots: [...f.slots, { category_id: "", quantity: 1 }],
+      slots: [...f.slots, { category_id: "", quantity: 1, excluded_product_ids: [] }],
     }));
   }
 
@@ -106,15 +185,43 @@ export function OnboardingBundlesStep({
     }));
   }
 
-  function updateSlot(i: number, field: keyof SlotState, value: string | number) {
-    setForm((f) => ({
-      ...f,
-      slots: f.slots.map((s, idx) => (idx === i ? { ...s, [field]: value } : s)),
-    }));
+  function setSlotCategory(i: number, val: string) {
+    setForm((f) => {
+      const prev = f.slots[i]?.category_id ?? "";
+      const clearExcluded = (prev && prev !== val) || !val;
+      if (prev && prev !== val) {
+        toast.info(
+          tr(
+            "Les réglages des plats ont été réinitialisés (nouvelle catégorie).",
+            "Dish settings were reset because the category changed."
+          )
+        );
+      }
+      return {
+        ...f,
+        slots: f.slots.map((s, idx) =>
+          idx === i
+            ? {
+                ...s,
+                category_id: val,
+                excluded_product_ids: clearExcluded ? [] : s.excluded_product_ids,
+              }
+            : s
+        ),
+      };
+    });
   }
 
-  function setSlotCategory(i: number, val: string) {
-    updateSlot(i, "category_id", val);
+  function setSlotProductOffered(i: number, productId: string, offered: boolean) {
+    setForm((f) => ({
+      ...f,
+      slots: f.slots.map((s, idx) => {
+        if (idx !== i) return s;
+        const cur = s.excluded_product_ids ?? [];
+        const next = offered ? cur.filter((id) => id !== productId) : [...cur, productId];
+        return { ...s, excluded_product_ids: next };
+      }),
+    }));
   }
 
   function closeForm() {
@@ -138,6 +245,23 @@ export function OnboardingBundlesStep({
     if (validSlots.length === 0) {
       toast.error(tr("Ajoutez au moins un choix avec une catégorie", "Add at least one option with a category"));
       return;
+    }
+
+    for (const s of validSlots) {
+      const excluded = sanitizeExcludedForCategory(s.category_id, s.excluded_product_ids, shopProducts);
+      const anyAvailable = shopProducts.some((p) => p.category_id === s.category_id && p.is_available);
+      const remaining = shopProducts.filter(
+        (p) => p.category_id === s.category_id && p.is_available && !excluded.includes(p.id)
+      );
+      if (anyAvailable && remaining.length === 0) {
+        toast.error(
+          tr(
+            "Au moins un plat disponible doit rester proposé pour chaque choix. Vérifiez les plats retirés de la formule.",
+            "At least one available dish must remain offered for each step. Check which dishes are removed from this bundle."
+          )
+        );
+        return;
+      }
     }
 
     setSaving(true);
@@ -183,6 +307,11 @@ export function OnboardingBundlesStep({
       label: catNameById[s.category_id] || tr("Choix", "Option"),
       quantity: s.quantity,
       display_order: i,
+      excluded_product_ids: sanitizeExcludedForCategory(
+        s.category_id,
+        s.excluded_product_ids,
+        shopProducts
+      ),
     }));
 
     const { error: slotsError } = await supabase.from("bundle_slots").insert(slotsPayload);
@@ -302,6 +431,98 @@ export function OnboardingBundlesStep({
                 </button>
               ) : null}
             </div>
+
+            {slot.category_id ? (
+              (() => {
+                const catId = slot.category_id;
+                const rowProducts = shopProducts
+                  .filter((p) => p.category_id === catId)
+                  .sort((a, b) => a.display_order - b.display_order);
+                const excluded = slot.excluded_product_ids ?? [];
+                const excludedCount = excluded.length;
+                const expanded = slotDishSectionOpen[i] ?? false;
+                return (
+                  <div className="space-y-2 rounded-md border border-border bg-background/50 p-2">
+                    <button
+                      type="button"
+                      onClick={() => setSlotDishSectionOpen((m) => ({ ...m, [i]: !m[i] }))}
+                      className="flex w-full items-center justify-between gap-2 text-left"
+                    >
+                      <span className="text-xs font-medium">
+                        {tr("Plats proposés pour ce choix", "Dishes offered for this step")}
+                      </span>
+                      <ChevronDown
+                        className={cn(
+                          "h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform",
+                          expanded && "rotate-180"
+                        )}
+                      />
+                    </button>
+                    {expanded ? (
+                      <>
+                        <p className="text-[11px] text-muted-foreground leading-snug">
+                          {tr(
+                            "Tous les plats de la catégorie sont proposés aux clients. Retirez de la formule ceux qui ne conviennent pas (prix, carte…).",
+                            "All dishes in this category are offered to customers by default. Remove from this bundle any that shouldn’t apply (price, menu rules…)."
+                          )}
+                        </p>
+                        {rowProducts.length === 0 ? (
+                          <p className="text-[11px] text-muted-foreground">
+                            {tr("Aucun produit dans cette catégorie.", "No products in this category.")}
+                          </p>
+                        ) : (
+                          <div className="max-h-40 space-y-1.5 overflow-y-auto pr-0.5">
+                            {rowProducts.map((product) => {
+                              const offered = !excluded.includes(product.id);
+                              const label = productRowLabel(product, locale);
+                              return (
+                                <div
+                                  key={product.id}
+                                  className={cn(
+                                    "flex items-center justify-between gap-2 rounded border border-border/60 px-1.5 py-1.5",
+                                    !product.is_available && "opacity-70"
+                                  )}
+                                >
+                                  <div className="min-w-0">
+                                    <p className="truncate text-xs font-medium">{label}</p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                      {formatPrice(product.price)}
+                                    </p>
+                                  </div>
+                                  {!product.is_available ? (
+                                    <Badge variant="secondary" className="shrink-0 text-[10px] font-normal">
+                                      {tr("Indisponible", "Unavailable")}
+                                    </Badge>
+                                  ) : (
+                                    <Switch
+                                      checked={offered}
+                                      onCheckedChange={(checked) =>
+                                        setSlotProductOffered(i, product.id, checked)
+                                      }
+                                      aria-label={tr("Retirer de la formule", "Remove from this bundle")}
+                                    />
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {excludedCount > 0 ? (
+                          <p className="text-[11px] text-muted-foreground">
+                            {excludedCount === 1
+                              ? tr("1 plat retiré de cette formule", "1 dish removed from this bundle")
+                              : tr(
+                                  `${excludedCount} plats retirés de cette formule`,
+                                  `${excludedCount} dishes removed from this bundle`
+                                )}
+                          </p>
+                        ) : null}
+                      </>
+                    ) : null}
+                  </div>
+                );
+              })()
+            ) : null}
           </div>
         ))}
       </div>

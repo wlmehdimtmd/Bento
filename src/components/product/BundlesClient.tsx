@@ -37,7 +37,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { BundleForm, type BundleRow, type BundleSavePayload } from "./BundleForm";
+import {
+  BundleForm,
+  type BundleFormProductOption,
+  type BundleRow,
+  type BundleSavePayload,
+} from "./BundleForm";
 import { ImportMenuDropdown } from "./ImportMenuDropdown";
 import { TemplatePickerDialog, importTemplatesIntoShop, type ImportData } from "@/components/templates/TemplatePickerDialog";
 import { PasteJsonImportDialog } from "@/components/import/PasteJsonImportDialog";
@@ -64,6 +69,7 @@ interface AdminBundleActions {
 interface BundlesClientProps {
   shopId: string;
   categories: CategoryOption[];
+  productsForBundlesForm?: BundleFormProductOption[];
   initialBundles: BundleRow[];
   /** Regroupe les formules actives sous une carte « Menu » sur la vitrine. */
   initialBundlesMenuGrouped?: boolean;
@@ -76,6 +82,7 @@ interface BundlesClientProps {
 export function BundlesClient({
   shopId,
   categories,
+  productsForBundlesForm = [],
   initialBundles,
   initialBundlesMenuGrouped = false,
   onBundlesMenuGroupedChange,
@@ -543,6 +550,7 @@ export function BundlesClient({
               <BundleForm
                 shopId={shopId}
                 categories={categories}
+                productsForBundlesForm={productsForBundlesForm}
                 initialData={editingBundle ?? undefined}
                 onSuccess={handleFormSuccess}
                 onCancel={() => setFormOpen(false)}
@@ -598,6 +606,7 @@ export function BundlesClient({
               <BundleForm
                 shopId={shopId}
                 categories={categories}
+                productsForBundlesForm={productsForBundlesForm}
                 initialData={editingBundle ?? undefined}
                 onSuccess={handleFormSuccess}
                 onCancel={() => setFormOpen(false)}

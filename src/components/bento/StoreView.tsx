@@ -90,6 +90,8 @@ export interface SlotSummary {
   categoryName: string;
   categoryEmoji: string;
   categoryId: string;
+  /** IDs retirés de ce choix de formule (non affichés sur la vitrine). */
+  excludedProductIds: string[];
 }
 
 export interface BundleInfo {
