@@ -1,19 +1,14 @@
 import { publicAppUrl } from "@/lib/publicAppUrl";
 
-/** PKCE après email (inscription, etc.) — à autoriser dans Supabase Redirect URLs. */
+/**
+ * Chemins à déclarer dans Supabase (Redirect URLs), en absolu par origine :
+ * `AUTH_CALLBACK_RELATIVE`, `AUTH_RESET_PASSWORD_RELATIVE`.
+ */
+/** PKCE après email (inscription, etc.). */
 export const AUTH_CALLBACK_RELATIVE = "/api/auth/callback";
 
-/** Flux « mot de passe oublié » — à autoriser dans Supabase Redirect URLs. */
+/** Flux « mot de passe oublié ». */
 export const AUTH_RESET_PASSWORD_RELATIVE = "/reset-password";
-
-/**
- * Chemins relatifs à ajouter dans le dashboard Supabase pour chaque origine
- * (ex. `http://localhost:3000` et `https://…vercel.app`) : une entrée par URL absolue.
- */
-export const SUPABASE_REDIRECT_RELATIVE_PATHS = [
-  AUTH_CALLBACK_RELATIVE,
-  AUTH_RESET_PASSWORD_RELATIVE,
-] as const;
 
 export function joinAppOrigin(origin: string, path: string): string {
   const base = origin.replace(/\/$/, "");
