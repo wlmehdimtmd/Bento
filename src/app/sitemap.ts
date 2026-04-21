@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { publicAppUrl } from "@/lib/publicAppUrl";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://bentorest.app";
+  const baseUrl = publicAppUrl;
 
   // Static routes
   const staticRoutes: MetadataRoute.Sitemap = [

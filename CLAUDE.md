@@ -190,7 +190,7 @@ STRIPE_WEBHOOK_SECRET=             # server-side uniquement
 NEXT_PUBLIC_BASE_URL=
 ```
 
-**`NEXT_PUBLIC_BASE_URL`** : URL publique HTTPS de l’app (ex. `https://app.votredomaine.com`). Elle est utilisée en priorité pour construire le lien de confirmation d’inscription (`emailRedirectTo` vers `/api/auth/callback?next=…`). Sans elle, l’URL est dérivée de la requête vers `/api/auth/register` (correct si les utilisateurs ouvrent toujours le site sur ce domaine ; indispensable si l’API est appelée derrière une origine interne ou pour forcer un domaine canonique).
+**`NEXT_PUBLIC_BASE_URL`** : URL publique HTTPS canonique de l’app (ex. `https://app.votredomaine.com`). Sert aussi aux liens absolus côté client (vitrines, QR codes, `metadataBase`, sitemap, admin) via `src/lib/publicAppUrl.ts`. Pour l’auth, elle construit en priorité le lien de confirmation d’inscription (`emailRedirectTo` vers `/api/auth/callback?next=…`). Sans elle, l’URL d’email est dérivée de la requête vers `/api/auth/register` (voir `resolvePublicAppOrigin` dans `src/lib/merchant-bootstrap.ts`). **Ne plus utiliser `NEXT_PUBLIC_APP_URL`** (remplacé par cette variable unique).
 
 Vérifier que `.env.local` est bien dans `.gitignore` avant tout commit.
 

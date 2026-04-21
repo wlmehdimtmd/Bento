@@ -1,3 +1,4 @@
+import { publicAppUrl } from "@/lib/publicAppUrl";
 import { assertAdminOrRedirect } from "@/lib/admin/requireAdmin";
 import { normalizeShopOwner } from "@/lib/admin/normalizeShopUser";
 import { AdminLogoutButton } from "./AdminLogoutButton";
@@ -47,7 +48,7 @@ export default async function AdminPage() {
 
   const reviewMap = Object.fromEntries((reviewRows ?? []).map((r) => [r.shop_id, r]));
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const appUrl = publicAppUrl;
 
   const adminRows: AdminShopMobileRow[] = shopRows.map((shop) => {
     const owner = normalizeShopOwner(shop.users);

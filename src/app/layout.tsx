@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { RecoveryHashHandler } from "@/components/auth/RecoveryHashHandler";
 import { LocaleClientProvider } from "@/components/i18n/LocaleClientProvider";
 import { resolveLocale, LOCALE_COOKIE_NAME } from "@/lib/i18n";
+import { publicAppUrl } from "@/lib/publicAppUrl";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,8 +20,6 @@ const onest = Onest({
   subsets: ["latin"],
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://bentorest.app";
-
 export const metadata: Metadata = {
   title: {
     default: "Bento Resto",
@@ -28,7 +27,7 @@ export const metadata: Metadata = {
   },
   description:
     "Digital ordering platform for independent restaurants and merchants.",
-  metadataBase: new URL(APP_URL),
+  metadataBase: new URL(publicAppUrl),
   openGraph: {
     siteName: "Bento Resto",
     locale: "en_US",
