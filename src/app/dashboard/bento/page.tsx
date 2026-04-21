@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { redirectLegacyDashboardToShopPath } from "@/lib/dashboard/redirectLegacyDashboardToShopPath";
 
-export default function LegacyBentoRedirect() {
-  redirect("/dashboard/vitrine/mise-en-page");
+export default async function LegacyBentoRedirect() {
+  await redirectLegacyDashboardToShopPath("vitrine/mise-en-page");
 }

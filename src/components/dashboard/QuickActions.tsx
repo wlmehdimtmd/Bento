@@ -26,22 +26,24 @@ export function QuickActions({ shopSlug, shopId }: QuickActionsProps) {
   const { locale } = useLocale();
   const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
 
+  const catalogBase = shopId ? `/dashboard/shops/${shopId}` : "/dashboard";
+
   const actions = [
     {
       key: "category" as const,
-      href: shopId ? `/dashboard/shops/${shopId}/categories` : "/dashboard/categories",
+      href: `${catalogBase}/categories`,
       label: tr("+ Catégorie", "+ Category"),
       icon: FolderPlus,
     },
     {
       key: "product" as const,
-      href: shopId ? `/dashboard/shops/${shopId}/products` : "/dashboard/products",
+      href: `${catalogBase}/products`,
       label: tr("+ Produit", "+ Product"),
       icon: PackagePlus,
     },
     {
       key: "bundle" as const,
-      href: shopId ? `/dashboard/shops/${shopId}/bundles` : "/dashboard/bundles",
+      href: `${catalogBase}/bundles`,
       label: tr("+ Formule", "+ Bundle"),
       icon: Gift,
     },

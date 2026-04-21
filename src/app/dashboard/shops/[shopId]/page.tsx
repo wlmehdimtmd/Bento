@@ -127,7 +127,10 @@ export default async function ShopDashboardPage({ params }: { params: Params }) 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{tr("Dernières commandes", "Latest orders")}</h2>
-          <Link href="/dashboard/orders" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+          <Link
+            href={`/dashboard/shops/${shopId}/orders`}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
             {tr("Voir tout", "View all")}
           </Link>
         </div>

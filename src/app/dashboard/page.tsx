@@ -152,7 +152,11 @@ export default async function DashboardPage() {
             {tr("Dernières commandes", "Latest orders")}
           </h2>
           <Link
-            href="/dashboard/orders"
+            href={
+              primaryShop?.id
+                ? `/dashboard/shops/${primaryShop.id}/orders`
+                : "/dashboard"
+            }
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             {tr("Voir tout", "View all")}

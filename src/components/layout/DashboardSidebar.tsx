@@ -57,33 +57,18 @@ function SidebarColumn({
   const firstShopId = shops[0]?.id ?? null;
   const effectiveShopId = routeShopId ?? firstShopId;
 
-  const categoriesHref = routeShopId
-    ? `/dashboard/shops/${routeShopId}/categories`
-    : "/dashboard/categories";
+  const shopBase = effectiveShopId ? `/dashboard/shops/${effectiveShopId}` : null;
 
-  const productsHref = routeShopId
-    ? `/dashboard/shops/${routeShopId}/products`
-    : "/dashboard/products";
+  const categoriesHref = shopBase ? `${shopBase}/categories` : "/dashboard";
+  const productsHref = shopBase ? `${shopBase}/products` : "/dashboard";
+  const bundlesHref = shopBase ? `${shopBase}/bundles` : "/dashboard";
+  const labelsHref = shopBase ? `${shopBase}/labels` : "/dashboard";
 
-  const bundlesHref = routeShopId
-    ? `/dashboard/shops/${routeShopId}/bundles`
-    : "/dashboard/bundles";
+  const vitrineConfigHref = shopBase ? `${shopBase}/settings` : "/dashboard";
 
-  const labelsHref = routeShopId
-    ? `/dashboard/shops/${routeShopId}/labels`
-    : "/dashboard/labels";
+  const vitrineLayoutHref = shopBase ? `${shopBase}/vitrine/mise-en-page` : "/dashboard";
 
-  const vitrineConfigHref = effectiveShopId
-    ? `/dashboard/shops/${effectiveShopId}/settings`
-    : "/dashboard";
-
-  const vitrineLayoutHref = effectiveShopId
-    ? `/dashboard/shops/${effectiveShopId}/vitrine/mise-en-page`
-    : "/dashboard/vitrine/mise-en-page";
-
-  const ordersHref = effectiveShopId
-    ? `/dashboard/shops/${effectiveShopId}/orders`
-    : "/dashboard/orders";
+  const ordersHref = shopBase ? `${shopBase}/orders` : "/dashboard";
 
   const settingsHref = "/dashboard/settings";
 
