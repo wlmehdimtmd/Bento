@@ -5,7 +5,8 @@ import { StoreView } from "@/components/bento/StoreView";
 import { fetchPublicShopPagePayload } from "@/lib/fetchPublicShopPagePayload";
 import { OrderConfirmation } from "@/components/checkout/OrderConfirmation";
 import { InactivePublicStorefront } from "@/components/storefront/InactivePublicStorefront";
-import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
+import { LOCALE_COOKIE_NAME, resolveLocale, type AppLocale } from "@/lib/i18n";
+import { MESSAGES } from "@/lib/i18nMessages";
 import { resolvePublicShopSlug } from "@/lib/resolvePublicShopSlug";
 
 type Params = Promise<{ slug: string }>;
@@ -82,7 +83,7 @@ export default async function ShopPage({
   params: Params;
   searchParams: SearchParams;
 }) {
-  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
+  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value) as AppLocale;
   const { slug } = await params;
   const { order: orderStatus, id: orderId } = await searchParams;
   const supabase = await createClient();
@@ -127,6 +128,8 @@ export default async function ShopPage({
     shopLabels,
   } = payload;
 
+  const sf = MESSAGES[locale];
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <StoreView
@@ -143,12 +146,8 @@ export default async function ShopPage({
 
       {categories.length === 0 && bundles.length === 0 && (
         <div className="mt-16 text-center text-muted-foreground">
-          <p className="text-lg">
-            {locale === "en"
-              ? "This shop does not have a menu yet."
-              : "Ce restaurant n'a pas encore de carte."}
-          </p>
-          <p className="text-sm mt-1">{locale === "en" ? "Please check back soon!" : "Revenez bientôt !"}</p>
+          <p className="text-lg">{sf["storefront.empty.menuTitle"]}</p>
+          <p className="text-sm mt-1">{sf["storefront.empty.menuSubtitle"]}</p>
         </div>
       )}
     </div>
