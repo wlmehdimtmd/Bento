@@ -214,6 +214,52 @@
     animation-direction: reverse;
   }
 
+  /* Dashboard vitrine : placeholder resize + déplacements plus fluides */
+  .storefront-bento-editor-grid .react-grid-item {
+    transition-property: transform, width, height;
+    transition-duration: 220ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, width, height;
+    overflow: hidden;
+  }
+
+  .storefront-bento-editor-grid .react-grid-placeholder {
+    border-radius: var(--bento-outer-r);
+    background: color-mix(in oklab, var(--color-bento-accent) 22%, transparent);
+    opacity: 0.9;
+    transition: all 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .storefront-bento-editor-grid .react-resizable-handle {
+    width: 28px;
+    height: 28px;
+    right: 8px;
+    bottom: 8px;
+    border-radius: 9999px;
+    background-image: none;
+    background-color: color-mix(in oklab, var(--card) 62%, var(--color-bento-accent) 38%);
+    border: 1px solid color-mix(in oklab, var(--foreground) 22%, transparent);
+    box-shadow: 0 6px 18px -6px rgb(0 0 0 / 0.35);
+    opacity: 1;
+  }
+
+  .storefront-bento-editor-grid .react-resizable-handle::before {
+    content: "";
+    position: absolute;
+    inset: 7px;
+    border-right: 2px solid color-mix(in oklab, var(--foreground) 76%, transparent);
+    border-bottom: 2px solid color-mix(in oklab, var(--foreground) 76%, transparent);
+    border-radius: 0 0 4px 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .storefront-bento-editor-grid .react-grid-item,
+    .storefront-bento-editor-grid .react-grid-placeholder {
+      transition: none;
+      will-change: auto;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .landing-marquee-track {
       animation: none;

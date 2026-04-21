@@ -65,6 +65,7 @@ export function BentoCardInfo({
   openingTimezone = "Europe/Paris",
   openOnPublicHolidays = false,
 }: BentoCardInfoProps) {
+  const hasSingleRowHeight = cardSize === "1x1" || cardSize === "2x1";
   const contactOnStorefront = _socialLinks.show_contact_on_storefront !== false;
   const hasActions =
     contactOnStorefront && Boolean(emailContact || phone || address);
@@ -84,30 +85,32 @@ export function BentoCardInfo({
       disableHover
       className={cn("flex flex-col", omitSizeClasses && "h-full min-h-0", cardClassName)}
     >
-      <div className="relative h-52 w-full shrink-0 bg-muted">
-        {coverUrl ? (
-          <Image
-            src={coverUrl}
-            alt={shopName}
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover"
-          />
-        ) : (
-          <div
-            className="h-full w-full"
-            style={{ backgroundColor: "var(--primary)" }}
-          />
-        )}
-        <div className="pointer-events-auto absolute right-2 bottom-2 z-10 max-w-[min(100%-0.75rem,16rem)]">
-          <ReviewsDisplay
-            reviews={reviews ?? null}
-            compact
-            className="justify-end drop-shadow-md"
-          />
+      {!hasSingleRowHeight && (
+        <div className="relative h-52 w-full shrink-0 bg-muted">
+          {coverUrl ? (
+            <Image
+              src={coverUrl}
+              alt={shopName}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
+          ) : (
+            <div
+              className="h-full w-full"
+              style={{ backgroundColor: "var(--primary)" }}
+            />
+          )}
+          <div className="pointer-events-auto absolute right-2 bottom-2 z-10 max-w-[min(100%-0.75rem,16rem)]">
+            <ReviewsDisplay
+              reviews={reviews ?? null}
+              compact
+              className="justify-end drop-shadow-md"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 bg-[var(--color-bento-card-bg,var(--card))] p-4 [--p:1rem] [--inner-r:max(0px,calc(var(--outer-r)-var(--p)))]">
         <ShopOpenStatus

@@ -38,29 +38,43 @@ export function BentoCardBundle({
   className,
   onClick,
 }: BentoCardBundleProps) {
+  const hasSingleRowHeight = size === "1x1" || size === "2x1";
+  const showBundleImage = Boolean(imageUrl) && !hasSingleRowHeight;
+
   return (
     <BentoCard
       size={size}
       omitSizeClasses={omitSizeClasses}
       onClick={onClick}
-      className={cn("flex flex-row", omitSizeClasses && "h-full min-h-0", className)}
+      className={cn(
+        "flex flex-row overflow-hidden",
+        omitSizeClasses && "h-full min-h-0",
+        className
+      )}
     >
-      {/* Left: image or icon */}
-      <div className="relative w-1/3 shrink-0 overflow-hidden rounded-l-[var(--outer-r)] bg-muted">
-        {imageUrl ? (
-          <Image src={imageUrl} alt={name} fill className="object-cover" />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center bg-muted">
-            <Gift
-              className="h-10 w-10"
-              style={{ color: "var(--primary)" }}
-            />
-          </div>
-        )}
-      </div>
+      {/* Left: image or icon (hidden on 1-row tiles) */}
+      {!hasSingleRowHeight && (
+        <div className="relative w-1/3 shrink-0 overflow-hidden rounded-l-[var(--outer-r)] bg-muted">
+          {showBundleImage ? (
+            <Image src={imageUrl!} alt={name} fill className="object-cover" />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center bg-muted">
+              <Gift
+                className="h-10 w-10"
+                style={{ color: "var(--primary)" }}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Right: content */}
-      <div className="flex flex-col gap-2 p-4 flex-1 min-w-0">
+      <div
+        className={cn(
+          "flex min-w-0 flex-1 flex-col",
+          hasSingleRowHeight ? "justify-center gap-1 p-3" : "gap-2 p-4"
+        )}
+      >
         {/* Badge + price */}
         <div className="flex items-center justify-between gap-2">
           <Badge
@@ -73,7 +87,12 @@ export function BentoCardBundle({
           >
             Formule
           </Badge>
-          <p className="text-lg font-bold tabular-nums shrink-0 text-foreground">
+          <p
+            className={cn(
+              "tabular-nums shrink-0 text-foreground font-bold",
+              hasSingleRowHeight ? "text-base" : "text-lg"
+            )}
+          >
             {formatPrice(price)}
           </p>
         </div>
@@ -88,11 +107,11 @@ export function BentoCardBundle({
 
         {/* Description or slots */}
         {description ? (
-          <p className="text-xs text-muted-foreground line-clamp-2">
+          <p className={cn("text-xs text-muted-foreground", hasSingleRowHeight ? "line-clamp-1" : "line-clamp-2")}>
             {description}
           </p>
         ) : (
-          <div className="flex flex-wrap gap-1">
+          <div className={cn("flex flex-wrap gap-1", hasSingleRowHeight && "overflow-hidden")}>
             {slots.slice(0, 3).map((slot, i) => (
               <span
                 key={i}

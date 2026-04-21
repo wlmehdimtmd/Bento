@@ -466,7 +466,7 @@ export function StorefrontBentoEditor({
 
           <div className="rounded-xl border border-border bg-background p-3 sm:p-4" style={storefrontThemeStyle}>
             <GridLayoutWithWidth
-              className="layout"
+              className="layout storefront-bento-editor-grid"
               cols={4}
               rowHeight={ROW_HEIGHT_PX}
               margin={[16, 16]}

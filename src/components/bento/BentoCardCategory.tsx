@@ -26,6 +26,9 @@ export function BentoCardCategory({
   className,
   onClick,
 }: BentoCardCategoryProps) {
+  const hasSingleRowHeight = size === "1x1" || size === "2x1";
+  const showCoverImage = Boolean(coverImageUrl) && !hasSingleRowHeight;
+
   return (
     <BentoCard
       size={size}
@@ -34,7 +37,7 @@ export function BentoCardCategory({
       className={cn(omitSizeClasses && "h-full min-h-0", className)}
     >
       {/* Background image ou fond carte */}
-      {coverImageUrl ? (
+      {showCoverImage ? (
         <Image
           src={coverImageUrl}
           alt={name}
@@ -49,7 +52,7 @@ export function BentoCardCategory({
         />
       )}
 
-      {coverImageUrl ? (
+      {showCoverImage ? (
         <div className="absolute bottom-2 left-1/2 z-10 flex w-fit max-w-[calc(100%-1rem)] -translate-x-1/2 flex-col items-center gap-1 rounded-lg bg-white/85 px-3 py-2 text-center shadow-sm dark:bg-black/65 dark:shadow-none">
           <span className="text-3xl leading-none" aria-hidden>
             {iconEmoji}
