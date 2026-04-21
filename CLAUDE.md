@@ -59,12 +59,13 @@ src/
 │   │       ├── page.tsx         # Vitrine Bento publique d'une boutique
 │   │       └── layout.tsx
 │   ├── dashboard/
-│   │   ├── layout.tsx           # Layout dashboard (sidebar + auth guard)
+│   │   ├── layout.tsx           # Layout dashboard (sidebar + session)
 │   │   ├── page.tsx             # Tableau de bord
-│   │   ├── categories/page.tsx
-│   │   ├── products/page.tsx
-│   │   ├── bundles/page.tsx
-│   │   ├── orders/page.tsx
+│   │   ├── shops/[shopId]/     # CRUD catalogue & vitrine (routes canoniques)
+│   │   ├── categories/page.tsx  # → redirect /dashboard/shops/[id]/categories
+│   │   ├── products/page.tsx    # idem …/products
+│   │   ├── bundles/page.tsx     # idem …/bundles
+│   │   ├── orders/page.tsx      # idem …/orders
 │   │   └── settings/page.tsx
 │   └── api/
 │       ├── stripe/
@@ -164,11 +165,12 @@ users
 | `/login` | Connexion |
 | `/register` | Inscription |
 | `/dashboard` | Tableau de bord boutique unique du user |
-| `/dashboard/categories` | CRUD catégories |
-| `/dashboard/products` | CRUD produits |
-| `/dashboard/bundles` | CRUD formules |
-| `/dashboard/orders` | Liste et gestion des commandes |
-| `/dashboard/settings` | Paramètres boutique |
+| `/dashboard/shops/[shopId]/categories` | CRUD catégories (les URL `/dashboard/categories` etc. redirigent ici) |
+| `/dashboard/shops/[shopId]/products` | CRUD produits |
+| `/dashboard/shops/[shopId]/bundles` | CRUD formules |
+| `/dashboard/shops/[shopId]/orders` | Liste et gestion des commandes |
+| `/dashboard/settings` | Paramètres compte / interface marchand |
+| `/dashboard/shops/[shopId]/settings` | Configuration vitrine (QR, infos, etc.) |
 | `/[slug]` | Vitrine publique Bento |
 
 ---

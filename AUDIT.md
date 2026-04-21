@@ -28,7 +28,7 @@ Ce fichier trace les **décisions structurantes** et l’avancement de l’audit
 | 2026-04-21 | Landing | Copy **mono-boutique** pour `landing.features.multishop.*` ; `landing.footer.rights` affiché dans le footer. | Fait |
 | 2026-04-21 | Repo   | Journal `AUDIT.md` initial commité (`docs: ajout du journal d'audit`). | Fait |
 | 2026-04-21 | Dashboard | CA dashboard : somme sur toutes les commandes non annulées (requête dédiée). | Fait |
-| 2026-04-21 | Dashboard | Double familles d’URLs catalogue : `/dashboard/categories` (shop implicite) vs `/dashboard/shops/[shopId]/categories` — même contenu, navigation selon contexte. | Dette / complexité acceptable si voulu ; sinon simplifier |
+| 2026-04-21 | Dashboard | Routes catalogue canoniques : `/dashboard/shops/[shopId]/…` ; anciennes URL `/dashboard/categories` etc. redirigent. | Fait |
 | 2026-04-21 | Dashboard | i18n : nombreuses chaînes via `tr(fr, en)` (cookies + `LocaleProvider`) en parallèle de `i18nMessages` / `getDashboardCatalogCopy`. | Refactor progressif possible |
 | 2026-04-21 | Dashboard | Props `user` inutilisées retirées (sidebar + layout) ; requête `users.full_name` supprimée du layout. | Fait |
 | 2026-04-21 | Dashboard | `StatsCard` / `RecentOrders` / `error.tsx` : format nombre et libellés selon locale. | Fait |
@@ -37,8 +37,9 @@ Ce fichier trace les **décisions structurantes** et l’avancement de l’audit
 | 2026-04-21 | Vitrine | Checkout : libellés modes depuis `FULFILLMENT_MODES` + `labelEn`. | Fait |
 | 2026-04-21 | Auth/API | Validation Zod register, schéma MDP partagé, `getAuthRequestMeta` (login, register, logout, callback). | Fait |
 | 2026-04-21 | Cart | Bloc no-op retiré dans `cartStore.addItem`. | Fait |
-| 2026-04-21 | Vitrine | Métadonnées `alternates.canonical` utilisent le `slug` d’URL, pas forcément le slug canonique boutique si jamais redirection slug. | À surveiller |
+| 2026-04-21 | Vitrine | `alternates.canonical` sur `/{slug}` : pas de changement code ; **surveillance** recommandée dans **Google Search Console** (couverture, canonicals, slug canonique vs URL saisie). | Surveillance GSC |
+| 2026-04-21 | Landing | `formatPrice` unifié (`utils`) + options décimales pour le hero démo (`fetchLandingDemoHero`). | Fait |
 
 ---
 
-*Dernière mise à jour : 2026-04-21 — vague de correctifs post-audit (commits atomiques).*
+*Dernière mise à jour : 2026-04-21*
