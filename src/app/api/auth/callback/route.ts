@@ -5,15 +5,13 @@ import {
   ensureDefaultShopForOwner,
   sanitizeAuthNextPath,
 } from "@/lib/merchant-bootstrap";
+import { getAuthRequestMeta } from "@/lib/auth/requestMeta";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const safeNext = sanitizeAuthNextPath(searchParams.get("next"));
-  const meta = {
-    ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? undefined,
-    userAgent: request.headers.get("user-agent") ?? undefined,
-  };
+  const meta = getAuthRequestMeta(request);
 
   if (code) {
     const supabase = await createClient();
