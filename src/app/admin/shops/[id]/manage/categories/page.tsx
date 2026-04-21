@@ -42,7 +42,6 @@ export default async function AdminManageCategoriesPage({ params }: { params: Pa
     name: c.name,
     description: c.description,
     icon_emoji: c.icon_emoji,
-    cover_image_url: c.cover_image_url,
     is_active: c.is_active,
     display_order: c.display_order,
     created_at: c.created_at,

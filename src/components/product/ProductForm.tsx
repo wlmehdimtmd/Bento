@@ -26,6 +26,7 @@ import { ImageUploader } from "@/components/product/ImageUploader";
 import { TagSelector } from "@/components/product/TagSelector";
 import { createClient } from "@/lib/supabase/client";
 import type { ProductLabelOption } from "@/lib/shop-labels";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 // ─── Types ────────────────────────────────────────────────────
 export interface ProductRow {
@@ -103,6 +104,8 @@ export function ProductForm({
   onSubViewChange,
   labels,
 }: ProductFormProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const isEdit = !!initialData;
 
   const [imageUrl, setImageUrl] = useState<string | null>(
@@ -170,10 +173,10 @@ export function ProductForm({
     if (onSave) {
       try {
         const result = await onSave(payload, isEdit, initialData?.id);
-        toast.success(isEdit ? "Produit mis à jour !" : "Produit créé !");
+        toast.success(isEdit ? tr("Produit mis à jour !", "Product updated!") : tr("Produit créé !", "Product created!"));
         onSuccess(result);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Erreur");
+        toast.error(e instanceof Error ? e.message : tr("Erreur", "Error"));
       }
       return;
     }
@@ -188,7 +191,7 @@ export function ProductForm({
         .select()
         .single();
       if (error) { toast.error(error.message); return; }
-      toast.success("Produit mis à jour !");
+      toast.success(tr("Produit mis à jour !", "Product updated!"));
       onSuccess({ ...data, tags: Array.isArray(data.tags) ? (data.tags as string[]) : [] } as ProductRow);
     } else {
       const { data, error } = await supabase
@@ -197,7 +200,7 @@ export function ProductForm({
         .select()
         .single();
       if (error) { toast.error(error.message); return; }
-      toast.success("Produit créé !");
+      toast.success(tr("Produit créé !", "Product created!"));
       onSuccess({ ...data, tags: Array.isArray(data.tags) ? (data.tags as string[]) : [] } as ProductRow);
     }
   }
@@ -208,12 +211,12 @@ export function ProductForm({
         <div className="flex-1 pb-4">
           {productName ? (
             <p className="mb-3 text-sm text-muted-foreground">
-              Produit : <span className="font-medium text-foreground">{productName}</span>
+              {tr("Produit", "Product")} : <span className="font-medium text-foreground">{productName}</span>
             </p>
           ) : null}
           <ImageUploader
             bucket="product-images"
-            label="Photo du produit"
+            label={tr("Photo du produit", "Product photo")}
             currentUrl={imageUrl}
             onUpload={setImageUrl}
             onRemove={() => setImageUrl(null)}
@@ -227,7 +230,7 @@ export function ProductForm({
             style={{ backgroundColor: "var(--primary)" }}
             className="w-full text-primary-foreground hover:opacity-90"
           >
-            Valider
+            {tr("Valider", "Confirm")}
           </Button>
         </div>
       </div>
@@ -252,7 +255,7 @@ export function ProductForm({
             style={{ backgroundColor: "var(--primary)" }}
             className="w-full text-primary-foreground hover:opacity-90"
           >
-            Valider
+            {tr("Valider", "Confirm")}
           </Button>
         </div>
       </div>
@@ -264,7 +267,7 @@ export function ProductForm({
       <div className="flex-1 space-y-5 pb-4">
       {/* Category */}
       <div className="space-y-1.5">
-        <Label>Catégorie *</Label>
+        <Label>{tr("Catégorie", "Category")} *</Label>
         <Select
           value={categoryId}
           items={categorySelectItems}
@@ -274,7 +277,7 @@ export function ProductForm({
           disabled={isSubmitting}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Choisir une catégorie…" />
+            <SelectValue placeholder={tr("Choisir une catégorie…", "Choose a category...")} />
           </SelectTrigger>
           <SelectContent>
             {categories.map((c) => (
@@ -291,7 +294,7 @@ export function ProductForm({
 
       {/* Name */}
       <div className="space-y-1.5">
-        <Label htmlFor="name">Nom *</Label>
+        <Label htmlFor="name">{tr("Nom", "Name")} *</Label>
         <Input
           id="name"
           {...register("name")}
@@ -306,11 +309,11 @@ export function ProductForm({
 
       {/* Description */}
       <div className="space-y-1.5">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">{tr("Description", "Description")}</Label>
         <Textarea
           id="description"
           {...register("description")}
-          placeholder="Décrivez brièvement votre produit"
+          placeholder={tr("Décrivez brièvement votre produit", "Briefly describe your product")}
           rows={2}
           disabled={isSubmitting}
         />
@@ -318,7 +321,7 @@ export function ProductForm({
 
       {/* Price */}
       <div className="space-y-1.5">
-        <Label htmlFor="price">Prix (€) *</Label>
+        <Label htmlFor="price">{tr("Prix (€)", "Price (€)")} *</Label>
         <Input
           id="price"
           type="number"
@@ -334,7 +337,7 @@ export function ProductForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label>Photo du produit</Label>
+        <Label>{tr("Photo du produit", "Product photo")}</Label>
         <Button
           type="button"
           variant="outline"
@@ -346,7 +349,7 @@ export function ProductForm({
               {imageUrl ? (
                 <Image
                   src={imageUrl}
-                  alt={productName || "Aperçu photo produit"}
+                  alt={productName || tr("Aperçu photo produit", "Product photo preview")}
                   fill
                   className="object-cover"
                   sizes="40px"
@@ -357,31 +360,31 @@ export function ProductForm({
                 </span>
               )}
             </span>
-            {imageUrl ? "Modifier la photo" : "Ajouter une photo"}
+            {imageUrl ? tr("Modifier la photo", "Edit photo") : tr("Ajouter une photo", "Add photo")}
           </span>
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
       <div className="space-y-1.5">
-        <Label>Allergènes et labels</Label>
+        <Label>{tr("Allergènes et labels", "Allergens and labels")}</Label>
         <Button type="button" variant="outline" className="w-full justify-between" onClick={() => changeSubView("tags")}>
-          <span>Sélectionner</span>
+          <span>{tr("Sélectionner", "Select")}</span>
           <Badge variant="secondary">{tags.length}</Badge>
         </Button>
       </div>
 
       {/* Option label */}
       <div className="space-y-1.5">
-        <Label htmlFor="option_label">Option / Variante</Label>
+        <Label htmlFor="option_label">{tr("Option / Variante", "Option / Variant")}</Label>
         <Input
           id="option_label"
           {...register("option_label")}
-          placeholder="Ex : Cuisson ? Taille ? (vide = pas d'option)"
+          placeholder={tr("Ex : Cuisson ? Taille ? (vide = pas d'option)", "Ex: Doneness? Size? (leave empty if none)")}
           disabled={isSubmitting}
         />
         <p className="text-xs text-muted-foreground">
-          Laissez vide si le produit n&apos;a pas d&apos;option. Cette question sera posée au client au moment de la commande.
+          {tr("Laissez vide si le produit n'a pas d'option. Cette question sera posée au client au moment de la commande.", "Leave empty if the product has no option. This question will be asked at checkout.")}
         </p>
       </div>
 
@@ -390,7 +393,7 @@ export function ProductForm({
       {/* Display order + available */}
       <div className="flex items-center gap-4 flex-wrap">
         <div className="space-y-1.5 w-28">
-          <Label htmlFor="display_order">Ordre</Label>
+          <Label htmlFor="display_order">{tr("Ordre", "Order")}</Label>
           <Input
             id="display_order"
             type="number"
@@ -410,9 +413,9 @@ export function ProductForm({
             disabled={isSubmitting}
           />
           <div>
-            <p className="text-sm font-medium">Disponible</p>
+            <p className="text-sm font-medium">{tr("Disponible", "Available")}</p>
             <p className="text-xs text-muted-foreground">
-              Visible et commandable sur la vitrine
+              {tr("Visible et commandable sur la vitrine", "Visible and orderable on storefront")}
             </p>
           </div>
         </div>
@@ -432,7 +435,7 @@ export function ProductForm({
           disabled={isSubmitting}
           className={sheetCtasFullWidth ? "flex-1" : "flex-1 md:flex-none"}
         >
-          Annuler
+          {tr("Annuler", "Cancel")}
         </Button>
         <Button
           type="submit"
@@ -443,12 +446,12 @@ export function ProductForm({
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Enregistrement…
+              {tr("Enregistrement…", "Saving...")}
             </>
           ) : isEdit ? (
-            "Mettre à jour"
+            tr("Mettre à jour", "Update")
           ) : (
-            "Créer le produit"
+            tr("Créer le produit", "Create product")
           )}
         </Button>
       </div>

@@ -1,14 +1,19 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { BUNDLE_PAGE_DESCRIPTION } from "@/lib/dashboard-catalog-copy";
+import { getDashboardCatalogCopy } from "@/lib/dashboard-catalog-copy";
 import { buttonVariants } from "@/components/ui/button";
 import { BundlesClient } from "@/components/product/BundlesClient";
 import type { BundleRow, BundleSlotData } from "@/components/product/BundleForm";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 
 export const metadata = { title: "Formules" };
 
 export default async function BundlesPage() {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const supabase = await createClient();
 
   const {
@@ -94,24 +99,24 @@ export default async function BundlesPage() {
           className="text-3xl font-bold"
           style={{ fontFamily: "var(--font-onest)" }}
         >
-          Formules
+          {tr("Formules", "Bundles")}
         </h1>
         <p className="text-sm text-muted-foreground">{shop.name}</p>
         <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
-          {BUNDLE_PAGE_DESCRIPTION}
+          {getDashboardCatalogCopy(locale, "bundle")}
         </p>
       </div>
 
       {(categories ?? []).length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
           <p className="text-muted-foreground">
-            Créez d&apos;abord des catégories avant de composer des formules.
+            {tr("Créez d'abord des catégories avant de composer des formules.", "Create categories first before composing bundles.")}
           </p>
           <Link
             href="/dashboard/categories"
             className={buttonVariants({ variant: "outline" })}
           >
-            Gérer les catégories
+            {tr("Gérer les catégories", "Manage categories")}
           </Link>
         </div>
       ) : (

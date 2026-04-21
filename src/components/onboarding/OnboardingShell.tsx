@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { ONBOARDING_MAIN_STEP_COUNT } from "@/lib/onboarding-flow";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { ChevronLeft } from "lucide-react";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface OnboardingShellProps {
   currentStep: number;
@@ -29,6 +30,8 @@ export function OnboardingShell({
   footerContentVariant,
   contentInnerClassName,
 }: OnboardingShellProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const resolvedFooterVariant = footerContentVariant ?? contentVariant;
 
   return (
@@ -40,7 +43,7 @@ export function OnboardingShell({
             <button
               onClick={backAction}
               className="flex items-center justify-center h-8 w-8 rounded-full hover:bg-muted transition-colors"
-              aria-label="Retour"
+              aria-label={tr("Retour", "Back")}
             >
               <ChevronLeft className="h-5 w-5" />
             </button>

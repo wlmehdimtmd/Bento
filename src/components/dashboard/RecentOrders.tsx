@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -9,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { formatPrice } from "@/lib/utils";
 import { ORDER_STATUSES } from "@/lib/constants";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface OrderRow {
   id: string;
@@ -35,21 +38,24 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function relativeTime(iso: string) {
+function relativeTime(iso: string, locale: "fr" | "en") {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return "à l'instant";
-  if (mins < 60) return `il y a ${mins} min`;
+  if (mins < 1) return locale === "en" ? "just now" : "à l'instant";
+  if (mins < 60) return locale === "en" ? `${mins} min ago` : `il y a ${mins} min`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `il y a ${hours} h`;
-  return new Date(iso).toLocaleDateString("fr-FR");
+  if (hours < 24) return locale === "en" ? `${hours} h ago` : `il y a ${hours} h`;
+  return new Date(iso).toLocaleDateString(locale === "en" ? "en-US" : "fr-FR");
 }
 
 export function RecentOrders({ orders }: RecentOrdersProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
+
   if (orders.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-        Aucune commande pour l&apos;instant.
+        {tr("Aucune commande pour l'instant.", "No orders yet.")}
       </div>
     );
   }
@@ -59,11 +65,11 @@ export function RecentOrders({ orders }: RecentOrdersProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-16">N°</TableHead>
-            <TableHead>Client</TableHead>
-            <TableHead className="text-right">Montant</TableHead>
-            <TableHead>Statut</TableHead>
-            <TableHead className="text-right">Heure</TableHead>
+            <TableHead className="w-16">{tr("N°", "No.")}</TableHead>
+            <TableHead>{tr("Client", "Customer")}</TableHead>
+            <TableHead className="text-right">{tr("Montant", "Amount")}</TableHead>
+            <TableHead>{tr("Statut", "Status")}</TableHead>
+            <TableHead className="text-right">{tr("Heure", "Time")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -80,7 +86,7 @@ export function RecentOrders({ orders }: RecentOrdersProps) {
                 <StatusBadge status={order.status} />
               </TableCell>
               <TableCell className="text-right text-xs text-muted-foreground">
-                {relativeTime(order.created_at)}
+                {relativeTime(order.created_at, locale)}
               </TableCell>
             </TableRow>
           ))}

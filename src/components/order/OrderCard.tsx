@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -76,6 +77,8 @@ export function OrderCard({
   onStatusChange,
   onOpenDetail,
 }: OrderCardProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const [isUpdating, setIsUpdating] = useState(false);
   const nextStatus = NEXT_STATUS[order.status];
 
@@ -92,7 +95,7 @@ export function OrderCard({
 
     setIsUpdating(false);
     if (error) {
-      toast.error("Erreur lors de la mise à jour.");
+      toast.error(tr("Erreur lors de la mise à jour.", "Error while updating."));
       onStatusChange(order.id, order.status); // rollback
     }
   }
@@ -110,7 +113,7 @@ export function OrderCard({
 
     setIsUpdating(false);
     if (error) {
-      toast.error("Erreur lors de l'annulation.");
+      toast.error(tr("Erreur lors de l'annulation.", "Error while cancelling."));
       onStatusChange(order.id, order.status); // rollback
     }
   }
@@ -135,9 +138,7 @@ export function OrderCard({
           </div>
           <p className="text-sm text-muted-foreground truncate mt-0.5">
             {order.customer_name}
-            {order.table_number && (
-              <span className="text-xs"> · Table {order.table_number}</span>
-            )}
+              {order.table_number && <span className="text-xs"> · {tr("Table", "Table")} {order.table_number}</span>}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -159,7 +160,7 @@ export function OrderCard({
         </Badge>
         {order.stripe_payment_status === "paid" && (
           <Badge variant="secondary" className="text-xs text-green-600">
-            💳 Payé
+            💳 {tr("Payé", "Paid")}
           </Badge>
         )}
       </div>
@@ -187,7 +188,7 @@ export function OrderCard({
             disabled={isUpdating}
             onClick={cancelOrder}
             className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
-            aria-label="Annuler"
+            aria-label={tr("Annuler", "Cancel")}
           >
             <X className="h-3.5 w-3.5" />
           </Button>

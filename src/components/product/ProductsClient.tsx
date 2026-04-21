@@ -60,6 +60,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
 import type { ProductLabelOption } from "@/lib/shop-labels";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface CategoryOption {
   id: string;
@@ -89,6 +90,8 @@ export function ProductsClient({
   shopLabels,
   adminActions,
 }: ProductsClientProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const router = useRouter();
   const [products, setProducts] =
     useState<ProductWithCategory[]>(initialProducts);
@@ -118,7 +121,11 @@ export function ProductsClient({
     const supabase = createClient();
     const existing = categories.map((c) => ({ id: c.id, name: c.name }));
     const { productCount } = await importTemplatesIntoShop(supabase, shopId, data, existing);
-    toast.success(`${productCount} produit${productCount !== 1 ? "s" : ""} importé${productCount !== 1 ? "s" : ""} !`);
+    toast.success(
+      locale === "en"
+        ? `${productCount} product${productCount !== 1 ? "s" : ""} imported!`
+        : `${productCount} produit${productCount !== 1 ? "s" : ""} importé${productCount !== 1 ? "s" : ""} !`
+    );
     router.refresh();
   }
 
@@ -132,12 +139,12 @@ export function ProductsClient({
 
   // ── Filtered list ────────────────────────────────────────────
   const categoryFilterItems = useMemo(() => {
-    const items: Record<string, string> = { all: "Toutes les catégories" };
+    const items: Record<string, string> = { all: tr("Toutes les catégories", "All categories") };
     for (const c of categories) {
       items[c.id] = `${c.icon_emoji} ${c.name}`;
     }
     return items;
-  }, [categories]);
+  }, [categories, tr]);
 
   const filtered = useMemo(() => {
     return products
@@ -163,30 +170,30 @@ export function ProductsClient({
     if (q) {
       return (
         <>
-          {n} produit{n !== 1 ? "s" : ""}
+          {n} {tr(`produit${n !== 1 ? "s" : ""}`, `product${n !== 1 ? "s" : ""}`)}
           {catName && (
             <>
               {" "}
-              dans <strong>{catName}</strong>
+              {tr("dans", "in")} <strong>{catName}</strong>
             </>
           )}
           {" "}
-          correspondant à &laquo;{q}&raquo;
+          {tr("correspondant à", "matching")} &laquo;{q}&raquo;
         </>
       );
     }
     return (
       <>
-        {n} produit{n !== 1 ? "s" : ""}
+        {n} {tr(`produit${n !== 1 ? "s" : ""}`, `product${n !== 1 ? "s" : ""}`)}
         {catName && (
           <>
             {" "}
-            dans <strong>{catName}</strong>
+            {tr("dans", "in")} <strong>{catName}</strong>
           </>
         )}
       </>
     );
-  }, [filtered.length, search, categoryFilter, categories]);
+  }, [filtered.length, search, categoryFilter, categories, tr]);
 
   // ── Handlers ────────────────────────────────────────────────
 
@@ -246,7 +253,7 @@ export function ProductsClient({
         )
       );
     } else {
-      toast.success(newValue ? "Produit activé" : "Produit désactivé");
+      toast.success(newValue ? tr("Produit activé", "Product enabled") : tr("Produit désactivé", "Product disabled"));
     }
   }
 
@@ -258,9 +265,9 @@ export function ProductsClient({
       try {
         await adminActions.onDelete(deletingId);
         setProducts((prev) => prev.filter((p) => p.id !== deletingId));
-        toast.success("Produit supprimé.");
+        toast.success(tr("Produit supprimé.", "Product deleted."));
       } catch {
-        toast.error("Erreur lors de la suppression.");
+        toast.error(tr("Erreur lors de la suppression.", "Error while deleting."));
       } finally {
         setIsDeleting(false);
         setDeleteOpen(false);
@@ -282,7 +289,7 @@ export function ProductsClient({
       toast.error(error.message);
     } else {
       setProducts((prev) => prev.filter((p) => p.id !== deletingId));
-      toast.success("Produit supprimé.");
+      toast.success(tr("Produit supprimé.", "Product deleted."));
       router.refresh();
     }
     setDeletingId(null);
@@ -299,7 +306,7 @@ export function ProductsClient({
           <div className="relative flex-1 min-w-48">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
-              placeholder="Rechercher un produit…"
+              placeholder={tr("Rechercher un produit…", "Search a product...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-8"
@@ -313,10 +320,10 @@ export function ProductsClient({
             }}
           >
             <SelectTrigger className="w-48 shrink-0">
-              <SelectValue placeholder="Toutes les catégories" />
+              <SelectValue placeholder={tr("Toutes les catégories", "All categories")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Toutes les catégories</SelectItem>
+              <SelectItem value="all">{tr("Toutes les catégories", "All categories")}</SelectItem>
               {categories.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.icon_emoji} {c.name}
@@ -344,7 +351,7 @@ export function ProductsClient({
               className="text-primary-foreground hover:opacity-90"
             >
               <Plus className="mr-1.5 h-4 w-4" />
-              Nouveau produit
+              {tr("Nouveau produit", "New product")}
             </Button>
           </div>
         </div>
@@ -355,12 +362,12 @@ export function ProductsClient({
           <Package className="h-10 w-10 text-muted-foreground/50" />
           <p className="text-muted-foreground">
             {products.length === 0
-              ? "Aucun produit. Créez-en un pour commencer."
-              : "Aucun produit ne correspond aux filtres."}
+              ? tr("Aucun produit. Créez-en un pour commencer.", "No products. Create one to get started.")
+              : tr("Aucun produit ne correspond aux filtres.", "No products match the filters.")}
           </p>
           {products.length === 0 && (
             <Button variant="outline" onClick={openCreate}>
-              Créer un produit
+              {tr("Créer un produit", "Create product")}
             </Button>
           )}
         </div>
@@ -373,12 +380,12 @@ export function ProductsClient({
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12"></TableHead>
-                <TableHead>Produit</TableHead>
-                <TableHead className="hidden sm:table-cell">Catégorie</TableHead>
-                <TableHead className="text-right">Prix</TableHead>
-                <TableHead className="hidden md:table-cell">Tags</TableHead>
-                {!adminActions && <TableHead className="text-center w-20">Dispo</TableHead>}
-                <TableHead className="text-right w-20">Actions</TableHead>
+                <TableHead>{tr("Produit", "Product")}</TableHead>
+                <TableHead className="hidden sm:table-cell">{tr("Catégorie", "Category")}</TableHead>
+                <TableHead className="text-right">{tr("Prix", "Price")}</TableHead>
+                <TableHead className="hidden md:table-cell">{tr("Tags", "Tags")}</TableHead>
+                {!adminActions && <TableHead className="text-center w-20">{tr("Dispo", "Avail.")}</TableHead>}
+                <TableHead className="text-right w-20">{tr("Actions", "Actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -407,7 +414,7 @@ export function ProductsClient({
                     <p className="font-medium truncate max-w-[180px]">{p.name}</p>
                     {p.option_label && (
                       <p className="text-xs text-muted-foreground truncate">
-                        Option : {p.option_label}
+                        {tr("Option", "Option")} : {p.option_label}
                       </p>
                     )}
                     {p.description && (
@@ -450,7 +457,7 @@ export function ProductsClient({
                         checked={p.is_available}
                         onCheckedChange={() => handleToggleAvailable(p)}
                         size="sm"
-                        aria-label={p.is_available ? "Désactiver" : "Activer"}
+                        aria-label={p.is_available ? tr("Désactiver", "Disable") : tr("Activer", "Enable")}
                       />
                     </TableCell>
                   )}
@@ -462,7 +469,7 @@ export function ProductsClient({
                         variant="ghost"
                         size="icon-sm"
                         onClick={() => openEdit(p)}
-                        aria-label="Modifier"
+                        aria-label={tr("Modifier", "Edit")}
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
@@ -471,7 +478,7 @@ export function ProductsClient({
                         size="icon-sm"
                         onClick={() => openDelete(p.id)}
                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        aria-label="Supprimer"
+                        aria-label={tr("Supprimer", "Delete")}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -514,18 +521,18 @@ export function ProductsClient({
           <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden">
             <DrawerHeader className={formSubView !== "main" ? "flex-row items-center gap-2" : undefined}>
               {formSubView !== "main" ? (
-                <Button type="button" variant="ghost" size="icon-sm" onClick={() => setFormSubView("main")} aria-label="Retour">
+                <Button type="button" variant="ghost" size="icon-sm" onClick={() => setFormSubView("main")} aria-label={tr("Retour", "Back")}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               ) : null}
               <DrawerTitle>
                 {formSubView === "photo"
-                  ? "Photo du produit"
+                  ? tr("Photo du produit", "Product photo")
                   : formSubView === "tags"
-                    ? "Allergènes et labels"
+                    ? tr("Allergènes et labels", "Allergens and labels")
                     : editingProduct
-                      ? "Modifier le produit"
-                      : "Nouveau produit"}
+                      ? tr("Modifier le produit", "Edit product")
+                      : tr("Nouveau produit", "New product")}
               </DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
@@ -560,19 +567,19 @@ export function ProductsClient({
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => setFormSubView("main")}
-                  aria-label="Retour"
+                  aria-label={tr("Retour", "Back")}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               ) : null}
               <SheetTitle>
                 {formSubView === "photo"
-                  ? "Photo du produit"
+                  ? tr("Photo du produit", "Product photo")
                   : formSubView === "tags"
-                    ? "Allergènes et labels"
+                    ? tr("Allergènes et labels", "Allergens and labels")
                     : editingProduct
-                      ? "Modifier le produit"
-                      : "Nouveau produit"}
+                      ? tr("Modifier le produit", "Edit product")
+                      : tr("Nouveau produit", "New product")}
               </SheetTitle>
             </SheetHeader>
             <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
@@ -597,11 +604,11 @@ export function ProductsClient({
       {/* Delete confirmation */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="sm:max-w-sm">
-          <DialogTitle>Supprimer le produit</DialogTitle>
+          <DialogTitle>{tr("Supprimer le produit", "Delete product")}</DialogTitle>
           <DialogDescription>
-            Êtes-vous sûr de vouloir supprimer{" "}
+            {tr("Êtes-vous sûr de vouloir supprimer", "Are you sure you want to delete")}{" "}
             <strong>&laquo;{deletingProduct?.name}&raquo;</strong> ?
-            Cette action est irréversible.
+            {" "}{tr("Cette action est irréversible.", "This action is irreversible.")}
           </DialogDescription>
           <DialogFooter>
             <Button
@@ -609,14 +616,14 @@ export function ProductsClient({
               onClick={() => setDeleteOpen(false)}
               disabled={isDeleting}
             >
-              Annuler
+              {tr("Annuler", "Cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={confirmDelete}
               disabled={isDeleting}
             >
-              {isDeleting ? "Suppression…" : "Supprimer"}
+              {isDeleting ? tr("Suppression…", "Deleting...") : tr("Supprimer", "Delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

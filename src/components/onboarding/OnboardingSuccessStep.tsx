@@ -7,6 +7,7 @@ import { ExternalLink, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { storefrontPublicUrl } from "@/lib/publicAppUrl";
 import { markOnboardingComplete } from "@/lib/onboarding";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface OnboardingSuccessStepProps {
   shopSlug: string;
@@ -23,6 +24,8 @@ export function OnboardingSuccessStep({
   previewMode = false,
   onPreviewFinish,
 }: OnboardingSuccessStepProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const router = useRouter();
   const storeUrl = storefrontPublicUrl(shopSlug);
   const [finishing, setFinishing] = useState(false);
@@ -50,10 +53,10 @@ export function OnboardingSuccessStep({
           className="text-3xl font-bold"
           style={{ fontFamily: "var(--font-onest)" }}
         >
-          Votre vitrine est prête !
+          {tr("Votre vitrine est prête !", "Your storefront is ready!")}
         </h1>
         <p className="text-muted-foreground">
-          Partagez le lien avec vos clients ou imprimez vos QR codes.
+          {tr("Partagez le lien avec vos clients ou imprimez vos QR codes.", "Share the link with your customers or print your QR codes.")}
         </p>
       </div>
 
@@ -65,7 +68,7 @@ export function OnboardingSuccessStep({
           className="flex items-center justify-center gap-2 w-full rounded-lg border border-border py-3 text-sm font-medium hover:bg-muted transition-colors"
         >
           <ExternalLink className="h-4 w-4" />
-          Voir ma vitrine
+          {tr("Voir ma vitrine", "View storefront")}
         </Link>
 
         <Button
@@ -77,10 +80,10 @@ export function OnboardingSuccessStep({
         >
           <LayoutDashboard className="h-4 w-4" />
           {previewMode
-            ? "Fermer la simulation"
+            ? tr("Fermer la simulation", "Close preview")
             : finishing
-              ? "Finalisation…"
-              : "Accéder au tableau de bord"}
+              ? tr("Finalisation…", "Finishing...")
+              : tr("Accéder au tableau de bord", "Go to dashboard")}
         </Button>
       </div>
     </div>

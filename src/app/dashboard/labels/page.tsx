@@ -1,13 +1,17 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 import { ShopLabelsClient } from "@/components/product/ShopLabelsClient";
 import { createClient } from "@/lib/supabase/server";
-import { LABEL_PAGE_DESCRIPTION } from "@/lib/dashboard-catalog-copy";
+import { getDashboardCatalogCopy } from "@/lib/dashboard-catalog-copy";
 import { fetchShopLabelsForDashboard } from "@/lib/shop-labels";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 
 export const metadata = { title: "Labels" };
 
 export default async function LabelsPage() {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
   const supabase = await createClient();
   const {
     data: { user },
@@ -58,7 +62,7 @@ export default async function LabelsPage() {
         </h1>
         <p className="text-sm text-muted-foreground">{shop.name}</p>
         <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
-          {LABEL_PAGE_DESCRIPTION}
+          {getDashboardCatalogCopy(locale, "label")}
         </p>
       </div>
 

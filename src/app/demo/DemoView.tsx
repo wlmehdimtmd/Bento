@@ -43,12 +43,12 @@ const DEMO_SHOP: ShopInfo = {
 };
 
 const DEMO_CATEGORIES: CategoryInfo[] = [
-  { id: "entrees", name: "Entrées", icon_emoji: "🥢", cover_image_url: null, description: "Nos entrées fraîches du jour", productCount: 4 },
-  { id: "plats", name: "Plats", icon_emoji: "🍜", cover_image_url: null, description: "Plats signatures de la maison", productCount: 5 },
-  { id: "sushis", name: "Sushis & Makis", icon_emoji: "🍣", cover_image_url: null, description: "Poisson ultra-frais, livré chaque matin", productCount: 4 },
-  { id: "desserts", name: "Desserts", icon_emoji: "🍰", cover_image_url: null, description: "Douceurs nippones maison", productCount: 3 },
-  { id: "boissons", name: "Boissons", icon_emoji: "🍶", cover_image_url: null, description: null, productCount: 5 },
-  { id: "cocktails", name: "Cocktails & Vins", icon_emoji: "🍷", cover_image_url: null, description: "Sélection soignée, accord mets-vins", productCount: 4 },
+  { id: "entrees", name: "Entrées", icon_emoji: "🥢", description: "Nos entrées fraîches du jour", productCount: 4 },
+  { id: "plats", name: "Plats", icon_emoji: "🍜", description: "Plats signatures de la maison", productCount: 5 },
+  { id: "sushis", name: "Sushis & Makis", icon_emoji: "🍣", description: "Poisson ultra-frais, livré chaque matin", productCount: 4 },
+  { id: "desserts", name: "Desserts", icon_emoji: "🍰", description: "Douceurs nippones maison", productCount: 3 },
+  { id: "boissons", name: "Boissons", icon_emoji: "🍶", description: null, productCount: 5 },
+  { id: "cocktails", name: "Cocktails & Vins", icon_emoji: "🍷", description: "Sélection soignée, accord mets-vins", productCount: 4 },
 ];
 
 const DEMO_PRODUCTS: Record<string, PublicProduct[]> = {

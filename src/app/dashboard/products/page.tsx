@@ -1,15 +1,20 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { PRODUCT_PAGE_DESCRIPTION } from "@/lib/dashboard-catalog-copy";
+import { getDashboardCatalogCopy } from "@/lib/dashboard-catalog-copy";
 import { buttonVariants } from "@/components/ui/button";
 import { ProductsClient } from "@/components/product/ProductsClient";
 import type { ProductRow } from "@/components/product/ProductForm";
 import { fetchShopLabelsForDashboard } from "@/lib/shop-labels";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 
 export const metadata = { title: "Produits" };
 
 export default async function ProductsPage() {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const supabase = await createClient();
 
   const {
@@ -62,24 +67,24 @@ export default async function ProductsPage() {
           className="text-3xl font-bold"
           style={{ fontFamily: "var(--font-onest)" }}
         >
-          Produits
+          {tr("Produits", "Products")}
         </h1>
         <p className="text-sm text-muted-foreground">{shop.name}</p>
         <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
-          {PRODUCT_PAGE_DESCRIPTION}
+          {getDashboardCatalogCopy(locale, "product")}
         </p>
       </div>
 
       {cats.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
           <p className="text-muted-foreground">
-            Créez d&apos;abord des catégories avant d&apos;ajouter des produits.
+            {tr("Créez d'abord des catégories avant d'ajouter des produits.", "Create categories first before adding products.")}
           </p>
           <Link
             href="/dashboard/categories"
             className={buttonVariants({ variant: "outline" })}
           >
-            Gérer les catégories
+            {tr("Gérer les catégories", "Manage categories")}
           </Link>
         </div>
       ) : (

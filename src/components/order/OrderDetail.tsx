@@ -21,6 +21,7 @@ import { OrderStatusBadge } from "./OrderStatusBadge";
 import type { OrderRow } from "./OrderCard";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -111,6 +112,8 @@ export function OrderDetail({
   onClose,
   onStatusChange,
 }: OrderDetailProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const [items, setItems] = useState<OrderItemFull[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
@@ -136,7 +139,7 @@ export function OrderDetail({
 
     setUpdatingStatus(false);
     if (error) {
-      toast.error("Erreur lors de la mise à jour.");
+      toast.error(tr("Erreur lors de la mise à jour.", "Error while updating."));
       onStatusChange(order.id, order.status);
     }
   }
@@ -151,7 +154,7 @@ export function OrderDetail({
           className="text-lg font-bold"
           style={{ fontFamily: "var(--font-onest)" }}
         >
-          Commande #{String(order.order_number).padStart(4, "0")}
+          {tr("Commande", "Order")} #{String(order.order_number).padStart(4, "0")}
         </DialogTitle>
 
         <div className="space-y-4">
@@ -186,20 +189,20 @@ export function OrderDetail({
           {/* Customer info */}
           <div className="space-y-2 text-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Client
+              {tr("Client", "Customer")}
             </p>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-              <span className="text-muted-foreground">Nom</span>
+              <span className="text-muted-foreground">{tr("Nom", "Name")}</span>
               <span className="font-medium">{order.customer_name}</span>
 
               {order.customer_phone && (
                 <>
-                  <span className="text-muted-foreground">Téléphone</span>
+                  <span className="text-muted-foreground">{tr("Téléphone", "Phone")}</span>
                   <span className="font-medium">{order.customer_phone}</span>
                 </>
               )}
 
-              <span className="text-muted-foreground">Mode</span>
+              <span className="text-muted-foreground">{tr("Mode", "Mode")}</span>
               <span>
                 <Badge variant="secondary" className="text-xs">
                   {FULFILLMENT_LABELS[order.fulfillment_mode] ??
@@ -209,21 +212,21 @@ export function OrderDetail({
 
               {order.table_number && (
                 <>
-                  <span className="text-muted-foreground">Table</span>
+                  <span className="text-muted-foreground">{tr("Table", "Table")}</span>
                   <span className="font-medium">#{order.table_number}</span>
                 </>
               )}
 
               {order.delivery_address && (
                 <>
-                  <span className="text-muted-foreground">Adresse</span>
+                  <span className="text-muted-foreground">{tr("Adresse", "Address")}</span>
                   <span className="font-medium">{order.delivery_address}</span>
                 </>
               )}
 
               {order.stripe_payment_status && (
                 <>
-                  <span className="text-muted-foreground">Paiement</span>
+                  <span className="text-muted-foreground">{tr("Paiement", "Payment")}</span>
                   <span
                     className={
                       order.stripe_payment_status === "paid"
@@ -231,7 +234,7 @@ export function OrderDetail({
                         : "text-muted-foreground"
                     }
                   >
-                    {order.stripe_payment_status === "paid" ? "✓ Payé" : order.stripe_payment_status}
+                    {order.stripe_payment_status === "paid" ? tr("✓ Payé", "✓ Paid") : order.stripe_payment_status}
                   </span>
                 </>
               )}
@@ -249,15 +252,15 @@ export function OrderDetail({
           {/* Items */}
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Articles
+              {tr("Articles", "Items")}
             </p>
             {loadingItems ? (
               <div className="flex items-center gap-2 py-4 justify-center text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="text-sm">Chargement…</span>
+                <span className="text-sm">{tr("Chargement…", "Loading...")}</span>
               </div>
             ) : items.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Aucun article.</p>
+              <p className="text-sm text-muted-foreground">{tr("Aucun article.", "No items.")}</p>
             ) : (
               <div className="divide-y divide-border">
                 {items.map((item) => (
@@ -272,12 +275,12 @@ export function OrderDetail({
                     </div>
                     {item.option_value && (
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Option : {item.option_value}
+                        {tr("Option", "Option")}: {item.option_value}
                       </p>
                     )}
                     {item.special_note && (
                       <p className="text-xs text-muted-foreground italic mt-0.5">
-                        Note : {item.special_note}
+                        {tr("Note", "Note")}: {item.special_note}
                       </p>
                     )}
                   </div>
@@ -290,7 +293,7 @@ export function OrderDetail({
 
           {/* Total */}
           <div className="flex justify-between font-bold text-base">
-            <span>Total</span>
+            <span>{tr("Total", "Total")}</span>
             <span style={{ color: "var(--primary)" }}>
               {formatPrice(order.total_amount)}
             </span>

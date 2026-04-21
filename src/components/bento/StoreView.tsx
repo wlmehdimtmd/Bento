@@ -10,6 +10,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -70,13 +71,14 @@ export interface ShopInfo {
   opening_hours?: unknown | null;
   opening_timezone?: string;
   open_on_public_holidays?: boolean;
+  /** Présent quand chargé depuis l’API ; `false` = vitrine pas publique pour les visiteurs anonymes. */
+  is_active?: boolean;
 }
 
 export interface CategoryInfo {
   id: string;
   name: string;
   icon_emoji: string;
-  cover_image_url: string | null;
   description: string | null;
   productCount: number;
 }
@@ -434,7 +436,6 @@ export function StoreView({
           name={cat.name}
           iconEmoji={cat.icon_emoji}
           productCount={cat.productCount}
-          coverImageUrl={cat.cover_image_url}
           size={size}
           omitSizeClasses={omitSizeClasses}
           onClick={() => goToCategory(cat)}
@@ -448,7 +449,6 @@ export function StoreView({
           name={MENU_CARD_NAME}
           iconEmoji={MENU_CARD_EMOJI}
           productCount={bundles.length}
-          coverImageUrl={null}
           size={size}
           omitSizeClasses={omitSizeClasses}
           onClick={goToBundlesMenu}
@@ -495,6 +495,27 @@ export function StoreView({
 
   return (
     <div className="bg-transparent" style={storefrontThemeStyle}>
+      {shop.is_active === false && (
+        <div
+          role="status"
+          className="mb-6 rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground"
+        >
+          <p className="font-medium">
+            {locale === "en" ? "This storefront is not public yet." : "Cette vitrine n'est pas encore publique."}
+          </p>
+          <p className="mt-1 text-muted-foreground">
+            {locale === "en"
+              ? "Activate your shop in settings so customers can open this link without signing in."
+              : "Activez la boutique dans les paramètres pour que les clients puissent ouvrir ce lien sans se connecter."}
+          </p>
+          <Link
+            href="/dashboard/settings"
+            className="mt-2 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline"
+          >
+            {locale === "en" ? "Open settings" : "Ouvrir les paramètres"}
+          </Link>
+        </div>
+      )}
       <AnimatePresence mode="wait">
         {level === "l1" ? (
           <motion.div

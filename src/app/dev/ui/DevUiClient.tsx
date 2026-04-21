@@ -134,8 +134,6 @@ const DEMO_COVER =
   "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80";
 const DEMO_LOGO =
   "https://images.unsplash.com/photo-1560969184-10fe8719e047?auto=format&fit=crop&w=128&q=80";
-const DEMO_CATEGORY_COVER =
-  "https://images.unsplash.com/photo-1579871494447-7f965a992fff?auto=format&fit=crop&w=800&q=80";
 const DEMO_PRODUCT_IMG =
   "https://images.unsplash.com/photo-1617195737497-67a819abbac6?auto=format&fit=crop&w=600&q=80";
 
@@ -651,17 +649,16 @@ export function DevUiClient() {
                 reviews={demoGoogleReviews}
               />
               <BentoCardCategory
-                name="Sans visuel"
+                name="Catégorie A"
                 iconEmoji="🍱"
                 productCount={8}
-                onClick={() => toast.message("Catégorie (sans image)")}
+                onClick={() => toast.message("Tuile catégorie (démo)")}
               />
               <BentoCardCategory
-                name="Avec photo"
+                name="Catégorie B"
                 iconEmoji="🍣"
                 productCount={12}
-                coverImageUrl={DEMO_CATEGORY_COVER}
-                onClick={() => toast.message("Catégorie (avec image)")}
+                onClick={() => toast.message("Tuile catégorie (démo)")}
               />
               <BentoCardProduct
                 name="Ramen miso"

@@ -2,10 +2,16 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { OrderList } from "@/components/order/OrderList";
 import type { OrderRow } from "@/components/order/OrderCard";
+import { cookies } from "next/headers";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
+import { MESSAGES } from "@/lib/i18nMessages";
 
 type Params = Promise<{ shopId: string }>;
 
 export async function generateMetadata({ params }: { params: Params }) {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const t = (key: string, fallback: string) => MESSAGES[locale][key] ?? fallback;
   const { shopId } = await params;
   const supabase = await createClient();
   const { data } = await supabase
@@ -13,10 +19,17 @@ export async function generateMetadata({ params }: { params: Params }) {
     .select("name")
     .eq("id", shopId)
     .single();
-  return { title: data ? `Commandes — ${data.name}` : "Commandes" };
+  return {
+    title: data
+      ? `${t("dashboard.orders.metadataPrefix", "Orders -")} ${data.name}`
+      : t("dashboard.orders.metadataFallback", "Orders"),
+  };
 }
 
 export default async function OrdersPage({ params }: { params: Params }) {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const t = (key: string, fallback: string) => MESSAGES[locale][key] ?? fallback;
   const { shopId } = await params;
   const supabase = await createClient();
 
@@ -70,7 +83,7 @@ export default async function OrdersPage({ params }: { params: Params }) {
           className="text-3xl font-bold"
           style={{ fontFamily: "var(--font-onest)" }}
         >
-          Commandes
+          {t("dashboard.orders.title", "Orders")}
         </h1>
         <p className="text-sm text-muted-foreground">{shop.name}</p>
       </div>

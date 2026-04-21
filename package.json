@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:shop": "node scripts/check-public-shop.mjs",
+    "supabase:link": "npx supabase link --project-ref pnvkrxdaviejwjuoxjar --yes",
+    "supabase:push": "npx supabase db push --yes"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.0",

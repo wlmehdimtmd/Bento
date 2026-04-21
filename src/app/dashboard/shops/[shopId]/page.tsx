@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Package, ShoppingCart, TrendingUp, FolderOpen } from "lucide-react";
 import Image from "next/image";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,17 +10,23 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentOrders } from "@/components/dashboard/RecentOrders";
 import { SHOP_TYPES } from "@/lib/constants";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 
 type Params = Promise<{ shopId: string }>;
 
 export async function generateMetadata({ params }: { params: Params }) {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
   const { shopId } = await params;
   const supabase = await createClient();
   const { data } = await supabase.from("shops").select("name").eq("id", shopId).single();
-  return { title: data?.name ?? "Boutique" };
+  return { title: data?.name ?? (locale === "en" ? "Shop" : "Boutique") };
 }
 
 export default async function ShopDashboardPage({ params }: { params: Params }) {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const { shopId } = await params;
   const supabase = await createClient();
   const {
@@ -104,24 +111,24 @@ export default async function ShopDashboardPage({ params }: { params: Params }) 
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard icon={<FolderOpen className="h-5 w-5" />} label="Catégories" value={catCount ?? 0} iconColor="bg-amber-500 text-white" />
-        <StatsCard icon={<Package className="h-5 w-5" />} label="Produits" value={productCount} iconColor="bg-violet-500 text-white" />
-        <StatsCard icon={<ShoppingCart className="h-5 w-5" />} label="Commandes" value={orderCount ?? 0} iconColor="bg-blue-500 text-white" />
-        <StatsCard icon={<TrendingUp className="h-5 w-5" />} label="Chiffre d'affaires" value={revenue} type="currency" iconColor="bg-primary text-primary-foreground dark:bg-[oklch(0.205_0_0)] dark:text-[oklch(0.985_0_0)]" />
+        <StatsCard icon={<FolderOpen className="h-5 w-5" />} label={tr("Catégories", "Categories")} value={catCount ?? 0} iconColor="bg-amber-500 text-white" />
+        <StatsCard icon={<Package className="h-5 w-5" />} label={tr("Produits", "Products")} value={productCount} iconColor="bg-violet-500 text-white" />
+        <StatsCard icon={<ShoppingCart className="h-5 w-5" />} label={tr("Commandes", "Orders")} value={orderCount ?? 0} iconColor="bg-blue-500 text-white" />
+        <StatsCard icon={<TrendingUp className="h-5 w-5" />} label={tr("Chiffre d'affaires", "Revenue")} value={revenue} type="currency" iconColor="bg-primary text-primary-foreground dark:bg-[oklch(0.205_0_0)] dark:text-[oklch(0.985_0_0)]" />
       </div>
 
       {/* Quick actions */}
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Actions rapides</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{tr("Actions rapides", "Quick actions")}</h2>
         <QuickActions shopSlug={shop.slug} shopId={shop.id} />
       </div>
 
       {/* Recent orders */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Dernières commandes</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{tr("Dernières commandes", "Latest orders")}</h2>
           <Link href="/dashboard/orders" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-            Voir tout
+            {tr("Voir tout", "View all")}
           </Link>
         </div>
         <RecentOrders orders={orders ?? []} />

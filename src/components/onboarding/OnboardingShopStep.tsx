@@ -24,20 +24,21 @@ import {
   useOnboardingRuntime,
   useOnboardingStepNav,
 } from "@/components/onboarding/OnboardingRuntimeContext";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 const FORM_ID = "onboarding-shop-form";
 
 const schema = z.object({
-  name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+  name: z.string().min(2, "Name must contain at least 2 characters"),
   slug: z
     .string()
-    .min(2, "Le slug doit contenir au moins 2 caractères")
-    .regex(/^[a-z0-9-]+$/, "Slug invalide (lettres minuscules, chiffres, tirets)"),
+    .min(2, "Slug must contain at least 2 characters")
+    .regex(/^[a-z0-9-]+$/, "Invalid slug (lowercase letters, numbers, hyphens)"),
   description: z
     .string()
     .max(
       SHOP_DESCRIPTION_MAX_CHARS,
-      `Maximum ${SHOP_DESCRIPTION_MAX_CHARS} caractères dans la description.`
+      `Maximum ${SHOP_DESCRIPTION_MAX_CHARS} characters in description.`
     )
     .optional(),
   address: z.string(),
@@ -46,12 +47,12 @@ const schema = z.object({
     .string()
     .optional()
     .refine((v) => !v || z.string().email().safeParse(v).success, {
-      message: "Email invalide",
+      message: "Invalid email",
     }),
   google_maps_url: z.string().optional(),
   fulfillment_modes: z
     .array(z.string())
-    .min(1, "Sélectionnez au moins un mode de service"),
+    .min(1, "Select at least one service mode"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -71,9 +72,9 @@ interface InitialData {
 }
 
 const FULFILLMENT_OPTIONS = [
-  { value: "dine_in", label: "Sur place" },
-  { value: "takeaway", label: "À emporter" },
-  { value: "delivery", label: "Livraison" },
+  { value: "dine_in", label: "Dine in" },
+  { value: "takeaway", label: "Takeaway" },
+  { value: "delivery", label: "Delivery" },
 ];
 
 // Fields to validate per sub-step
@@ -93,6 +94,8 @@ export function OnboardingShopStep({
   initialData: InitialData;
   initialSubStep?: number;
 }) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const { mode } = useOnboardingRuntime();
   const goStep = useOnboardingStepNav(shopId);
   const isPreview = mode === "preview";
@@ -199,19 +202,19 @@ export function OnboardingShopStep({
   const step1Content = (
     <div className="space-y-6 pt-2">
       <OnboardingStepTitle
-        title="Ma nouvelle vitrine"
-        subtitle="Donnez un nom à votre vitrine en ligne et personnalisez l’URL."
+        title={tr("Ma nouvelle vitrine", "My new storefront")}
+        subtitle={tr("Donnez un nom à votre vitrine en ligne et personnalisez l’URL.", "Name your online storefront and customize its URL.")}
       />
 
       <div className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="name">
-            Nom de la vitrine <span className="text-destructive">*</span>
+            {tr("Nom de la vitrine", "Storefront name")} <span className="text-destructive">*</span>
           </Label>
           <Input
             id="name"
             {...register("name")}
-            placeholder="La Bonne Table"
+            placeholder={tr("La Bonne Table", "The Good Table")}
             disabled={isSubmitting}
           />
           {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
@@ -220,7 +223,7 @@ export function OnboardingShopStep({
         <div className="space-y-1.5">
           <Label htmlFor="slug">
             Slug URL{" "}
-            <span className="text-xs font-normal text-muted-foreground">(auto-généré)</span>
+            <span className="text-xs font-normal text-muted-foreground">{tr("(auto-généré)", "(auto-generated)")}</span>
           </Label>
           <Input
             id="slug"
@@ -257,12 +260,12 @@ export function OnboardingShopStep({
                 }
               },
             })}
-            placeholder="Ce que vos clients doivent savoir en arrivant sur votre vitrine"
+            placeholder={tr("Ce que vos clients doivent savoir en arrivant sur votre vitrine", "What customers should know when they arrive on your storefront")}
             rows={4}
             disabled={isSubmitting}
           />
           <p className="text-xs text-muted-foreground">
-            Maximum {SHOP_DESCRIPTION_MAX_CHARS} caractères affichés dans la carte.
+            {tr("Maximum", "Maximum")} {SHOP_DESCRIPTION_MAX_CHARS} {tr("caractères affichés dans la carte.", "characters shown on the menu.")}
           </p>
           {errors.description && (
             <p className="text-xs text-destructive">{errors.description.message}</p>
@@ -281,12 +284,12 @@ export function OnboardingShopStep({
             simulationDisabled={isPreview}
           />
           <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Prévisualisation logo</p>
+            <p className="text-xs font-medium text-muted-foreground">{tr("Prévisualisation logo", "Logo preview")}</p>
             <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
               {logoUrl ? (
                 <Image
                   src={logoUrl}
-                  alt="Aperçu logo de la vitrine"
+                  alt={tr("Aperçu logo de la vitrine", "Storefront logo preview")}
                   width={48}
                   height={48}
                   className="h-full w-full object-cover"
@@ -305,14 +308,14 @@ export function OnboardingShopStep({
   const step2Content = (
     <div className="space-y-6 pt-2">
       <OnboardingStepTitle
-        title="Ma vitrine en ligne"
-        subtitle="Ces visuels apparaissent sur votre page publique : soignez la première impression."
+        title={tr("Ma vitrine en ligne", "My online storefront")}
+        subtitle={tr("Ces visuels apparaissent sur votre page publique : soignez la première impression.", "These visuals appear on your public page: make a great first impression.")}
       />
 
       <div className="space-y-4">
         <ImageUploader
           bucket="shop-assets"
-          label="Photo de couverture"
+          label={tr("Photo de couverture", "Cover image")}
           currentUrl={coverUrl}
           onUpload={setCoverUrl}
           onRemove={() => setCoverUrl(null)}
@@ -333,24 +336,24 @@ export function OnboardingShopStep({
       }}
     >
       <OnboardingStepTitle
-        title="Mes coordonnées"
-        subtitle="Adresse et téléphone sont facultatifs. Renseignez-les si vous souhaitez les afficher sur votre vitrine."
+        title={tr("Mes coordonnées", "My contact details")}
+        subtitle={tr("Adresse et téléphone sont facultatifs. Renseignez-les si vous souhaitez les afficher sur votre vitrine.", "Address and phone are optional. Fill them in if you want to show them on your storefront.")}
       />
 
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="address">Adresse</Label>
+          <Label htmlFor="address">{tr("Adresse", "Address")}</Label>
           <Input
             id="address"
             {...register("address")}
-            placeholder="12 rue de la Paix, 75001 Paris"
+            placeholder={tr("12 rue de la Paix, 75001 Paris", "12 Main Street, 75001 Paris")}
             disabled={isSubmitting}
           />
           {errors.address && <p className="text-xs text-destructive">{errors.address.message}</p>}
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="phone">Téléphone</Label>
+          <Label htmlFor="phone">{tr("Téléphone", "Phone")}</Label>
           <Input
             id="phone"
             {...register("phone")}
@@ -362,7 +365,7 @@ export function OnboardingShopStep({
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="email_contact">Email de contact</Label>
+          <Label htmlFor="email_contact">{tr("Email de contact", "Contact email")}</Label>
           <Input
             id="email_contact"
             {...register("email_contact")}
@@ -379,7 +382,7 @@ export function OnboardingShopStep({
           <Label htmlFor="google_maps_url">
             <span className="flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-              Lien Google Maps
+              {tr("Lien Google Maps", "Google Maps link")}
             </span>
           </Label>
           <Input
@@ -402,7 +405,7 @@ export function OnboardingShopStep({
             Modes de service <span className="text-destructive">*</span>
           </>
         }
-        subtitle="Comment vos clients peuvent-ils commander sur votre vitrine ?"
+        subtitle={tr("Comment vos clients peuvent-ils commander sur votre vitrine ?", "How can customers order from your storefront?")}
       />
 
       <div className="space-y-3">
@@ -448,7 +451,7 @@ export function OnboardingShopStep({
           className="flex-1 sm:flex-initial gap-1.5"
         >
           <ChevronLeft className="h-4 w-4" />
-          Précédent
+          {tr("Précédent", "Previous")}
         </Button>
       ) : null}
       {isLastSubStep ? (
@@ -465,11 +468,11 @@ export function OnboardingShopStep({
           {isSubmitting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Enregistrement…
+              {tr("Enregistrement…", "Saving...")}
             </>
           ) : (
             <>
-              Suivant
+              {tr("Suivant", "Next")}
               <ChevronRight className="h-4 w-4" />
             </>
           )}
@@ -484,7 +487,7 @@ export function OnboardingShopStep({
             subStep > 1 ? "flex-1 sm:flex-initial" : "w-full"
           )}
         >
-          Suivant
+          {tr("Suivant", "Next")}
           <ChevronRight className="h-4 w-4" />
         </Button>
       )}

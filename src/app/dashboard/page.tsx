@@ -1,14 +1,19 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { Package, ShoppingCart, TrendingUp, Store } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentOrders } from "@/components/dashboard/RecentOrders";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 
 export const metadata = { title: "Tableau de bord" };
 
 export default async function DashboardPage() {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const supabase = await createClient();
   const {
     data: { user },
@@ -78,11 +83,13 @@ export default async function DashboardPage() {
             className="text-2xl font-bold"
             style={{ fontFamily: "var(--font-onest)" }}
           >
-            Bienvenue sur Bento Resto !
+            {tr("Bienvenue sur Bento Resto !", "Welcome to Bento Resto!")}
           </h2>
           <p className="text-muted-foreground max-w-md">
-            Votre boutique est activée par l&apos;équipe Bento. Une fois votre compte associé à une
-            vitrine, vous retrouverez ici le tableau de bord et vos commandes.
+            {tr(
+              "Votre boutique est activée par l'équipe Bento. Une fois votre compte associé à une vitrine, vous retrouverez ici le tableau de bord et vos commandes.",
+              "Your shop is activated by the Bento team. Once your account is linked to a storefront, your dashboard and orders will appear here."
+            )}
           </p>
         </div>
       </div>
@@ -96,7 +103,7 @@ export default async function DashboardPage() {
           className="text-3xl font-bold"
           style={{ fontFamily: "var(--font-onest)" }}
         >
-          Tableau de bord
+          {tr("Tableau de bord", "Dashboard")}
         </h1>
         {primaryShop && (
           <p className="mt-1 text-sm text-muted-foreground">{primaryShop.name}</p>
@@ -106,19 +113,19 @@ export default async function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <StatsCard
           icon={<Package className="h-5 w-5" />}
-          label="Produits actifs"
+          label={tr("Produits actifs", "Active products")}
           value={productCount}
           iconColor="bg-violet-500 text-white"
         />
         <StatsCard
           icon={<ShoppingCart className="h-5 w-5" />}
-          label="Commandes totales"
+          label={tr("Commandes totales", "Total orders")}
           value={orderCount}
           iconColor="bg-blue-500 text-white"
         />
         <StatsCard
           icon={<TrendingUp className="h-5 w-5" />}
-          label="Chiffre d'affaires"
+          label={tr("Chiffre d'affaires", "Revenue")}
           value={revenue}
           type="currency"
           iconColor="bg-primary text-primary-foreground dark:bg-[oklch(0.205_0_0)] dark:text-[oklch(0.985_0_0)]"
@@ -127,7 +134,7 @@ export default async function DashboardPage() {
 
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-          Actions rapides
+          {tr("Actions rapides", "Quick actions")}
         </h2>
         <QuickActions shopSlug={primaryShop?.slug} shopId={primaryShop?.id} />
       </div>
@@ -135,13 +142,13 @@ export default async function DashboardPage() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-            Dernières commandes
+            {tr("Dernières commandes", "Latest orders")}
           </h2>
           <Link
             href="/dashboard/orders"
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
-            Voir tout
+            {tr("Voir tout", "View all")}
           </Link>
         </div>
         <RecentOrders orders={recentOrders} />

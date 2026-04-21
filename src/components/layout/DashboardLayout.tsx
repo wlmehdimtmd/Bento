@@ -8,6 +8,7 @@ import { MerchantDashboardShell } from "./MerchantDashboardShell";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { createClient } from "@/lib/supabase/client";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface DashboardLayoutProps {
   user: { email: string; full_name?: string | null };
@@ -19,10 +20,13 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ user, shops, activeOrdersCount = 0, children }: DashboardLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false);
   }, [pathname]);
 
@@ -58,7 +62,7 @@ export function DashboardLayout({ user, shops, activeOrdersCount = 0, children }
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Ouvrir le menu"
+            aria-label={tr("Ouvrir le menu", "Open menu")}
             onClick={() => setMobileOpen(true)}
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

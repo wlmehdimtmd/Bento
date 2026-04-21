@@ -29,6 +29,7 @@ import {
   normalizeLabelValue,
   type ShopLabelOption,
 } from "@/lib/shop-labels";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface ShopLabelsClientProps {
   shopId: string;
@@ -48,6 +49,8 @@ export function ShopLabelsClient({
   initialLabels,
   existingProductTags,
 }: ShopLabelsClientProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const router = useRouter();
   const supabase = createClient();
 
@@ -80,7 +83,7 @@ export function ShopLabelsClient({
 
   function openCreate() {
     if (isAtLimit) {
-      toast.error("Limite atteinte: 50 labels maximum.");
+      toast.error(tr("Limite atteinte: 50 labels maximum.", "Limit reached: 50 labels maximum."));
       return;
     }
     setDraft({ label: "" });
@@ -103,12 +106,12 @@ export function ShopLabelsClient({
   async function saveLabel() {
     const labelText = draft.label.trim();
     if (!labelText) {
-      toast.error("Le nom du label est requis.");
+      toast.error(tr("Le nom du label est requis.", "Label name is required."));
       return;
     }
     const value = normalizeLabelValue(labelText);
     if (!value) {
-      toast.error("Nom invalide pour générer une clé de label.");
+      toast.error(tr("Nom invalide pour générer une clé de label.", "Invalid name to generate label key."));
       return;
     }
 
@@ -116,7 +119,7 @@ export function ShopLabelsClient({
       (item) => item.value === value && item.id !== draft.id
     );
     if (duplicate) {
-      toast.error("Un label avec ce nom existe déjà.");
+      toast.error(tr("Un label avec ce nom existe déjà.", "A label with this name already exists."));
       return;
     }
 
@@ -143,7 +146,7 @@ export function ShopLabelsClient({
         prev.map((item) => (item.id === draft.id ? (data as ShopLabelOption) : item))
       );
       setDialogOpen(false);
-      toast.success("Label mis a jour.");
+      toast.success(tr("Label mis a jour.", "Label updated."));
       router.refresh();
       return;
     }
@@ -164,7 +167,7 @@ export function ShopLabelsClient({
 
     if (error) {
       if (error.message.includes("SHOP_LABEL_LIMIT_REACHED")) {
-        toast.error("Maximum 50 labels par boutique.");
+        toast.error(tr("Maximum 50 labels par boutique.", "Maximum 50 labels per shop."));
       } else {
         toast.error(error.message);
       }
@@ -173,7 +176,7 @@ export function ShopLabelsClient({
 
     setLabels((prev) => [...prev, data as ShopLabelOption]);
     setDialogOpen(false);
-    toast.success("Label ajoute.");
+    toast.success(tr("Label ajoute.", "Label added."));
     router.refresh();
   }
 
@@ -191,7 +194,7 @@ export function ShopLabelsClient({
 
     setLabels((prev) => prev.filter((item) => item.id !== deleting.id));
     setDeleting(null);
-    toast.success("Label supprime.");
+    toast.success(tr("Label supprime.", "Label deleted."));
     router.refresh();
   }
 
@@ -200,7 +203,7 @@ export function ShopLabelsClient({
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">
-            {count} / {MAX_SHOP_LABELS} labels
+            {count} / {MAX_SHOP_LABELS} {tr("labels", "labels")}
           </p>
           <Button
             onClick={openCreate}
@@ -209,22 +212,22 @@ export function ShopLabelsClient({
             className="text-primary-foreground hover:opacity-90"
           >
             <Plus className="mr-1.5 h-4 w-4" />
-            Nouveau label
+            {tr("Nouveau label", "New label")}
           </Button>
         </div>
 
         {sorted.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border py-12 text-center text-sm text-muted-foreground">
-            Aucun label personnalise pour le moment.
+            {tr("Aucun label personnalise pour le moment.", "No custom labels yet.")}
           </div>
         ) : (
           <div className="rounded-lg border border-border overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Label</TableHead>
-                  <TableHead className="hidden sm:table-cell">Cle</TableHead>
-                  <TableHead className="w-24 text-right">Actions</TableHead>
+                  <TableHead>{tr("Label", "Label")}</TableHead>
+                  <TableHead className="hidden sm:table-cell">{tr("Cle", "Key")}</TableHead>
+                  <TableHead className="w-24 text-right">{tr("Actions", "Actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -242,7 +245,7 @@ export function ShopLabelsClient({
                           variant="ghost"
                           size="icon-sm"
                           onClick={() => openEdit(item)}
-                          aria-label="Modifier"
+                          aria-label={tr("Modifier", "Edit")}
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
@@ -251,7 +254,7 @@ export function ShopLabelsClient({
                           size="icon-sm"
                           onClick={() => openDelete(item)}
                           className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          aria-label="Supprimer"
+                          aria-label={tr("Supprimer", "Delete")}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -266,22 +269,22 @@ export function ShopLabelsClient({
 
         <div className="rounded-lg border border-border p-4 space-y-3">
           <div className="space-y-1">
-            <p className="text-sm font-medium">Tags detectes dans les produits</p>
+            <p className="text-sm font-medium">{tr("Tags detectes dans les produits", "Detected tags in products")}</p>
             <p className="text-xs text-muted-foreground">
-              {existingProductTags.length} tag(s) trouve(s) dans la base pour cette boutique.
+              {existingProductTags.length} {tr("tag(s) trouve(s) dans la base pour cette boutique.", "tag(s) found in this shop database.")}
             </p>
           </div>
 
           {existingProductTags.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Aucun tag present dans les produits.
+              {tr("Aucun tag present dans les produits.", "No tags found in products.")}
             </p>
           ) : (
             <div className="space-y-2">
               {unmappedProductTags.length > 0 && (
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
-                    Non mappes ({unmappedProductTags.length})
+                    {tr("Non mappes", "Unmapped")} ({unmappedProductTags.length})
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {unmappedProductTags.map((tag) => (
@@ -296,7 +299,7 @@ export function ShopLabelsClient({
               {mappedProductTags.length > 0 && (
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                    Mappes ({mappedProductTags.length})
+                    {tr("Mappes", "Mapped")} ({mappedProductTags.length})
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {mappedProductTags.map((tag) => (
@@ -314,27 +317,27 @@ export function ShopLabelsClient({
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogTitle>{draft.id ? "Modifier le label" : "Nouveau label"}</DialogTitle>
+          <DialogTitle>{draft.id ? tr("Modifier le label", "Edit label") : tr("Nouveau label", "New label")}</DialogTitle>
           <DialogDescription>
-            Ce label pourra etre applique sur vos produits.
+            {tr("Ce label pourra etre applique sur vos produits.", "This label can be applied to your products.")}
           </DialogDescription>
           <div className="space-y-3">
             <div className="space-y-1.5">
               <label htmlFor="label-name" className="text-sm font-medium">
-                Nom
+                {tr("Nom", "Name")}
               </label>
               <Input
                 id="label-name"
                 value={draft.label}
                 onChange={(e) => setDraft((prev) => ({ ...prev, label: e.target.value }))}
-                placeholder="Ex: Nouveaute"
+                placeholder={tr("Ex: Nouveaute", "Ex: New")}
                 disabled={isSaving}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSaving}>
-              Annuler
+              {tr("Annuler", "Cancel")}
             </Button>
             <Button
               onClick={saveLabel}
@@ -342,7 +345,7 @@ export function ShopLabelsClient({
               style={{ backgroundColor: "var(--primary)" }}
               className="text-primary-foreground hover:opacity-90"
             >
-              {isSaving ? "Enregistrement..." : "Enregistrer"}
+              {isSaving ? tr("Enregistrement...", "Saving...") : tr("Enregistrer", "Save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -350,9 +353,9 @@ export function ShopLabelsClient({
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="sm:max-w-sm">
-          <DialogTitle>Supprimer le label</DialogTitle>
+          <DialogTitle>{tr("Supprimer le label", "Delete label")}</DialogTitle>
           <DialogDescription>
-            Confirmer la suppression de <strong>{deleting?.label}</strong> ?
+            {tr("Confirmer la suppression de", "Confirm deletion of")} <strong>{deleting?.label}</strong> ?
           </DialogDescription>
           <DialogFooter>
             <Button
@@ -360,10 +363,10 @@ export function ShopLabelsClient({
               onClick={() => setDeleteOpen(false)}
               disabled={isDeleting}
             >
-              Annuler
+              {tr("Annuler", "Cancel")}
             </Button>
             <Button variant="destructive" onClick={confirmDelete} disabled={isDeleting}>
-              {isDeleting ? "Suppression..." : "Supprimer"}
+              {isDeleting ? tr("Suppression...", "Deleting...") : tr("Supprimer", "Delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

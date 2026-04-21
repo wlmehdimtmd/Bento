@@ -1,15 +1,21 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { PRODUCT_PAGE_DESCRIPTION } from "@/lib/dashboard-catalog-copy";
+import { getDashboardCatalogCopy } from "@/lib/dashboard-catalog-copy";
 import { buttonVariants } from "@/components/ui/button";
 import { ProductsClient } from "@/components/product/ProductsClient";
 import type { ProductRow } from "@/components/product/ProductForm";
 import { fetchShopLabelsForDashboard } from "@/lib/shop-labels";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
+import { MESSAGES } from "@/lib/i18nMessages";
 
 type Params = Promise<{ shopId: string }>;
 
 export async function generateMetadata({ params }: { params: Params }) {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const t = (key: string, fallback: string) => MESSAGES[locale][key] ?? fallback;
   const { shopId } = await params;
   const supabase = await createClient();
   const { data } = await supabase
@@ -17,10 +23,17 @@ export async function generateMetadata({ params }: { params: Params }) {
     .select("name")
     .eq("id", shopId)
     .single();
-  return { title: data ? `Produits — ${data.name}` : "Produits" };
+  return {
+    title: data
+      ? `${t("dashboard.products.metadataPrefix", "Products -")} ${data.name}`
+      : t("dashboard.products.metadataFallback", "Products"),
+  };
 }
 
 export default async function ProductsPage({ params }: { params: Params }) {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const t = (key: string, fallback: string) => MESSAGES[locale][key] ?? fallback;
   const { shopId } = await params;
   const supabase = await createClient();
 
@@ -76,24 +89,26 @@ export default async function ProductsPage({ params }: { params: Params }) {
           className="text-3xl font-bold"
           style={{ fontFamily: "var(--font-onest)" }}
         >
-          Produits
+          {t("dashboard.products.metadataFallback", "Products")}
         </h1>
         <p className="text-sm text-muted-foreground">{shop.name}</p>
         <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
-          {PRODUCT_PAGE_DESCRIPTION}
+          {getDashboardCatalogCopy(locale, "product")}
         </p>
       </div>
 
       {cats.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
           <p className="text-muted-foreground">
-            Créez d&apos;abord des catégories avant d&apos;ajouter des produits.
+            {locale === "en"
+              ? "Create categories first before adding products."
+              : "Créez d'abord des catégories avant d'ajouter des produits."}
           </p>
           <Link
             href={`/dashboard/shops/${shopId}/categories`}
             className={buttonVariants({ variant: "outline" })}
           >
-            Gérer les catégories
+            {locale === "en" ? "Manage categories" : "Gérer les catégories"}
           </Link>
         </div>
       ) : (

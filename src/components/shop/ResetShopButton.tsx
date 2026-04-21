@@ -17,8 +17,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 export function ResetShopButton({ shopName }: { shopName: string }) {
+  const { t } = useLocale();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [confirm, setConfirm] = useState("");
@@ -30,14 +32,14 @@ export function ResetShopButton({ shopName }: { shopName: string }) {
       const res = await fetch("/api/shop/reset", { method: "POST" });
       const data = await res.json();
       if (!res.ok) {
-        toast.error(data.error ?? "Erreur lors du reset");
+        toast.error(data.error ?? t("dashboard.resetShop.toastUnexpectedError", "Unexpected error"));
         return;
       }
-      toast.success("Boutique réinitialisée");
+      toast.success(t("dashboard.resetShop.toastSuccess", "Shop reset"));
       setOpen(false);
       router.push(`/onboarding/shop?shopId=${data.shopId}`);
     } catch {
-      toast.error("Erreur inattendue");
+      toast.error(t("dashboard.resetShop.toastUnexpectedError", "Unexpected error"));
     } finally {
       setLoading(false);
     }
@@ -49,23 +51,24 @@ export function ResetShopButton({ shopName }: { shopName: string }) {
         className="inline-flex items-center gap-2 rounded-md border border-destructive px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
       >
         <RotateCcw className="h-4 w-4" />
-        Réinitialiser la boutique
+        {t("dashboard.resetShop.trigger", "Reset shop")}
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
             <TriangleAlert className="h-5 w-5" />
-            Réinitialiser la boutique
+            {t("dashboard.resetShop.dialogTitle", "Reset shop")}
           </DialogTitle>
           <DialogDescription>
-            Cette action est <strong>irréversible</strong>. Elle supprime définitivement toutes les catégories, produits, formules et commandes, puis repart de l&apos;onboarding.
+            {t("dashboard.resetShop.dialogDescription", "This action is irreversible.")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2 py-2">
           <Label htmlFor="confirm-name">
-            Tapez <span className="font-semibold">{shopName}</span> pour confirmer
+            {t("dashboard.resetShop.confirmLabelPrefix", "Type")} <span className="font-semibold">{shopName}</span>{" "}
+            {t("dashboard.resetShop.confirmLabelSuffix", "to confirm")}
           </Label>
           <Input
             id="confirm-name"
@@ -78,7 +81,7 @@ export function ResetShopButton({ shopName }: { shopName: string }) {
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)} disabled={loading}>
-            Annuler
+            {t("dashboard.common.cancel", "Cancel")}
           </Button>
           <Button
             variant="destructive"
@@ -88,10 +91,10 @@ export function ResetShopButton({ shopName }: { shopName: string }) {
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Réinitialisation…
+                {t("dashboard.resetShop.resetting", "Resetting...")}
               </>
             ) : (
-              "Tout effacer et recommencer"
+              t("dashboard.resetShop.confirmAction", "Delete everything and start over")
             )}
           </Button>
         </DialogFooter>

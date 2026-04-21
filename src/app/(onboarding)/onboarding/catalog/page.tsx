@@ -17,7 +17,7 @@ import {
   redirectIfVitrineNotDone,
 } from "@/lib/onboarding-load-shop";
 
-export const metadata = { title: "Votre catalogue — Bento Resto" };
+export const metadata = { title: "Your catalog — Bento Resto" };
 
 function normalizeTags(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
@@ -97,10 +97,7 @@ export default async function OnboardingCatalogPage({ searchParams }: Props) {
   redirectIfVitrineNotDone(shop.id, shop.social_links);
 
   const payload =
-    (await fetchPublicShopPagePayload(supabase, {
-      id: shop.id,
-      includeInactiveShop: true,
-    })) ?? emptyPayloadFromShop(shop);
+    (await fetchPublicShopPagePayload(supabase, { id: shop.id })) ?? emptyPayloadFromShop(shop);
 
   const catIds = payload.categories.map((c) => c.id);
   let initialProducts: OnboardingProductRow[] = [];

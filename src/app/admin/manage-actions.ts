@@ -26,7 +26,6 @@ export async function adminSaveCategory(
     name: string;
     description: string | null;
     icon_emoji: string;
-    cover_image_url: string | null;
     is_active: boolean;
     display_order: number;
   },
@@ -42,7 +41,6 @@ export async function adminSaveCategory(
         name: payload.name,
         description: payload.description,
         icon_emoji: payload.icon_emoji || "📦",
-        cover_image_url: payload.cover_image_url,
         is_active: payload.is_active,
       })
       .eq("id", existingId)
@@ -64,7 +62,6 @@ export async function adminSaveCategory(
       name: payload.name,
       description: payload.description,
       icon_emoji: payload.icon_emoji || "📦",
-      cover_image_url: payload.cover_image_url,
       is_active: payload.is_active,
       display_order: payload.display_order ?? (count ?? 0) + 1,
     })

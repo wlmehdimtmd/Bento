@@ -12,7 +12,6 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-import { ImageUploader } from "@/components/product/ImageUploader";
 import { OnboardingStepTitle } from "@/components/onboarding/OnboardingStepTitle";
 import {
   Sheet,
@@ -24,13 +23,13 @@ import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface CategoryItem {
   id: string;
   name: string;
   description: string | null;
   icon_emoji: string;
-  cover_image_url?: string | null;
   is_active?: boolean;
   display_order: number;
 }
@@ -48,6 +47,8 @@ export function OnboardingCategoriesStep({
   isPreview = false,
   onCatalogChanged,
 }: OnboardingCategoriesStepProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const [categories, setCategories] = useState<CategoryItem[]>(initialCategories);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -55,11 +56,10 @@ export function OnboardingCategoriesStep({
   const [newName, setNewName] = useState("");
   const [newEmoji, setNewEmoji] = useState("🍱");
   const [newDescription, setNewDescription] = useState("");
-  const [newCoverUrl, setNewCoverUrl] = useState<string | null>(null);
   const [newIsActive, setNewIsActive] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [formPresentation, setFormPresentation] = useState<"drawer" | "sheet">("sheet");
-  const [subView, setSubView] = useState<"main" | "icon" | "cover">("main");
+  const [subView, setSubView] = useState<"main" | "icon">("main");
   const [saving, setSaving] = useState(false);
   const isMobile = useIsMobile(640);
 
@@ -149,14 +149,14 @@ export function OnboardingCategoriesStep({
       .delete()
       .eq("category_id", id);
     if (slotsError) {
-      toast.error("Impossible de supprimer les formules liées à cette catégorie.");
+      toast.error(tr("Impossible de supprimer les formules liées à cette catégorie.", "Unable to delete bundles linked to this category."));
       return;
     }
 
     const { error } = await supabase.from("categories").delete().eq("id", id);
     if (error) {
       if (error.code === "23503") {
-        toast.error("Cette catégorie est encore utilisée ailleurs (formules, produits ou commandes).");
+        toast.error(tr("Cette catégorie est encore utilisée ailleurs (formules, produits ou commandes).", "This category is still used elsewhere (bundles, products, or orders)."));
       } else {
         toast.error(error.message);
       }
@@ -178,7 +178,6 @@ export function OnboardingCategoriesStep({
           name: newName.trim(),
           description: description || null,
           icon_emoji: newEmoji || "🍱",
-          cover_image_url: newCoverUrl,
           is_active: newIsActive,
           display_order: order,
         },
@@ -186,7 +185,6 @@ export function OnboardingCategoriesStep({
       setNewName("");
       setNewEmoji("🍱");
       setNewDescription("");
-      setNewCoverUrl(null);
       setNewIsActive(true);
       setCreateOpen(false);
       notify();
@@ -201,7 +199,6 @@ export function OnboardingCategoriesStep({
         name: newName.trim(),
         description: description || null,
         icon_emoji: newEmoji || "🍱",
-        cover_image_url: newCoverUrl,
         display_order: order,
         is_active: newIsActive,
       })
@@ -216,7 +213,6 @@ export function OnboardingCategoriesStep({
     setNewName("");
     setNewEmoji("🍱");
     setNewDescription("");
-    setNewCoverUrl(null);
     setNewIsActive(true);
     setCreateOpen(false);
     notify();
@@ -228,7 +224,6 @@ export function OnboardingCategoriesStep({
     setNewName("");
     setNewEmoji("🍱");
     setNewDescription("");
-    setNewCoverUrl(null);
     setNewIsActive(true);
   }
 
@@ -284,7 +279,7 @@ export function OnboardingCategoriesStep({
                   ? "border-[var(--primary)] bg-[var(--primary)]/10"
                   : "border-border hover:border-muted-foreground"
               )}
-              aria-label={`Icône ${emoji}`}
+              aria-label={tr(`Icône ${emoji}`, `Icon ${emoji}`)}
             >
               {emoji}
             </button>
@@ -298,32 +293,7 @@ export function OnboardingCategoriesStep({
           style={{ backgroundColor: "var(--primary)" }}
           className="w-full text-primary-foreground hover:opacity-90"
         >
-          Valider
-        </Button>
-      </div>
-    </div>
-  );
-
-  const coverPanel = (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="flex-1 px-1 pb-4">
-        <ImageUploader
-          bucket="shop-assets"
-          label="Image de couverture"
-          currentUrl={newCoverUrl}
-          onUpload={setNewCoverUrl}
-          onRemove={() => setNewCoverUrl(null)}
-          simulationDisabled={isPreview}
-        />
-      </div>
-      <div className="sticky bottom-0 mt-auto border-t border-border px-1 py-3">
-        <Button
-          type="button"
-          onClick={() => setSubView("main")}
-          style={{ backgroundColor: "var(--primary)" }}
-          className="w-full text-primary-foreground hover:opacity-90"
-        >
-          Valider
+          {tr("Valider", "Confirm")}
         </Button>
       </div>
     </div>
@@ -333,7 +303,7 @@ export function OnboardingCategoriesStep({
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex-1 space-y-4 px-1 pb-4">
         <div className="space-y-1.5">
-          <p className="text-sm font-medium">Nom</p>
+          <p className="text-sm font-medium">{tr("Nom", "Name")}</p>
           <Input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
@@ -341,7 +311,7 @@ export function OnboardingCategoriesStep({
               if (e.key === "Enter") void addCategory();
               if (e.key === "Escape") closeCreatePanel();
             }}
-            placeholder="Nom de la catégorie"
+            placeholder={tr("Nom de la catégorie", "Category name")}
             autoFocus
           />
         </div>
@@ -353,7 +323,7 @@ export function OnboardingCategoriesStep({
           className="h-12 w-full justify-between rounded-xl px-3 text-base"
         >
           <span className="flex items-center gap-2">
-            <span>Icône</span>
+            <span>{tr("Icône", "Icon")}</span>
             <span className="text-xl leading-none">{newEmoji}</span>
           </span>
           <ChevronRight className="h-4 w-4" />
@@ -361,36 +331,26 @@ export function OnboardingCategoriesStep({
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Descriptif</p>
+            <p className="text-sm font-medium">{tr("Descriptif", "Description")}</p>
             <span className="text-xs text-muted-foreground">{newDescription.length}/32</span>
           </div>
           <Input
             value={newDescription}
             onChange={(e) => setNewDescription(e.target.value.slice(0, 32))}
-            placeholder="Ex: Nos meilleures spécialités"
+            placeholder={tr("Ex: Nos meilleures spécialités", "Ex: Our best specialties")}
             maxLength={32}
           />
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setSubView("cover")}
-          className="h-12 w-full justify-between rounded-xl px-3 text-base"
-        >
-          <span>{newCoverUrl ? "Modifier l'image de couverture" : "Ajouter une image de couverture"}</span>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-
         <div className="flex items-center justify-between rounded-lg border border-border p-3">
           <div>
-            <p className="text-sm font-medium">Catégorie active</p>
-            <p className="text-xs text-muted-foreground">Visible sur la vitrine publique</p>
+            <p className="text-sm font-medium">{tr("Catégorie active", "Active category")}</p>
+            <p className="text-xs text-muted-foreground">{tr("Visible sur la vitrine publique", "Visible on public storefront")}</p>
           </div>
           <Switch
             checked={newIsActive}
             onCheckedChange={setNewIsActive}
-            aria-label={newIsActive ? "Désactiver la catégorie" : "Activer la catégorie"}
+            aria-label={newIsActive ? tr("Désactiver la catégorie", "Disable category") : tr("Activer la catégorie", "Enable category")}
           />
         </div>
       </div>
@@ -398,7 +358,7 @@ export function OnboardingCategoriesStep({
       <div className="sticky bottom-0 mt-auto border-t border-border px-1 py-3">
         <div className="flex items-center gap-2">
           <Button type="button" variant="outline" onClick={closeCreatePanel} className="flex-1">
-            Annuler
+            {tr("Annuler", "Cancel")}
           </Button>
           <Button
             type="button"
@@ -407,7 +367,7 @@ export function OnboardingCategoriesStep({
             style={{ backgroundColor: "var(--primary)" }}
             className="flex-1 text-primary-foreground hover:opacity-90"
           >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Ajouter"}
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : tr("Ajouter", "Add")}
           </Button>
         </div>
       </div>
@@ -417,8 +377,8 @@ export function OnboardingCategoriesStep({
   return (
     <div className="space-y-6 pt-2">
       <OnboardingStepTitle
-        title="Catégories"
-        subtitle="Structurez votre carte : chaque catégorie devient une tuile sur votre vitrine."
+        title={tr("Catégories", "Categories")}
+        subtitle={tr("Structurez votre carte : chaque catégorie devient une tuile sur votre vitrine.", "Structure your menu: each category becomes a tile on your storefront.")}
       />
 
       <ul className="space-y-2">
@@ -460,7 +420,7 @@ export function OnboardingCategoriesStep({
                   onClick={() => void saveEdit(cat.id)}
                   disabled={saving}
                   className="shrink-0 text-green-600 hover:text-green-700"
-                  aria-label="Valider"
+                  aria-label={tr("Valider", "Confirm")}
                 >
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                 </button>
@@ -468,7 +428,7 @@ export function OnboardingCategoriesStep({
                   type="button"
                   onClick={() => setEditingId(null)}
                   className="shrink-0 text-muted-foreground hover:text-foreground"
-                  aria-label="Annuler"
+                  aria-label={tr("Annuler", "Cancel")}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -486,7 +446,7 @@ export function OnboardingCategoriesStep({
                   type="button"
                   onClick={() => void startEdit(cat)}
                   className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Renommer"
+                  aria-label={tr("Renommer", "Rename")}
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
@@ -494,7 +454,7 @@ export function OnboardingCategoriesStep({
                   type="button"
                   onClick={() => void deleteCategory(cat.id)}
                   className="shrink-0 text-muted-foreground hover:text-destructive transition-colors"
-                  aria-label="Supprimer"
+                  aria-label={tr("Supprimer", "Delete")}
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -514,7 +474,7 @@ export function OnboardingCategoriesStep({
         className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm text-muted-foreground hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors"
       >
         <Plus className="h-4 w-4" />
-        Nouvelle catégorie
+        {tr("Nouvelle catégorie", "New category")}
       </button>
 
       {formPresentation === "drawer" ? (
@@ -536,21 +496,19 @@ export function OnboardingCategoriesStep({
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => setSubView("main")}
-                  aria-label="Retour"
+                  aria-label={tr("Retour", "Back")}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               ) : null}
               <DrawerTitle>
                 {subView === "icon"
-                  ? "Icône de la catégorie"
-                  : subView === "cover"
-                    ? "Image de couverture"
-                    : "Nouvelle catégorie"}
+                  ? tr("Icône de la catégorie", "Category icon")
+                  : tr("Nouvelle catégorie", "New category")}
               </DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
-              {subView === "icon" ? iconPanel : subView === "cover" ? coverPanel : createCategoryForm}
+              {subView === "icon" ? iconPanel : createCategoryForm}
             </div>
           </DrawerContent>
         </Drawer>
@@ -573,21 +531,19 @@ export function OnboardingCategoriesStep({
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => setSubView("main")}
-                  aria-label="Retour"
+                  aria-label={tr("Retour", "Back")}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               ) : null}
               <SheetTitle>
                 {subView === "icon"
-                  ? "Icône de la catégorie"
-                  : subView === "cover"
-                    ? "Image de couverture"
-                    : "Nouvelle catégorie"}
+                  ? tr("Icône de la catégorie", "Category icon")
+                  : tr("Nouvelle catégorie", "New category")}
               </SheetTitle>
             </SheetHeader>
             <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
-              {subView === "icon" ? iconPanel : subView === "cover" ? coverPanel : createCategoryForm}
+              {subView === "icon" ? iconPanel : createCategoryForm}
             </div>
           </SheetContent>
         </Sheet>

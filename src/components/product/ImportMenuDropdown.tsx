@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 /** Réactiver l’import IA depuis ce menu quand la fonctionnalité sera prête. */
 export const AI_MENU_IMPORT_ENABLED = false;
@@ -28,6 +29,7 @@ export function ImportMenuDropdown({
   aiEnabled = AI_MENU_IMPORT_ENABLED,
   onImportAi,
 }: ImportMenuDropdownProps) {
+  const { t } = useLocale();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -36,7 +38,7 @@ export function ImportMenuDropdown({
           "inline-flex shrink-0 gap-1.5 whitespace-nowrap"
         )}
       >
-        Importer
+        {t("dashboard.import.trigger", "Import")}
         <ChevronDown className="h-4 w-4 opacity-70" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-64">
@@ -47,7 +49,7 @@ export function ImportMenuDropdown({
           }}
         >
           <Layers />
-          Importer depuis un modèle
+          {t("dashboard.import.fromTemplate", "Import from template")}
         </DropdownMenuItem>
         <DropdownMenuItem
           className="whitespace-nowrap"
@@ -56,7 +58,7 @@ export function ImportMenuDropdown({
           }}
         >
           <Braces />
-          Coller du JSON
+          {t("dashboard.import.fromJson", "Paste JSON")}
         </DropdownMenuItem>
         <DropdownMenuItem
           className="whitespace-nowrap"
@@ -66,7 +68,7 @@ export function ImportMenuDropdown({
           }}
         >
           <Sparkles />
-          Importer mon menu avec l&apos;IA
+          {t("dashboard.import.fromAi", "Import my menu with AI")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

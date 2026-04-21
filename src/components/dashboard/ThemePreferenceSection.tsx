@@ -5,6 +5,7 @@ import { Monitor, Moon, Sun } from "lucide-react";
 import { useSyncExternalStore } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 function subscribe() {
   return () => {};
@@ -20,6 +21,7 @@ function getServerSnapshot() {
 
 export function ThemePreferenceSection() {
   const { theme, setTheme } = useTheme();
+  const { t } = useLocale();
   const mounted = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
 
   if (!mounted) {
@@ -33,9 +35,9 @@ export function ThemePreferenceSection() {
   }
 
   const options = [
-    { value: "light" as const, label: "Clair", icon: Sun },
-    { value: "dark" as const, label: "Sombre", icon: Moon },
-    { value: "system" as const, label: "Système", icon: Monitor },
+    { value: "light" as const, label: t("dashboard.settings.themeLight", "Light"), icon: Sun },
+    { value: "dark" as const, label: t("dashboard.settings.themeDark", "Dark"), icon: Moon },
+    { value: "system" as const, label: t("dashboard.settings.themeSystem", "System"), icon: Monitor },
   ];
 
   return (

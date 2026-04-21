@@ -10,13 +10,10 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { AppBrandMark } from "@/components/layout/AppBrandMark";
-import { cookies } from "next/headers";
-import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 
 export async function generateMetadata() {
-  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
   return {
-    title: locale === "en" ? "Log in — Bento Resto" : "Connexion — Bento Resto",
+    title: "Log in — Bento Resto",
   };
 }
 
@@ -25,7 +22,7 @@ export default function LoginPage() {
     <div className="w-full max-w-md space-y-2">
       <Link
         href="/"
-        aria-label="Retour à l'accueil"
+        aria-label="Back to home"
         className={buttonVariants({ variant: "ghost", size: "icon" })}
       >
         <ChevronLeft className="h-5 w-5" />
@@ -35,9 +32,9 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <AppBrandMark variant="auth" />
           </div>
-          <CardTitle className="text-2xl">Bon retour !</CardTitle>
+          <CardTitle className="text-2xl">Welcome back!</CardTitle>
           <CardDescription>
-            Connectez-vous pour gérer votre commerce.
+            Log in to manage your business.
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-4">

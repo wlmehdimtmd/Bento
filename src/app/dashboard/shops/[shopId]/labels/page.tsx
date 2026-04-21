@@ -2,19 +2,32 @@ import { notFound, redirect } from "next/navigation";
 
 import { ShopLabelsClient } from "@/components/product/ShopLabelsClient";
 import { createClient } from "@/lib/supabase/server";
-import { LABEL_PAGE_DESCRIPTION } from "@/lib/dashboard-catalog-copy";
+import { getDashboardCatalogCopy } from "@/lib/dashboard-catalog-copy";
 import { fetchShopLabelsForDashboard } from "@/lib/shop-labels";
+import { cookies } from "next/headers";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
+import { MESSAGES } from "@/lib/i18nMessages";
 
 type Params = Promise<{ shopId: string }>;
 
 export async function generateMetadata({ params }: { params: Params }) {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const t = (key: string, fallback: string) => MESSAGES[locale][key] ?? fallback;
   const { shopId } = await params;
   const supabase = await createClient();
   const { data } = await supabase.from("shops").select("name").eq("id", shopId).single();
-  return { title: data ? `Labels — ${data.name}` : "Labels" };
+  return {
+    title: data
+      ? `${t("dashboard.labels.metadataPrefix", "Labels -")} ${data.name}`
+      : t("dashboard.labels.metadataFallback", "Labels"),
+  };
 }
 
 export default async function ShopLabelsPage({ params }: { params: Params }) {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const t = (key: string, fallback: string) => MESSAGES[locale][key] ?? fallback;
   const { shopId } = await params;
   const supabase = await createClient();
 
@@ -61,11 +74,11 @@ export default async function ShopLabelsPage({ params }: { params: Params }) {
     <div className="p-6 md:p-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold" style={{ fontFamily: "var(--font-onest)" }}>
-          Labels
+          {t("dashboard.labels.metadataFallback", "Labels")}
         </h1>
         <p className="text-sm text-muted-foreground">{shop.name}</p>
         <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
-          {LABEL_PAGE_DESCRIPTION}
+          {getDashboardCatalogCopy(locale, "label")}
         </p>
       </div>
 

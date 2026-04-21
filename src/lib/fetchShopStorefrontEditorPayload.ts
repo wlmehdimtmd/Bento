@@ -79,7 +79,7 @@ export async function fetchShopStorefrontEditorPayload(
 
   const { data: rawCategories } = await supabase
     .from("categories")
-    .select("id, name, icon_emoji, cover_image_url, description, display_order")
+    .select("id, name, icon_emoji, description, display_order")
     .eq("shop_id", shop.id)
     .eq("is_active", true)
     .order("display_order");
@@ -104,7 +104,6 @@ export async function fetchShopStorefrontEditorPayload(
     id: c.id,
     name: c.name,
     icon_emoji: c.icon_emoji,
-    cover_image_url: c.cover_image_url,
     description: c.description,
     productCount: productCounts[c.id] ?? 0,
   }));

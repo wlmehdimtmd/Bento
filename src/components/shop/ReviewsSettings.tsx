@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import type { ShopReviews } from "@/lib/types";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 // ── Types ─────────────────────────────────────────────────────
 
@@ -67,6 +68,8 @@ function GoogleSection({
   initial: ShopReviews | null;
   reviewsMutateApiBase: string;
 }) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const [enabled, setEnabled] = useState(initial?.google_enabled ?? false);
   const [connected, setConnected] = useState(!!initial?.google_place_id);
   const [placeName, setPlaceName] = useState(initial?.google_place_name ?? null);
@@ -137,7 +140,7 @@ function GoogleSection({
       if (!res.ok) throw new Error();
       setEnabled(val);
     } catch {
-      toast.error("Impossible de modifier le paramètre.");
+      toast.error(tr("Impossible de modifier le paramètre.", "Unable to update setting."));
     } finally {
       setToggling(false);
     }
@@ -154,16 +157,16 @@ function GoogleSection({
         body: JSON.stringify({ shopId, placeId: p.place_id }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Erreur");
+      if (!res.ok) throw new Error(data.error ?? tr("Erreur", "Error"));
       setPlaceName(data.name);
       setPlaceAddress(data.address);
       setRating(data.rating);
       setReviewCount(data.review_count);
       setLastFetched(new Date().toISOString());
       setConnected(true);
-      toast.success("Restaurant Google connecté !");
+      toast.success(tr("Restaurant Google connecté !", "Google business connected!"));
     } catch (e) {
-      toast.error((e as Error).message || "Impossible de connecter le restaurant.");
+      toast.error((e as Error).message || tr("Impossible de connecter le restaurant.", "Unable to connect business."));
     } finally {
       setConnecting(false);
     }
@@ -184,9 +187,9 @@ function GoogleSection({
       setRating(null);
       setReviewCount(null);
       setLastFetched(null);
-      toast.success("Déconnecté de Google.");
+      toast.success(tr("Déconnecté de Google.", "Disconnected from Google."));
     } catch {
-      toast.error("Impossible de dissocier.");
+      toast.error(tr("Impossible de dissocier.", "Unable to disconnect."));
     }
   }
 
@@ -196,10 +199,10 @@ function GoogleSection({
         <div className="space-y-0.5">
           <Label className="text-base font-semibold flex items-center gap-2">
             <GoogleLogo />
-            Afficher ma note Google
+            {tr("Afficher ma note Google", "Show my Google rating")}
           </Label>
           <p className="text-xs text-muted-foreground">
-            La note sera actualisée automatiquement chaque jour.
+            {tr("La note sera actualisée automatiquement chaque jour.", "Rating is refreshed automatically each day.")}
           </p>
         </div>
         <Switch
@@ -213,16 +216,16 @@ function GoogleSection({
       {enabled && !connected && (
         <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-4">
           <div className="space-y-1">
-            <p className="text-sm font-medium">Trouvez votre restaurant sur Google :</p>
+            <p className="text-sm font-medium">{tr("Trouvez votre restaurant sur Google :", "Find your business on Google:")}</p>
             <ol className="text-sm text-muted-foreground space-y-1 list-none">
               <li>
-                <span className="font-medium text-foreground">Étape 1</span> — Tapez le nom de votre restaurant ci-dessous
+                <span className="font-medium text-foreground">{tr("Étape 1", "Step 1")}</span> — {tr("Tapez le nom de votre restaurant ci-dessous", "Type your business name below")}
               </li>
               <li>
-                <span className="font-medium text-foreground">Étape 2</span> — Sélectionnez-le dans la liste (vérifiez l&apos;adresse)
+                <span className="font-medium text-foreground">{tr("Étape 2", "Step 2")}</span> — {tr("Sélectionnez-le dans la liste (vérifiez l'adresse)", "Select it from the list (check the address)")}
               </li>
               <li>
-                <span className="font-medium text-foreground">Étape 3</span> — C&apos;est terminé ! Votre note se met à jour automatiquement.
+                <span className="font-medium text-foreground">{tr("Étape 3", "Step 3")}</span> — {tr("C'est terminé ! Votre note se met à jour automatiquement.", "Done! Your rating updates automatically.")}
               </li>
             </ol>
           </div>
@@ -236,7 +239,7 @@ function GoogleSection({
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ex : Le Bistrot de Mamie, Paris"
+                placeholder={tr("Ex : Le Bistrot de Mamie, Paris", "Ex: Joe's Bistro, Paris")}
                 className="pl-9 pr-9"
                 disabled={connecting}
               />
@@ -270,7 +273,7 @@ function GoogleSection({
             <div className="space-y-1">
               <p className="flex items-center gap-1.5 text-sm font-semibold text-green-700 dark:text-green-400">
                 <CheckCircle className="h-4 w-4 shrink-0" />
-                Restaurant trouvé !
+                {tr("Restaurant trouvé !", "Business found!")}
               </p>
               <p className="text-sm font-medium">{placeName}</p>
               {placeAddress && (
@@ -284,14 +287,14 @@ function GoogleSection({
                   <StarRating value={rating} />
                   <span className="font-semibold">{rating.toFixed(1)}/5</span>
                   {reviewCount !== null && (
-                    <span className="text-xs text-muted-foreground">— {reviewCount.toLocaleString("fr")} avis</span>
+                    <span className="text-xs text-muted-foreground">— {reviewCount.toLocaleString(locale === "en" ? "en-US" : "fr")} {tr("avis", "reviews")}</span>
                   )}
                 </p>
               )}
               {lastFetched && (
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <RefreshCw className="h-3 w-3" />
-                  Dernière mise à jour {staleLabel(lastFetched)}
+                  {tr("Dernière mise à jour", "Last update")} {staleLabel(lastFetched)}
                 </p>
               )}
             </div>
@@ -303,7 +306,7 @@ function GoogleSection({
               size="sm"
               onClick={() => { setConnected(false); }}
             >
-              Modifier
+              {tr("Modifier", "Edit")}
             </Button>
             <Button
               type="button"
@@ -313,7 +316,7 @@ function GoogleSection({
               onClick={handleDisconnect}
             >
               <X className="h-3.5 w-3.5 mr-1" />
-              Dissocier
+              {tr("Dissocier", "Disconnect")}
             </Button>
           </div>
         </div>
@@ -343,16 +346,18 @@ export function ReviewsSettings({
   reviewsMutateApiBase = "/api/reviews",
   omitOuterChrome = false,
 }: ReviewsSettingsProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const inner = (
     <>
       {!omitOuterChrome ? (
         <>
-          <h2 className="text-lg font-semibold">Avis clients</h2>
+          <h2 className="text-lg font-semibold">{tr("Avis clients", "Customer reviews")}</h2>
           <Separator />
         </>
       ) : null}
       <p className="text-sm text-muted-foreground">
-        Associez vos pages une seule fois — les notes se mettent à jour automatiquement.
+        {tr("Associez vos pages une seule fois — les notes se mettent à jour automatiquement.", "Connect once — ratings update automatically.")}
       </p>
 
       <div className="rounded-lg border border-border bg-card p-6">

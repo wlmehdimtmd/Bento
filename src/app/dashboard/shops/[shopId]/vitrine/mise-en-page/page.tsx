@@ -2,16 +2,22 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { fetchShopStorefrontEditorPayload } from "@/lib/fetchShopStorefrontEditorPayload";
 import { StorefrontBentoEditor } from "@/components/dashboard/StorefrontBentoEditor";
+import { cookies } from "next/headers";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
+import { MESSAGES } from "@/lib/i18nMessages";
 
 type Params = Promise<{ shopId: string }>;
 
 export async function generateMetadata({ params }: { params: Params }) {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const t = (key: string, fallback: string) => MESSAGES[locale][key] ?? fallback;
   const { shopId } = await params;
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { title: "Mise en page vitrine" };
+  if (!user) return { title: t("dashboard.storefrontLayout.metadataFallback", "Storefront layout") };
 
   const { data } = await supabase
     .from("shops")
@@ -20,7 +26,11 @@ export async function generateMetadata({ params }: { params: Params }) {
     .eq("owner_id", user.id)
     .maybeSingle();
 
-  return { title: data ? `Mise en page — ${data.name}` : "Mise en page vitrine" };
+  return {
+    title: data
+      ? `${t("dashboard.storefrontLayout.metadataPrefix", "Layout -")} ${data.name}`
+      : t("dashboard.storefrontLayout.metadataFallback", "Storefront layout"),
+  };
 }
 
 export default async function ShopVitrineMiseEnPagePage({ params }: { params: Params }) {

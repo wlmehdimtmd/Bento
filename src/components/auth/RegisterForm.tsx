@@ -16,15 +16,15 @@ import { ensureDefaultShopForOwner } from "@/lib/merchant-bootstrap";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
 const registerSchema = z.object({
-  full_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  email: z.string().email("Adresse email invalide"),
+  full_name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
   password: z
     .string()
-    .min(10, "Au moins 10 caractères")
-    .regex(/[A-Z]/, "Au moins une lettre majuscule")
-    .regex(/[a-z]/, "Au moins une lettre minuscule")
-    .regex(/[0-9]/, "Au moins un chiffre")
-    .regex(/[^A-Za-z0-9]/, "Au moins un caractère spécial (!@#$%…)"),
+    .min(10, "At least 10 characters")
+    .regex(/[A-Z]/, "At least one uppercase letter")
+    .regex(/[a-z]/, "At least one lowercase letter")
+    .regex(/[0-9]/, "At least one number")
+    .regex(/[^A-Za-z0-9]/, "At least one special character (!@#$%…)"),
 });
 
 type RegisterValues = z.infer<typeof registerSchema>;
@@ -34,16 +34,16 @@ function mapAuthError(message: string): string {
     message.includes("already registered") ||
     message.includes("already been registered")
   ) {
-    // Ne pas révéler si l'email est déjà pris — message identique au cas succès
-    return "Si cette adresse est valide, vous recevrez un email de confirmation.";
+    // Do not reveal whether the email is already taken.
+    return "If this address is valid, you will receive a confirmation email.";
   }
   if (message.includes("Password should be at least")) {
-    return "Votre mot de passe doit contenir au moins 10 caractères.";
+    return "Your password must contain at least 10 characters.";
   }
   if (message.includes("weak") || message.includes("too short")) {
-    return "Ajoutez des majuscules, chiffres ou caractères spéciaux pour renforcer votre mot de passe.";
+    return "Add uppercase letters, numbers, or special characters to strengthen your password.";
   }
-  return "Une erreur est survenue, veuillez réessayer.";
+  return "An error occurred, please try again.";
 }
 
 export function RegisterForm() {
@@ -67,15 +67,15 @@ export function RegisterForm() {
           typeof data.error === "string" && data.error.length > 0
             ? data.error
             : res.status === 404
-              ? "Raccourci indisponible (environnement ou configuration)."
-              : `Erreur serveur (${res.status}).`;
-        setServerError(`Erreur : ${detail}`);
+              ? "Shortcut unavailable (environment or configuration)."
+              : `Server error (${res.status}).`;
+        setServerError(`Error: ${detail}`);
         return;
       }
       router.push(`/onboarding/shop?shopId=${data.shopId}`);
       router.refresh();
     } catch {
-      setServerError(locale === "en" ? "Unexpected error." : "Erreur inattendue.");
+      setServerError(locale === "en" ? "Unexpected error." : "Unexpected error.");
     } finally {
       setIsQuickLoading(false);
     }
@@ -95,7 +95,7 @@ export function RegisterForm() {
     const supabase = createClient();
 
     try {
-      // 1. Créer le compte via route serveur (logging IP + user-agent)
+      // 1. Create account through server route (IP + user-agent logging)
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -108,7 +108,7 @@ export function RegisterForm() {
 
       if (!res.ok) {
         const data = await res.json();
-        console.error("[register] Échec signUp", {
+        console.error("[register] signUp failed", {
           error: data.error,
           timestamp: new Date().toISOString(),
         });
@@ -122,19 +122,19 @@ export function RegisterForm() {
         setServerError(
           locale === "en"
             ? "An unexpected error occurred."
-            : "Une erreur inattendue s'est produite."
+            : "An unexpected error occurred."
         );
         return;
       }
 
-      // Si Supabase demande une confirmation email, la session est null.
-      // Le mot de passe est bien persisté ; l'utilisateur doit d'abord confirmer.
+      // If Supabase requires email confirmation, session is null.
+      // Password is persisted; user must confirm first.
       if (!hasSession) {
         setAwaitingConfirmation(true);
         return;
       }
 
-      // 2. Créer la boutique (nécessite la session cookie posée par la route register)
+      // 2. Create shop (requires session cookie set by register route)
       const shopResult = await ensureDefaultShopForOwner(
         supabase,
         userId,
@@ -142,7 +142,7 @@ export function RegisterForm() {
       );
 
       if (!shopResult.ok) {
-        console.error("[register] Échec création boutique", {
+        console.error("[register] shop creation failed", {
           userId,
           error: shopResult.error,
           timestamp: new Date().toISOString(),
@@ -152,7 +152,7 @@ export function RegisterForm() {
         setServerError(
           locale === "en"
             ? "Account creation failed. Please try again."
-            : "La création de votre compte a échoué. Veuillez réessayer."
+            : "Account creation failed. Please try again."
         );
         return;
       }
@@ -163,7 +163,7 @@ export function RegisterForm() {
       setServerError(
         locale === "en"
           ? "An unexpected error occurred. Please try again."
-          : "Une erreur inattendue s'est produite. Veuillez réessayer."
+          : "An unexpected error occurred. Please try again."
       );
     }
   }
@@ -172,21 +172,20 @@ export function RegisterForm() {
     return (
       <div className="space-y-4 text-center">
         <p className="text-sm font-medium text-foreground">
-          Bento Resto vous a envoyé un email de confirmation.
+          Bento Resto has sent you a confirmation email.
         </p>
         <p className="text-sm text-muted-foreground">
-          Ouvrez le message et suivez le lien : votre compte sera activé et vous
-          serez connecté pour configurer votre vitrine en ligne (étape d&apos;onboarding).
+          Open the message and follow the link: your account will be activated and
+          you will be signed in to configure your storefront (onboarding step).
         </p>
         <p className="text-xs text-muted-foreground">
-          Rien dans la boîte de réception ? Vérifiez les courriers indésirables ou
-          l&apos;onglet Promotions.
+          Nothing in your inbox? Check spam or the Promotions tab.
         </p>
         <Link
           href="/login"
           className="block text-sm font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary)]"
         >
-          Retour à la connexion
+          Back to login
         </Link>
       </div>
     );
@@ -195,7 +194,7 @@ export function RegisterForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div className="space-y-1.5">
-        <Label htmlFor="full_name">Nom complet</Label>
+        <Label htmlFor="full_name">Full name</Label>
         <Input
           id="full_name"
           type="text"
@@ -215,7 +214,7 @@ export function RegisterForm() {
         <Input
           id="email"
           type="email"
-          placeholder="vous@exemple.com"
+          placeholder="you@example.com"
           autoComplete="email"
           disabled={isSubmitting}
           {...register("email")}
@@ -227,7 +226,7 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="password">Mot de passe</Label>
+        <Label htmlFor="password">Password</Label>
         <Input
           id="password"
           type="password"
@@ -252,10 +251,10 @@ export function RegisterForm() {
         {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Création du compte…
+            Creating account...
           </>
         ) : (
-          "Créer mon compte"
+          "Create my account"
         )}
       </Button>
 
@@ -282,12 +281,12 @@ export function RegisterForm() {
             {isQuickLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Création…
+                Creating...
               </>
             ) : (
               <>
                 <Zap className="mr-2 h-4 w-4" />
-                Compte test en 1 clic
+                1-click test account
               </>
             )}
           </Button>
@@ -295,12 +294,12 @@ export function RegisterForm() {
       )}
 
       <p className="text-center text-sm text-muted-foreground">
-        Déjà un compte ?{" "}
+        Already have an account?{" "}
         <Link
           href="/login"
           className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary)]"
         >
-          Se connecter
+          Log in
         </Link>
       </p>
     </form>

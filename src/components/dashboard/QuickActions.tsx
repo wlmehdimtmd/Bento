@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   FolderPlus,
   PackagePlus,
@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { QRCodeDisplay } from "@/components/shop/QRCodeDisplay";
 import { cn } from "@/lib/utils";
 import { storefrontPublicUrl } from "@/lib/publicAppUrl";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface QuickActionsProps {
   shopSlug?: string;
@@ -22,30 +23,29 @@ interface QuickActionsProps {
 
 export function QuickActions({ shopSlug, shopId }: QuickActionsProps) {
   const [qrOpen, setQrOpen] = useState(false);
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
 
-  const actions = useMemo(
-    () => [
-      {
-        key: "category" as const,
-        href: shopId ? `/dashboard/shops/${shopId}/categories` : "/dashboard/categories",
-        label: "+ Catégorie",
-        icon: FolderPlus,
-      },
-      {
-        key: "product" as const,
-        href: shopId ? `/dashboard/shops/${shopId}/products` : "/dashboard/products",
-        label: "+ Produit",
-        icon: PackagePlus,
-      },
-      {
-        key: "bundle" as const,
-        href: shopId ? `/dashboard/shops/${shopId}/bundles` : "/dashboard/bundles",
-        label: "+ Formule",
-        icon: Gift,
-      },
-    ],
-    [shopId]
-  );
+  const actions = [
+    {
+      key: "category" as const,
+      href: shopId ? `/dashboard/shops/${shopId}/categories` : "/dashboard/categories",
+      label: tr("+ Catégorie", "+ Category"),
+      icon: FolderPlus,
+    },
+    {
+      key: "product" as const,
+      href: shopId ? `/dashboard/shops/${shopId}/products` : "/dashboard/products",
+      label: tr("+ Produit", "+ Product"),
+      icon: PackagePlus,
+    },
+    {
+      key: "bundle" as const,
+      href: shopId ? `/dashboard/shops/${shopId}/bundles` : "/dashboard/bundles",
+      label: tr("+ Formule", "+ Bundle"),
+      icon: Gift,
+    },
+  ];
   const storeUrl = shopSlug ? storefrontPublicUrl(shopSlug) : null;
 
   return (
@@ -70,14 +70,14 @@ export function QuickActions({ shopSlug, shopId }: QuickActionsProps) {
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
           >
             <ExternalLink className="mr-1.5 h-4 w-4" />
-            Voir ma vitrine
+            {tr("Voir ma vitrine", "View storefront")}
           </a>
         )}
 
         {shopId && (
           <Button variant="outline" size="sm" onClick={() => setQrOpen(true)}>
             <QrCode className="mr-1.5 h-4 w-4" />
-            QR Code
+            {tr("QR Code", "QR code")}
           </Button>
         )}
       </div>
@@ -85,7 +85,7 @@ export function QuickActions({ shopSlug, shopId }: QuickActionsProps) {
       {storeUrl && (
         <Dialog open={qrOpen} onOpenChange={setQrOpen}>
           <DialogContent className="sm:max-w-sm">
-            <DialogTitle>QR Code de votre vitrine</DialogTitle>
+            <DialogTitle>{tr("QR Code de votre vitrine", "Storefront QR code")}</DialogTitle>
             <QRCodeDisplay url={storeUrl} shopName={shopSlug} />
           </DialogContent>
         </Dialog>

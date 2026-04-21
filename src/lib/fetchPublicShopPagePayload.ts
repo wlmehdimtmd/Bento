@@ -25,6 +25,7 @@ type ShopRow = {
   id: string;
   name: string;
   slug: string;
+  is_active: boolean;
   description: string | null;
   logo_url: string | null;
   cover_image_url: string | null;
@@ -56,8 +57,8 @@ function pickLocalized(
  */
 export type PublicShopFetchOpts =
   | { slug: string }
-  /** `includeInactiveShop` : prévisualisation onboarding / back-office (boutique pas encore active). */
-  | { id: string; includeInactiveShop?: boolean };
+  /** Chargement par id : visibilité (boutique inactive, etc.) gérée par la RLS. */
+  | { id: string };
 
 export async function fetchPublicShopPagePayload(
   supabase: SupabaseClient,
@@ -67,13 +68,8 @@ export async function fetchPublicShopPagePayload(
   let q = supabase
     .from("shops")
     .select(
-      "id, name, slug, description, name_fr, name_en, description_fr, description_en, logo_url, cover_image_url, address, phone, email_contact, social_links, fulfillment_modes, opening_hours, opening_timezone, open_on_public_holidays, stripe_account_id"
+      "id, name, slug, is_active, description, name_fr, name_en, description_fr, description_en, logo_url, cover_image_url, address, phone, email_contact, social_links, fulfillment_modes, opening_hours, opening_timezone, open_on_public_holidays, stripe_account_id"
     );
-
-  const skipActiveFilter = "id" in opts && opts.includeInactiveShop === true;
-  if (!skipActiveFilter) {
-    q = q.eq("is_active", true);
-  }
 
   if ("slug" in opts) {
     q = q.eq("slug", opts.slug);
@@ -137,7 +133,7 @@ export async function fetchPublicShopPagePayload(
 
   const { data: rawCategories } = await supabase
     .from("categories")
-    .select("id, name, name_fr, name_en, icon_emoji, cover_image_url, description, description_fr, description_en, display_order")
+    .select("id, name, name_fr, name_en, icon_emoji, description, description_fr, description_en, display_order")
     .eq("shop_id", s.id)
     .eq("is_active", true)
     .order("display_order");
@@ -148,7 +144,6 @@ export async function fetchPublicShopPagePayload(
     name_fr?: string | null;
     name_en?: string | null;
     icon_emoji: string;
-    cover_image_url: string | null;
     description: string | null;
     description_fr?: string | null;
     description_en?: string | null;
@@ -176,7 +171,6 @@ export async function fetchPublicShopPagePayload(
       legacy: c.name,
     }) ?? c.name,
     icon_emoji: c.icon_emoji,
-    cover_image_url: c.cover_image_url,
     description: pickLocalized(locale, {
       fr: c.description_fr,
       en: c.description_en,
@@ -285,6 +279,7 @@ export async function fetchPublicShopPagePayload(
     id: s.id,
     name: pickLocalized(locale, { fr: s.name_fr, en: s.name_en, legacy: s.name }) ?? s.name,
     slug: s.slug,
+    is_active: s.is_active,
     description: pickLocalized(locale, {
       fr: s.description_fr,
       en: s.description_en,

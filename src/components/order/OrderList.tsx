@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { OrderCard, type OrderRow } from "./OrderCard";
 import { OrderDetail } from "./OrderDetail";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 // ── Notification sound ─────────────────────────────────────────
 
@@ -33,11 +34,11 @@ function playNotificationSound() {
 // ── Tabs config ────────────────────────────────────────────────
 
 const TABS = [
-  { id: "all", label: "Toutes", statuses: null },
-  { id: "pending", label: "En attente", statuses: ["pending"] },
-  { id: "confirmed", label: "Confirmées", statuses: ["confirmed"] },
-  { id: "preparing", label: "En cours", statuses: ["preparing"] },
-  { id: "ready", label: "Prêtes", statuses: ["ready"] },
+  { id: "all", key: "dashboard.orders.tabs.all", fallback: "All", statuses: null },
+  { id: "pending", key: "dashboard.orders.tabs.pending", fallback: "Pending", statuses: ["pending"] },
+  { id: "confirmed", key: "dashboard.orders.tabs.confirmed", fallback: "Confirmed", statuses: ["confirmed"] },
+  { id: "preparing", key: "dashboard.orders.tabs.preparing", fallback: "Preparing", statuses: ["preparing"] },
+  { id: "ready", key: "dashboard.orders.tabs.ready", fallback: "Ready", statuses: ["ready"] },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -50,6 +51,7 @@ interface OrderListProps {
 }
 
 export function OrderList({ initialOrders, shopId }: OrderListProps) {
+  const { t } = useLocale();
   const [orders, setOrders] = useState<OrderRow[]>(initialOrders);
   const [activeTab, setActiveTab] = useState<TabId>("all");
   const [detailOrder, setDetailOrder] = useState<OrderRow | null>(null);
@@ -146,20 +148,20 @@ export function OrderList({ initialOrders, shopId }: OrderListProps) {
     <>
       {/* Tabs */}
       <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-none">
-        {TABS.map((t) => {
-          const count = countForTab(t.id);
-          const isActive = activeTab === t.id;
+        {TABS.map((tabItem) => {
+          const count = countForTab(tabItem.id);
+          const isActive = activeTab === tabItem.id;
           return (
             <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id)}
+              key={tabItem.id}
+              onClick={() => setActiveTab(tabItem.id)}
               className={`flex items-center gap-1.5 shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:text-foreground"
               }`}
             >
-              {t.label}
+              {t(tabItem.key, tabItem.fallback)}
               {count > 0 && (
                 <span
                   className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-bold ${
@@ -182,8 +184,8 @@ export function OrderList({ initialOrders, shopId }: OrderListProps) {
           <Package className="h-10 w-10 text-muted-foreground/50" />
           <p className="text-muted-foreground">
             {activeTab === "all"
-              ? "Aucune commande pour ce commerce."
-              : "Aucune commande dans cette catégorie."}
+              ? t("dashboard.orders.emptyAll", "No orders for this shop.")
+              : t("dashboard.orders.emptyFiltered", "No orders in this category.")}
           </p>
         </div>
       ) : (

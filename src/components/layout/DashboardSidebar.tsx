@@ -18,6 +18,7 @@ import {
   Tags,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface DashboardSidebarProps {
   user: { email: string; full_name?: string | null };
@@ -46,6 +47,8 @@ function SidebarColumn({
   className?: string;
 }) {
   const pathname = usePathname();
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const router = useRouter();
 
   const routeShopId = useMemo(() => parseShopIdFromPath(pathname), [pathname]);
@@ -108,10 +111,12 @@ function SidebarColumn({
   const [vitrineOpen, setVitrineOpen] = useState(true);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (carteGroupActive) setCarteOpen(true);
   }, [carteGroupActive]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (vitrineGroupActive) setVitrineOpen(true);
   }, [vitrineGroupActive]);
 
@@ -142,7 +147,7 @@ function SidebarColumn({
           )}
         >
           <LayoutDashboard className="h-4 w-4 shrink-0" />
-          Tableau de bord
+          {tr("Tableau de bord", "Dashboard")}
         </Link>
 
         <div className="pt-1">
@@ -158,7 +163,7 @@ function SidebarColumn({
             )}
           >
             <Store className="h-4 w-4 shrink-0" />
-            <span className="flex-1 text-left">Modifier ma vitrine</span>
+            <span className="flex-1 text-left">{tr("Modifier ma vitrine", "Edit storefront")}</span>
             <ChevronDown
               className={cn("h-4 w-4 shrink-0 transition-transform", vitrineOpen && "rotate-180")}
             />
@@ -176,7 +181,7 @@ function SidebarColumn({
                 )}
               >
                 <SlidersHorizontal className="h-4 w-4 shrink-0" />
-                Configuration vitrine
+                {tr("Configuration vitrine", "Storefront settings")}
               </Link>
               <Link
                 href={vitrineLayoutHref}
@@ -188,7 +193,7 @@ function SidebarColumn({
                 )}
               >
                 <LayoutGrid className="h-4 w-4 shrink-0" />
-                Mise en page vitrine
+                {tr("Mise en page vitrine", "Storefront layout")}
               </Link>
             </div>
           ) : null}
@@ -207,7 +212,7 @@ function SidebarColumn({
             )}
           >
             <Package className="h-4 w-4 shrink-0" />
-            <span className="flex-1 text-left">Ma carte</span>
+            <span className="flex-1 text-left">{tr("Ma carte", "My menu")}</span>
             <ChevronDown
               className={cn("h-4 w-4 shrink-0 transition-transform", carteOpen && "rotate-180")}
             />
@@ -225,7 +230,7 @@ function SidebarColumn({
                 )}
               >
                 <FolderOpen className="h-4 w-4 shrink-0" />
-                Catégories
+                {tr("Catégories", "Categories")}
               </Link>
               <Link
                 href={productsHref}
@@ -237,7 +242,7 @@ function SidebarColumn({
                 )}
               >
                 <Package className="h-4 w-4 shrink-0" />
-                Produits
+                {tr("Produits", "Products")}
               </Link>
               <Link
                 href={bundlesHref}
@@ -249,7 +254,7 @@ function SidebarColumn({
                 )}
               >
                 <Gift className="h-4 w-4 shrink-0" />
-                Formules
+                {tr("Formules", "Bundles")}
               </Link>
               <Link
                 href={labelsHref}
@@ -261,7 +266,7 @@ function SidebarColumn({
                 )}
               >
                 <Tags className="h-4 w-4 shrink-0" />
-                Labels
+                {tr("Labels", "Labels")}
               </Link>
             </div>
           ) : null}
@@ -277,7 +282,7 @@ function SidebarColumn({
           )}
         >
           <ShoppingCart className="h-4 w-4 shrink-0" />
-          <span className="flex-1 text-left">Commandes</span>
+          <span className="flex-1 text-left">{tr("Commandes", "Orders")}</span>
           {activeOrdersCount > 0 ? (
             <span
               className={cn(
@@ -286,7 +291,11 @@ function SidebarColumn({
                   ? "bg-white/20 text-white"
                   : "bg-[var(--primary)] text-white"
               )}
-              aria-label={`${activeOrdersCount} commande${activeOrdersCount > 1 ? "s" : ""} à traiter`}
+              aria-label={
+                locale === "en"
+                  ? `${activeOrdersCount} order${activeOrdersCount > 1 ? "s" : ""} to process`
+                  : `${activeOrdersCount} commande${activeOrdersCount > 1 ? "s" : ""} à traiter`
+              }
             >
               {activeOrdersCount > 99 ? "99+" : activeOrdersCount}
             </span>
@@ -314,7 +323,7 @@ function SidebarColumn({
           )}
         >
           <Settings className="h-4 w-4 shrink-0" />
-          Paramètres
+          {tr("Paramètres", "Settings")}
         </Link>
 
         <button
@@ -323,7 +332,7 @@ function SidebarColumn({
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         >
           <LogOut className="h-4 w-4 shrink-0" />
-          Se déconnecter
+          {tr("Se déconnecter", "Log out")}
         </button>
       </div>
     </div>

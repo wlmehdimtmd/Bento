@@ -35,6 +35,7 @@ import {
 import { slugify, cn } from "@/lib/utils";
 import type { ShopReviews, SocialLinks } from "@/lib/types";
 import { seedEnglishText } from "@/lib/translationSeed";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 import { OpeningHoursSection } from "./OpeningHoursSection";
 import { updateShopProfileAdmin } from "@/app/admin/actions";
@@ -133,6 +134,8 @@ export function ShopForm({
   initialReviews = null,
   reviewsMutateApiBase = "/api/reviews",
 }: ShopFormProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const router = useRouter();
   const isEdit = !!initialData?.id;
 
@@ -202,7 +205,7 @@ export function ShopForm({
     if (showOpeningHours) {
       const parsedHours = shopOpeningHoursDocSchema.safeParse(openingHoursDoc);
       if (!parsedHours.success) {
-        toast.error("Vérifiez les horaires (créneaux invalides).");
+        toast.error(tr("Vérifiez les horaires (créneaux invalides).", "Check opening hours (invalid slots)."));
         return;
       }
       openingHoursPayload = parsedHours.data as Json;
@@ -217,7 +220,7 @@ export function ShopForm({
 
     if (submitAsAdmin) {
       if (!isEdit || !initialData?.id) {
-        toast.error("Création de boutique via l’admin n’est pas prise en charge ici.");
+        toast.error(tr("Création de boutique via l’admin n’est pas prise en charge ici.", "Shop creation via admin is not supported here."));
         return;
       }
       try {
@@ -240,13 +243,13 @@ export function ShopForm({
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Erreur";
         if (msg === "SLUG_DUPLICATE") {
-          toast.error("Ce slug est déjà utilisé. Choisissez-en un autre.");
+          toast.error(tr("Ce slug est déjà utilisé. Choisissez-en un autre.", "This slug is already used. Choose another one."));
         } else {
           toast.error(msg);
         }
         return;
       }
-      toast.success("Boutique mise à jour !");
+      toast.success(tr("Boutique mise à jour !", "Shop updated!"));
       router.push(adminRedirectPath ?? `/admin/shops/${initialData.id}/settings`);
       router.refresh();
       return;
@@ -288,14 +291,14 @@ export function ShopForm({
 
     if (error) {
       if (error.code === "23505") {
-        toast.error("Ce slug est déjà utilisé. Choisissez-en un autre.");
+        toast.error(tr("Ce slug est déjà utilisé. Choisissez-en un autre.", "This slug is already used. Choose another one."));
       } else {
         toast.error(error.message);
       }
       return;
     }
 
-    toast.success(isEdit ? "Boutique mise à jour !" : "Boutique créée !");
+    toast.success(isEdit ? tr("Boutique mise à jour !", "Shop updated!") : tr("Boutique créée !", "Shop created!"));
     router.push("/dashboard");
     router.refresh();
   }
@@ -312,14 +315,14 @@ export function ShopForm({
 
   const identitySection = (
     <div className="space-y-4">
-      {sectionChrome("Identité")}
+      {sectionChrome(tr("Identité", "Identity"))}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="name">Nom de la boutique *</Label>
+          <Label htmlFor="name">{tr("Nom de la boutique", "Shop name")} *</Label>
           <Input
             id="name"
             {...register("name")}
-            placeholder="La Bonne Table"
+            placeholder={tr("La Bonne Table", "The Good Table")}
             disabled={isSubmitting}
           />
           {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
@@ -327,8 +330,7 @@ export function ShopForm({
 
         <div className="space-y-1.5">
           <Label htmlFor="slug">
-            Slug URL *{" "}
-            <span className="text-xs font-normal text-muted-foreground">(auto-généré)</span>
+            Slug URL * <span className="text-xs font-normal text-muted-foreground">({tr("auto-généré", "auto-generated")})</span>
           </Label>
           <Input
             id="slug"
@@ -382,7 +384,7 @@ export function ShopForm({
 
   const imagesSection = (
     <div className="space-y-4">
-      {sectionChrome("Images")}
+      {sectionChrome(tr("Images", "Images"))}
       <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px] md:items-end">
         <ImageUploader
           bucket="shop-assets"
@@ -424,15 +426,15 @@ export function ShopForm({
 
   const contactSection = (
     <div className="space-y-4">
-      {sectionChrome("Contact & Localisation")}
+      {sectionChrome(tr("Contact & Localisation", "Contact & Location"))}
 
       <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <Label htmlFor="show-contact-storefront" className="text-base">
-            Afficher dans la vitrine
+            {tr("Afficher dans la vitrine", "Show on storefront")}
           </Label>
           <p className="text-xs text-muted-foreground">
-            Téléphone, email et accès itinéraire sur la carte « Infos » de votre vitrine publique.
+            {tr("Téléphone, email et accès itinéraire sur la carte « Infos » de votre vitrine publique.", "Phone, email and directions on the Info card of your public storefront.")}
           </p>
         </div>
         <Switch
@@ -440,7 +442,7 @@ export function ShopForm({
           checked={showContactOnStorefront}
           onCheckedChange={setShowContactOnStorefront}
           disabled={isSubmitting}
-          aria-label="Afficher le contact sur la vitrine"
+          aria-label={tr("Afficher le contact sur la vitrine", "Show contact on storefront")}
         />
       </div>
 
@@ -483,7 +485,7 @@ export function ShopForm({
       <div className="space-y-1.5">
         <Label htmlFor="google_maps_url" className="flex items-center gap-1.5">
           <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-          Lien Google Avis
+          {tr("Lien Google Avis", "Google reviews link")}
         </Label>
         <Input
           id="google_maps_url"
@@ -520,7 +522,7 @@ export function ShopForm({
 
   const fulfillmentSection = (
     <div className="space-y-4">
-      {sectionChrome("Modes de service *")}
+      {sectionChrome(tr("Modes de service", "Service modes") + " *")}
       {fulfillmentFields}
     </div>
   );
@@ -547,12 +549,12 @@ export function ShopForm({
       {isSubmitting ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Enregistrement…
+          {tr("Enregistrement…", "Saving...")}
         </>
       ) : isEdit ? (
-        "Mettre à jour la boutique"
+        tr("Mettre à jour la boutique", "Update shop")
       ) : (
-        "Créer la boutique"
+        tr("Créer la boutique", "Create shop")
       )}
     </Button>
   );

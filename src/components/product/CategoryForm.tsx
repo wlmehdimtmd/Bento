@@ -12,8 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { ImageUploader } from "@/components/product/ImageUploader";
 import { createClient } from "@/lib/supabase/client";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 // ─── Schema ───────────────────────────────────────────────────
 const categorySchema = z.object({
@@ -32,7 +32,6 @@ export interface CategoryRow {
   name: string;
   description: string | null;
   icon_emoji: string;
-  cover_image_url: string | null;
   display_order: number;
   is_active: boolean;
   created_at: string;
@@ -43,7 +42,6 @@ export type CategorySavePayload = {
   name: string;
   description: string | null;
   icon_emoji: string;
-  cover_image_url: string | null;
   is_active: boolean;
   display_order: number;
 };
@@ -56,8 +54,8 @@ interface CategoryFormProps {
   onCancel: () => void;
   onSave?: (payload: CategorySavePayload, isEdit: boolean, existingId?: string) => Promise<CategoryRow>;
   sheetCtasFullWidth?: boolean;
-  subViewOverride?: "main" | "icon" | "cover";
-  onSubViewChange?: (subView: "main" | "icon" | "cover") => void;
+  subViewOverride?: "main" | "icon";
+  onSubViewChange?: (subView: "main" | "icon") => void;
 }
 
 const CATEGORY_ICONS = ["🥗","🍽️","🍰","🥤","🍕","🍔","🍜","🥩","🐟","🌮","🍣","🧁","🍷","🍺","☕","🌿","🔥","⭐"];
@@ -74,10 +72,9 @@ export function CategoryForm({
   subViewOverride,
   onSubViewChange,
 }: CategoryFormProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const isEdit = !!initialData;
-  const [coverUrl, setCoverUrl] = useState<string | null>(
-    initialData?.cover_image_url ?? null
-  );
 
   const {
     register,
@@ -97,7 +94,7 @@ export function CategoryForm({
 
   const iconEmoji = watch("icon_emoji") || "📦";
   const isActive = watch("is_active");
-  const [subView, setSubView] = useState<"main" | "icon" | "cover">("main");
+  const [subView, setSubView] = useState<"main" | "icon">("main");
 
   useEffect(() => {
     if (subViewOverride && subViewOverride !== subView) {
@@ -105,7 +102,7 @@ export function CategoryForm({
     }
   }, [subView, subViewOverride]);
 
-  function changeSubView(next: "main" | "icon" | "cover") {
+  function changeSubView(next: "main" | "icon") {
     if (next === subView) return;
     setSubView(next);
     onSubViewChange?.(next);
@@ -117,7 +114,6 @@ export function CategoryForm({
       name: values.name,
       description: values.description || null,
       icon_emoji: values.icon_emoji || "📦",
-      cover_image_url: coverUrl,
       is_active: values.is_active,
       display_order: initialData?.display_order ?? nextOrder,
     };
@@ -125,10 +121,10 @@ export function CategoryForm({
     if (onSave) {
       try {
         const result = await onSave(payload, isEdit, initialData?.id);
-        toast.success(isEdit ? "Catégorie mise à jour !" : "Catégorie créée !");
+        toast.success(isEdit ? tr("Catégorie mise à jour !", "Category updated!") : tr("Catégorie créée !", "Category created!"));
         onSuccess(result);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Erreur");
+        toast.error(e instanceof Error ? e.message : tr("Erreur", "Error"));
       }
       return;
     }
@@ -144,7 +140,7 @@ export function CategoryForm({
         .single();
 
       if (error) { toast.error(error.message); return; }
-      toast.success("Catégorie mise à jour !");
+      toast.success(tr("Catégorie mise à jour !", "Category updated!"));
       onSuccess(data as CategoryRow);
     } else {
       const { data, error } = await supabase
@@ -154,7 +150,7 @@ export function CategoryForm({
         .single();
 
       if (error) { toast.error(error.message); return; }
-      toast.success("Catégorie créée !");
+      toast.success(tr("Catégorie créée !", "Category created!"));
       onSuccess(data as CategoryRow);
     }
   }
@@ -184,34 +180,7 @@ export function CategoryForm({
             style={{ backgroundColor: "var(--primary)" }}
             className="w-full text-primary-foreground hover:opacity-90"
           >
-            Valider
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (subView === "cover") {
-    return (
-      <div className="flex h-full min-h-0 flex-col">
-        <div className="flex-1 pb-4">
-          <ImageUploader
-            bucket="shop-assets"
-            label="Image de couverture"
-            currentUrl={coverUrl}
-            onUpload={setCoverUrl}
-            onRemove={() => setCoverUrl(null)}
-            square
-          />
-        </div>
-        <div className="mt-auto border-t border-border py-3">
-          <Button
-            type="button"
-            onClick={() => changeSubView("main")}
-            style={{ backgroundColor: "var(--primary)" }}
-            className="w-full text-primary-foreground hover:opacity-90"
-          >
-            Valider
+            {tr("Valider", "Confirm")}
           </Button>
         </div>
       </div>
@@ -223,11 +192,11 @@ export function CategoryForm({
       <div className="flex-1 space-y-5 pb-4">
         {/* Name */}
         <div className="space-y-1.5">
-        <Label htmlFor="name">Nom *</Label>
+        <Label htmlFor="name">{tr("Nom", "Name")} *</Label>
         <Input
           id="name"
           {...register("name")}
-          placeholder="Entrées, Plats, Desserts…"
+          placeholder={tr("Entrées, Plats, Desserts…", "Starters, Mains, Desserts...")}
           disabled={isSubmitting}
           autoFocus
         />
@@ -237,20 +206,20 @@ export function CategoryForm({
         </div>
 
         <div className="space-y-1.5">
-          <Label>Icône</Label>
+          <Label>{tr("Icône", "Icon")}</Label>
           <Button type="button" variant="outline" className="w-full justify-start gap-2" onClick={() => changeSubView("icon")}>
             <span className="text-lg leading-none">{iconEmoji}</span>
-            <span>Choisir une icône</span>
+            <span>{tr("Choisir une icône", "Choose an icon")}</span>
           </Button>
         </div>
 
       {/* Description */}
         <div className="space-y-1.5">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{tr("Description", "Description")}</Label>
           <Textarea
             id="description"
             {...register("description")}
-            placeholder="Description optionnelle de la catégorie…"
+            placeholder={tr("Description optionnelle de la catégorie…", "Optional category description...")}
             rows={2}
             maxLength={32}
             disabled={isSubmitting}
@@ -263,19 +232,12 @@ export function CategoryForm({
           )}
         </div>
 
-        <div className="space-y-1.5">
-          <Label>Image de couverture</Label>
-          <Button type="button" variant="outline" className="w-full justify-start" onClick={() => changeSubView("cover")}>
-            {coverUrl ? "Modifier l’image de couverture" : "Ajouter une image de couverture"}
-          </Button>
-        </div>
-
       {/* Active toggle */}
         <div className="flex items-center justify-between rounded-lg border border-border p-3">
           <div>
-            <p className="text-sm font-medium">Catégorie active</p>
+            <p className="text-sm font-medium">{tr("Catégorie active", "Active category")}</p>
             <p className="text-xs text-muted-foreground">
-              Visible sur la vitrine publique
+              {tr("Visible sur la vitrine publique", "Visible on storefront")}
             </p>
           </div>
           <Switch
@@ -301,7 +263,7 @@ export function CategoryForm({
           disabled={isSubmitting}
           className={sheetCtasFullWidth ? "flex-1" : "flex-1 md:flex-none"}
         >
-          Annuler
+          {tr("Annuler", "Cancel")}
         </Button>
         <Button
           type="submit"
@@ -312,12 +274,12 @@ export function CategoryForm({
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Enregistrement…
+              {tr("Enregistrement…", "Saving...")}
             </>
           ) : isEdit ? (
-            "Mettre à jour"
+            tr("Mettre à jour", "Update")
           ) : (
-            "Créer la catégorie"
+            tr("Créer la catégorie", "Create category")
           )}
         </Button>
       </div>

@@ -50,6 +50,7 @@ import { TemplatePickerDialog, importTemplatesIntoShop, type ImportData } from "
 import { PasteJsonImportDialog } from "@/components/import/PasteJsonImportDialog";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface AdminCategoryActions {
   onSave: (payload: CategorySavePayload, isEdit: boolean, existingId?: string) => Promise<CategoryRow>;
@@ -69,6 +70,8 @@ export function CategoriesClient({
   initialCategories,
   adminActions,
 }: CategoriesClientProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const router = useRouter();
   const [categories, setCategories] =
     useState<CategoryWithCount[]>(initialCategories);
@@ -77,7 +80,7 @@ export function CategoriesClient({
   const [formOpen, setFormOpen] = useState(false);
   const [editingCategory, setEditingCategory] =
     useState<CategoryWithCount | null>(null);
-  const [formSubView, setFormSubView] = useState<"main" | "icon" | "cover">("main");
+  const [formSubView, setFormSubView] = useState<"main" | "icon">("main");
 
   // Delete confirmation state
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -94,7 +97,11 @@ export function CategoriesClient({
     const supabase = createClient();
     const existing = categories.map((c) => ({ id: c.id, name: c.name }));
     const { categoryCount, productCount } = await importTemplatesIntoShop(supabase, shopId, data, existing);
-    toast.success(`${categoryCount} catégorie${categoryCount !== 1 ? "s" : ""} et ${productCount} produit${productCount !== 1 ? "s" : ""} importés !`);
+    toast.success(
+      locale === "en"
+        ? `${categoryCount} categor${categoryCount !== 1 ? "ies" : "y"} and ${productCount} product${productCount !== 1 ? "s" : ""} imported!`
+        : `${categoryCount} catégorie${categoryCount !== 1 ? "s" : ""} et ${productCount} produit${productCount !== 1 ? "s" : ""} importés !`
+    );
     router.refresh();
   }
 
@@ -120,19 +127,25 @@ export function CategoriesClient({
     if (q) {
       return (
         <>
-          {n} résultat{n !== 1 ? "s" : ""} pour &laquo;{q}&raquo;
+          {locale === "en"
+            ? `${n} result${n !== 1 ? "s" : ""} for`
+            : `${n} résultat${n !== 1 ? "s" : ""} pour`}{" "}
+          &laquo;{q}&raquo;
           {total !== n && (
-            <span className="text-muted-foreground/80"> ({total} au total)</span>
+            <span className="text-muted-foreground/80">
+              {" "}
+              ({total} {tr("au total", "total")})
+            </span>
           )}
         </>
       );
     }
     return (
       <>
-        {total} catégorie{total !== 1 ? "s" : ""}
+        {total} {tr(`catégorie${total !== 1 ? "s" : ""}`, `categor${total !== 1 ? "ies" : "y"}`)}
       </>
     );
-  }, [displayed.length, search, sorted.length]);
+  }, [displayed.length, locale, search, sorted.length, tr]);
 
   const nextOrder = sorted.length > 0
     ? Math.max(...sorted.map((c) => c.display_order)) + 1
@@ -192,7 +205,7 @@ export function CategoriesClient({
         prev.map((c) => (c.id === cat.id ? { ...c, is_active: cat.is_active } : c))
       );
     } else {
-      toast.success(newValue ? "Catégorie activée" : "Catégorie désactivée");
+      toast.success(newValue ? tr("Catégorie activée", "Category enabled") : tr("Catégorie désactivée", "Category disabled"));
       router.refresh();
     }
   }
@@ -229,7 +242,7 @@ export function CategoriesClient({
     ]);
 
     if (r1.error || r2.error) {
-      toast.error("Erreur lors de la réorganisation.");
+      toast.error(tr("Erreur lors de la réorganisation.", "Error while reordering."));
       // Revert
       setCategories((prev) =>
         prev.map((c) => {
@@ -249,9 +262,9 @@ export function CategoriesClient({
       try {
         await adminActions.onDelete(deletingId);
         setCategories((prev) => prev.filter((c) => c.id !== deletingId));
-        toast.success("Catégorie supprimée.");
+        toast.success(tr("Catégorie supprimée.", "Category deleted."));
       } catch {
-        toast.error("Erreur lors de la suppression.");
+        toast.error(tr("Erreur lors de la suppression.", "Error while deleting."));
       } finally {
         setIsDeleting(false);
         setDeleteOpen(false);
@@ -268,7 +281,7 @@ export function CategoriesClient({
 
     if (slotsError) {
       setIsDeleting(false);
-      toast.error("Impossible de supprimer les formules liées à cette catégorie.");
+      toast.error(tr("Impossible de supprimer les formules liées à cette catégorie.", "Cannot delete bundles linked to this category."));
       return;
     }
 
@@ -282,13 +295,13 @@ export function CategoriesClient({
 
     if (error) {
       if (error.code === "23503") {
-        toast.error("Cette catégorie est encore utilisée ailleurs (formules, produits ou commandes).");
+        toast.error(tr("Cette catégorie est encore utilisée ailleurs (formules, produits ou commandes).", "This category is still used elsewhere (bundles, products or orders)."));
       } else {
         toast.error(error.message);
       }
     } else {
       setCategories((prev) => prev.filter((c) => c.id !== deletingId));
-      toast.success("Catégorie supprimée.");
+      toast.success(tr("Catégorie supprimée.", "Category deleted."));
       router.refresh();
     }
 
@@ -307,7 +320,7 @@ export function CategoriesClient({
           <div className="relative flex-1 min-w-48">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
-              placeholder="Rechercher une catégorie…"
+              placeholder={tr("Rechercher une catégorie…", "Search a category...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-8"
@@ -332,7 +345,7 @@ export function CategoriesClient({
               className="text-primary-foreground hover:opacity-90"
             >
               <Plus className="mr-1.5 h-4 w-4" />
-              Nouvelle catégorie
+              {tr("Nouvelle catégorie", "New category")}
             </Button>
           </div>
         </div>
@@ -342,7 +355,7 @@ export function CategoriesClient({
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
           <Package className="h-10 w-10 text-muted-foreground/50" />
           <p className="text-muted-foreground">
-            Aucune catégorie. Créez-en une pour commencer.
+            {tr("Aucune catégorie. Créez-en une pour commencer.", "No categories. Create one to get started.")}
           </p>
         </div>
       )}
@@ -351,7 +364,7 @@ export function CategoriesClient({
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
           <Package className="h-10 w-10 text-muted-foreground/50" />
           <p className="text-muted-foreground">
-            Aucune catégorie ne correspond à votre recherche.
+            {tr("Aucune catégorie ne correspond à votre recherche.", "No category matches your search.")}
           </p>
         </div>
       )}
@@ -362,20 +375,20 @@ export function CategoriesClient({
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12"></TableHead>
-                <TableHead>Catégorie</TableHead>
+                <TableHead>{tr("Catégorie", "Category")}</TableHead>
                 <TableHead className="hidden md:table-cell max-w-[200px]">
-                  Description
+                  {tr("Description", "Description")}
                 </TableHead>
                 <TableHead className="text-right hidden sm:table-cell w-28">
-                  Produits
+                  {tr("Produits", "Products")}
                 </TableHead>
                 {!adminActions && (
-                  <TableHead className="text-center w-24">Actif</TableHead>
+                  <TableHead className="text-center w-24">{tr("Actif", "Active")}</TableHead>
                 )}
                 {!adminActions && (
-                  <TableHead className="text-center w-24">Ordre</TableHead>
+                  <TableHead className="text-center w-24">{tr("Ordre", "Order")}</TableHead>
                 )}
-                <TableHead className="text-right w-24">Actions</TableHead>
+                <TableHead className="text-right w-24">{tr("Actions", "Actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -411,7 +424,7 @@ export function CategoriesClient({
                           checked={cat.is_active}
                           onCheckedChange={() => handleToggleActive(cat)}
                           size="sm"
-                          aria-label={cat.is_active ? "Désactiver" : "Activer"}
+                          aria-label={cat.is_active ? tr("Désactiver", "Disable") : tr("Activer", "Enable")}
                         />
                       </TableCell>
                     )}
@@ -423,7 +436,7 @@ export function CategoriesClient({
                             size="icon-sm"
                             onClick={() => handleReorder(cat, "up")}
                             disabled={gi <= 0}
-                            aria-label="Monter"
+                            aria-label={tr("Monter", "Move up")}
                           >
                             <ChevronUp className="h-4 w-4" />
                           </Button>
@@ -432,7 +445,7 @@ export function CategoriesClient({
                             size="icon-sm"
                             onClick={() => handleReorder(cat, "down")}
                             disabled={gi >= sorted.length - 1}
-                            aria-label="Descendre"
+                            aria-label={tr("Descendre", "Move down")}
                           >
                             <ChevronDown className="h-4 w-4" />
                           </Button>
@@ -445,7 +458,7 @@ export function CategoriesClient({
                           variant="ghost"
                           size="icon-sm"
                           onClick={() => openEdit(cat)}
-                          aria-label="Modifier"
+                          aria-label={tr("Modifier", "Edit")}
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
@@ -454,7 +467,7 @@ export function CategoriesClient({
                           size="icon-sm"
                           onClick={() => openDelete(cat.id)}
                           className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          aria-label="Supprimer"
+                          aria-label={tr("Supprimer", "Delete")}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -497,18 +510,16 @@ export function CategoriesClient({
           <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden">
             <DrawerHeader className={formSubView !== "main" ? "flex-row items-center gap-2" : undefined}>
               {formSubView !== "main" ? (
-                <Button type="button" variant="ghost" size="icon-sm" onClick={() => setFormSubView("main")} aria-label="Retour">
+                <Button type="button" variant="ghost" size="icon-sm" onClick={() => setFormSubView("main")} aria-label={tr("Retour", "Back")}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               ) : null}
               <DrawerTitle>
                 {formSubView === "icon"
-                  ? "Icône de la catégorie"
-                  : formSubView === "cover"
-                    ? "Image de couverture"
-                    : editingCategory
-                      ? "Modifier la catégorie"
-                      : "Nouvelle catégorie"}
+                  ? tr("Icône de la catégorie", "Category icon")
+                  : editingCategory
+                    ? tr("Modifier la catégorie", "Edit category")
+                    : tr("Nouvelle catégorie", "New category")}
               </DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
@@ -526,11 +537,32 @@ export function CategoriesClient({
           </DrawerContent>
         </Drawer>
       ) : (
-        <Sheet open={formOpen} onOpenChange={setFormOpen}>
+        <Sheet
+          open={formOpen}
+          onOpenChange={(open) => {
+            setFormOpen(open);
+            if (!open) setFormSubView("main");
+          }}
+        >
           <SheetContent side="right" className="w-full sm:max-w-lg h-full overflow-hidden">
-            <SheetHeader>
+            <SheetHeader className={formSubView !== "main" ? "flex-row items-center gap-2" : undefined}>
+              {formSubView !== "main" ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setFormSubView("main")}
+                  aria-label={tr("Retour", "Back")}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              ) : null}
               <SheetTitle>
-                {editingCategory ? "Modifier la catégorie" : "Nouvelle catégorie"}
+                {formSubView === "icon"
+                  ? tr("Icône de la catégorie", "Category icon")
+                  : editingCategory
+                    ? tr("Modifier la catégorie", "Edit category")
+                    : tr("Nouvelle catégorie", "New category")}
               </SheetTitle>
             </SheetHeader>
             <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
@@ -542,6 +574,8 @@ export function CategoriesClient({
                 onCancel={() => setFormOpen(false)}
                 onSave={adminActions?.onSave}
                 sheetCtasFullWidth
+                subViewOverride={formSubView}
+                onSubViewChange={setFormSubView}
               />
             </div>
           </SheetContent>
@@ -551,15 +585,21 @@ export function CategoriesClient({
       {/* Delete confirmation dialog */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="sm:max-w-sm">
-          <DialogTitle>Supprimer la catégorie</DialogTitle>
+          <DialogTitle>{tr("Supprimer la catégorie", "Delete category")}</DialogTitle>
           <DialogDescription>
-            Êtes-vous sûr de vouloir supprimer{" "}
+            {tr("Êtes-vous sûr de vouloir supprimer", "Are you sure you want to delete")}{" "}
             <strong>&laquo;{deletingCat?.name}&raquo;</strong> ?
             {(deletingCat?.productCount ?? 0) > 0 && (
               <span className="mt-1 block text-destructive">
-                ⚠️ Cette catégorie contient{" "}
-                <strong>{deletingCat!.productCount} produit{deletingCat!.productCount > 1 ? "s" : ""}</strong>{" "}
-                qui seront également supprimés.
+                ⚠️ {tr("Cette catégorie contient", "This category contains")}{" "}
+                <strong>
+                  {deletingCat!.productCount}{" "}
+                  {tr(
+                    `produit${deletingCat!.productCount > 1 ? "s" : ""}`,
+                    `product${deletingCat!.productCount > 1 ? "s" : ""}`
+                  )}
+                </strong>{" "}
+                {tr("qui seront également supprimés.", "that will also be deleted.")}
               </span>
             )}
           </DialogDescription>
@@ -569,14 +609,14 @@ export function CategoriesClient({
               onClick={() => setDeleteOpen(false)}
               disabled={isDeleting}
             >
-              Annuler
+              {tr("Annuler", "Cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={confirmDelete}
               disabled={isDeleting}
             >
-              {isDeleting ? "Suppression…" : "Supprimer"}
+              {isDeleting ? tr("Suppression…", "Deleting...") : tr("Supprimer", "Delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

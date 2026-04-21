@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { ImageUploader } from "@/components/product/ImageUploader";
 import { createClient } from "@/lib/supabase/client";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 // ─── Types ────────────────────────────────────────────────────
 export interface BundleSlotData {
@@ -64,32 +65,26 @@ interface BundleFormProps {
   sheetCtasFullWidth?: boolean;
 }
 
-// ─── Schema ───────────────────────────────────────────────────
-const slotSchema = z.object({
-  id: z.string().optional(),
-  category_id: z.string().min(1, "Catégorie requise"),
-  quantity: z.number().int().min(1, "Minimum 1"),
-  display_order: z.number().int().min(0),
-});
-
-const bundleSchema = z.object({
-  name: z.string().min(1, "Nom requis"),
-  description: z.string().optional(),
-  price: z.number().positive("Le prix doit être supérieur à 0"),
-  is_active: z.boolean(),
-  slots: z
-    .array(slotSchema)
-    .min(1, "Ajoutez au moins un choix à la formule"),
-});
-
-type BundleFormValues = z.infer<typeof bundleSchema>;
+type BundleFormValues = {
+  name: string;
+  description?: string;
+  price: number;
+  is_active: boolean;
+  slots: Array<{
+    id?: string;
+    category_id: string;
+    quantity: number;
+    display_order: number;
+  }>;
+};
 
 function categoryNameForSlot(
   categoryId: string,
-  categories: CategoryOption[]
+  categories: CategoryOption[],
+  emptyLabel: string
 ): string {
   const n = categories.find((c) => c.id === categoryId)?.name?.trim();
-  return n && n.length > 0 ? n : "Choix";
+  return n && n.length > 0 ? n : emptyLabel;
 }
 
 // ─── Component ───────────────────────────────────────────────
@@ -104,6 +99,25 @@ export function BundleForm({
   onSubViewChange,
   sheetCtasFullWidth = false,
 }: BundleFormProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
+  const bundleSchema = useMemo(() => {
+    const slotSchema = z.object({
+      id: z.string().optional(),
+      category_id: z.string().min(1, tr("Catégorie requise", "Category is required")),
+      quantity: z.number().int().min(1, tr("Minimum 1", "Minimum 1")),
+      display_order: z.number().int().min(0),
+    });
+    return z.object({
+      name: z.string().min(1, tr("Nom requis", "Name is required")),
+      description: z.string().optional(),
+      price: z.number().positive(tr("Le prix doit être supérieur à 0", "Price must be greater than 0")),
+      is_active: z.boolean(),
+      slots: z
+        .array(slotSchema)
+        .min(1, tr("Ajoutez au moins un choix à la formule", "Add at least one choice to the bundle")),
+    });
+  }, [tr]);
   const isEdit = !!initialData;
   const [imageUrl, setImageUrl] = useState<string | null>(
     initialData?.image_url ?? null
@@ -191,7 +205,7 @@ export function BundleForm({
       slots: values.slots.map((s, i) => ({
         id: s.id,
         category_id: s.category_id,
-        label: categoryNameForSlot(s.category_id, categories),
+        label: categoryNameForSlot(s.category_id, categories, tr("Choix", "Choice")),
         quantity: s.quantity,
         display_order: i,
       })),
@@ -200,10 +214,10 @@ export function BundleForm({
     if (onSave) {
       try {
         const result = await onSave(bundlePayload, isEdit, initialData?.id);
-        toast.success(isEdit ? "Formule mise à jour !" : "Formule créée !");
+        toast.success(isEdit ? tr("Formule mise à jour !", "Bundle updated!") : tr("Formule créée !", "Bundle created!"));
         onSuccess(result);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Erreur");
+        toast.error(e instanceof Error ? e.message : tr("Erreur", "Error"));
       }
       return;
     }
@@ -246,7 +260,7 @@ export function BundleForm({
     const slotsPayload = values.slots.map((s, i) => ({
       bundle_id: bundleId,
       category_id: s.category_id,
-      label: categoryNameForSlot(s.category_id, categories),
+      label: categoryNameForSlot(s.category_id, categories, tr("Choix", "Choice")),
       quantity: s.quantity,
       display_order: i,
     }));
@@ -258,7 +272,7 @@ export function BundleForm({
 
     if (slotsError) { toast.error(slotsError.message); return; }
 
-    toast.success(isEdit ? "Formule mise à jour !" : "Formule créée !");
+    toast.success(isEdit ? tr("Formule mise à jour !", "Bundle updated!") : tr("Formule créée !", "Bundle created!"));
 
     // Fetch the full bundle to return
     const { data: fullBundle } = await supabase
@@ -283,9 +297,9 @@ export function BundleForm({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-base font-semibold">Composition *</h3>
+          <h3 className="text-base font-semibold">{tr("Composition", "Composition")} *</h3>
           <p className="text-xs text-muted-foreground">
-            Pour chaque étape, choisissez la catégorie : l’intitulé affiché au client sera son nom.
+            {tr("Pour chaque étape, choisissez la catégorie : l’intitulé affiché au client sera son nom.", "For each step, choose the category: its name will be shown to the customer.")}
           </p>
         </div>
         <Button
@@ -296,7 +310,7 @@ export function BundleForm({
           disabled={isSubmitting}
         >
           <Plus className="mr-1.5 h-4 w-4" />
-          Ajouter un choix
+          {tr("Ajouter un choix", "Add choice")}
         </Button>
       </div>
 
@@ -316,7 +330,7 @@ export function BundleForm({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <GripVertical className="h-4 w-4" />
-                Choix {idx + 1}
+                {tr("Choix", "Choice")} {idx + 1}
               </div>
               <Button
                 type="button"
@@ -331,7 +345,7 @@ export function BundleForm({
             </div>
 
             <div className="space-y-1.5">
-              <Label>Catégorie de produits *</Label>
+              <Label>{tr("Catégorie de produits", "Product category")} *</Label>
               <div className="flex flex-wrap gap-1.5">
                 {categories.map((c) => {
                   const active = slotCategoryValues[idx] === c.id;
@@ -359,7 +373,7 @@ export function BundleForm({
                   className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
                 >
                   <X className="h-3.5 w-3.5" />
-                  Désélectionner la catégorie
+                  {tr("Désélectionner la catégorie", "Unselect category")}
                 </button>
               ) : null}
               {errors.slots?.[idx]?.category_id && (
@@ -370,7 +384,7 @@ export function BundleForm({
             </div>
 
             <div className="space-y-1.5 w-32">
-              <Label htmlFor={`slot-qty-${idx}`}>Quantité *</Label>
+              <Label htmlFor={`slot-qty-${idx}`}>{tr("Quantité", "Quantity")} *</Label>
               <Input
                 id={`slot-qty-${idx}`}
                 type="number"
@@ -397,7 +411,7 @@ export function BundleForm({
         <div className="flex-1 pb-4">
           <ImageUploader
             bucket="product-images"
-            label="Image de la formule"
+            label={tr("Image de la formule", "Bundle image")}
             currentUrl={imageUrl}
             onUpload={setImageUrl}
             onRemove={() => setImageUrl(null)}
@@ -411,7 +425,7 @@ export function BundleForm({
             style={{ backgroundColor: "var(--primary)" }}
             className="w-full text-primary-foreground hover:opacity-90"
           >
-            Valider
+            {tr("Valider", "Confirm")}
           </Button>
         </div>
       </div>
@@ -429,7 +443,7 @@ export function BundleForm({
             style={{ backgroundColor: "var(--primary)" }}
             className="w-full text-primary-foreground hover:opacity-90"
           >
-            Valider
+            {tr("Valider", "Confirm")}
           </Button>
         </div>
       </div>
@@ -441,11 +455,11 @@ export function BundleForm({
       <div className="flex-1 space-y-6 pb-4">
       {/* Name */}
       <div className="space-y-1.5">
-        <Label htmlFor="name">Nom de la formule *</Label>
+        <Label htmlFor="name">{tr("Nom de la formule", "Bundle name")} *</Label>
         <Input
           id="name"
           {...register("name")}
-          placeholder="Menu Midi, Formule Découverte…"
+          placeholder={tr("Menu Midi, Formule Découverte…", "Lunch menu, Discovery set…")}
           disabled={isSubmitting}
           autoFocus
         />
@@ -456,11 +470,11 @@ export function BundleForm({
 
       {/* Description */}
       <div className="space-y-1.5">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">{tr("Description", "Description")}</Label>
         <Textarea
           id="description"
           {...register("description")}
-          placeholder="Décrivez la formule…"
+          placeholder={tr("Décrivez la formule…", "Describe the bundle…")}
           rows={2}
           disabled={isSubmitting}
         />
@@ -468,7 +482,7 @@ export function BundleForm({
 
       {/* Price */}
       <div className="space-y-1.5">
-        <Label htmlFor="price">Prix (€) *</Label>
+        <Label htmlFor="price">{tr("Prix (€)", "Price (€)")} *</Label>
         <Input
           id="price"
           type="number"
@@ -484,17 +498,19 @@ export function BundleForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label>Photo de la formule</Label>
+        <Label>{tr("Photo de la formule", "Bundle photo")}</Label>
         <Button type="button" variant="outline" className="w-full justify-start" onClick={() => changeSubView("photo")}>
-          {imageUrl ? "Modifier la photo de la formule" : "Ajouter une photo de la formule"}
+          {imageUrl
+            ? tr("Modifier la photo de la formule", "Edit bundle photo")
+            : tr("Ajouter une photo de la formule", "Add bundle photo")}
         </Button>
       </div>
 
       {/* Active */}
       <div className="flex items-center justify-between rounded-lg border border-border p-3">
         <div>
-          <p className="text-sm font-medium">Formule active</p>
-          <p className="text-xs text-muted-foreground">Visible sur la vitrine</p>
+          <p className="text-sm font-medium">{tr("Formule active", "Active bundle")}</p>
+          <p className="text-xs text-muted-foreground">{tr("Visible sur la vitrine", "Visible on storefront")}</p>
         </div>
         <Switch
           checked={isActive}
@@ -506,9 +522,9 @@ export function BundleForm({
       </div>
 
       <div className="space-y-4">
-        <Label>Composition du menu</Label>
+        <Label>{tr("Composition du menu", "Menu composition")}</Label>
         <Button type="button" variant="outline" className="w-full justify-start" onClick={() => changeSubView("composition")}>
-          Gérer la composition
+          {tr("Gérer la composition", "Manage composition")}
         </Button>
       </div>
       </div>
@@ -526,7 +542,7 @@ export function BundleForm({
           disabled={isSubmitting}
           className={sheetCtasFullWidth ? "flex-1" : "flex-1 md:flex-none"}
         >
-          Annuler
+          {tr("Annuler", "Cancel")}
         </Button>
         <Button
           type="submit"
@@ -537,12 +553,12 @@ export function BundleForm({
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Enregistrement…
+              {tr("Enregistrement…", "Saving...")}
             </>
           ) : isEdit ? (
-            "Mettre à jour"
+            tr("Mettre à jour", "Update")
           ) : (
-            "Créer la formule"
+            tr("Créer la formule", "Create bundle")
           )}
         </Button>
       </div>

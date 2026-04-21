@@ -1,14 +1,20 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { BUNDLE_PAGE_DESCRIPTION } from "@/lib/dashboard-catalog-copy";
+import { getDashboardCatalogCopy } from "@/lib/dashboard-catalog-copy";
 import { buttonVariants } from "@/components/ui/button";
 import { BundlesClient } from "@/components/product/BundlesClient";
 import type { BundleRow, BundleSlotData } from "@/components/product/BundleForm";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
+import { MESSAGES } from "@/lib/i18nMessages";
 
 type Params = Promise<{ shopId: string }>;
 
 export async function generateMetadata({ params }: { params: Params }) {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const t = (key: string, fallback: string) => MESSAGES[locale][key] ?? fallback;
   const { shopId } = await params;
   const supabase = await createClient();
   const { data } = await supabase
@@ -16,10 +22,18 @@ export async function generateMetadata({ params }: { params: Params }) {
     .select("name")
     .eq("id", shopId)
     .single();
-  return { title: data ? `Formules — ${data.name}` : "Formules" };
+  return {
+    title: data
+      ? `${t("dashboard.bundles.metadataPrefix", "Bundles -")} ${data.name}`
+      : t("dashboard.bundles.metadataFallback", "Bundles"),
+  };
 }
 
 export default async function BundlesPage({ params }: { params: Params }) {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const t = (key: string, fallback: string) => MESSAGES[locale][key] ?? fallback;
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const { shopId } = await params;
   const supabase = await createClient();
 
@@ -109,24 +123,24 @@ export default async function BundlesPage({ params }: { params: Params }) {
           className="text-3xl font-bold"
           style={{ fontFamily: "var(--font-onest)" }}
         >
-          Formules
+          {t("dashboard.bundles.metadataFallback", "Bundles")}
         </h1>
         <p className="text-sm text-muted-foreground">{shop.name}</p>
         <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
-          {BUNDLE_PAGE_DESCRIPTION}
+          {getDashboardCatalogCopy(locale, "bundle")}
         </p>
       </div>
 
       {(categories ?? []).length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
           <p className="text-muted-foreground">
-            Créez d&apos;abord des catégories avant de composer des formules.
+            {tr("Créez d'abord des catégories avant de composer des formules.", "Create categories first before composing bundles.")}
           </p>
           <Link
             href={`/dashboard/shops/${shopId}/categories`}
             className={buttonVariants({ variant: "outline" })}
           >
-            Gérer les catégories
+            {tr("Gérer les catégories", "Manage categories")}
           </Link>
         </div>
       ) : (

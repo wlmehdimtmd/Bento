@@ -39,8 +39,7 @@ export default function RootError({ error, reset }: ErrorProps) {
       <div className="flex gap-3">
         <button
           onClick={reset}
-          className={buttonVariants()}
-          style={{ backgroundColor: "var(--primary)", color: "white" }}
+          className={buttonVariants({ variant: "default" })}
         >
           Réessayer
         </button>

@@ -4,7 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { StoreView } from "@/components/bento/StoreView";
 import { fetchPublicShopPagePayload } from "@/lib/fetchPublicShopPagePayload";
 import { OrderConfirmation } from "@/components/checkout/OrderConfirmation";
+import { InactivePublicStorefront } from "@/components/storefront/InactivePublicStorefront";
 import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
+import { resolvePublicShopSlug } from "@/lib/resolvePublicShopSlug";
 
 type Params = Promise<{ slug: string }>;
 type SearchParams = Promise<{ order?: string; id?: string }>;
@@ -12,6 +14,27 @@ type SearchParams = Promise<{ order?: string; id?: string }>;
 export async function generateMetadata({ params }: { params: Params }) {
   const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
   const { slug } = await params;
+  const resolved = await resolvePublicShopSlug(slug);
+
+  if (resolved.status === "not_found") {
+    return { title: locale === "en" ? "Storefront not found" : "Vitrine introuvable" };
+  }
+
+  if (resolved.status === "inactive_public") {
+    const title =
+      locale === "en"
+        ? `${resolved.name} — storefront not published`
+        : `${resolved.name} — vitrine non publique`;
+    return {
+      title,
+      description:
+        locale === "en"
+          ? "This shop is not visible to the public yet."
+          : "Cette boutique n'est pas encore visible publiquement.",
+      robots: { index: false, follow: false },
+    };
+  }
+
   const supabase = await createClient();
   const payload = await fetchPublicShopPagePayload(supabase, { slug });
 
@@ -76,6 +99,16 @@ export default async function ShopPage({
     if (orderData) {
       return <OrderConfirmation order={orderData} shopSlug={slug} />;
     }
+  }
+
+  const resolved = await resolvePublicShopSlug(slug);
+
+  if (resolved.status === "inactive_public") {
+    return <InactivePublicStorefront shopName={resolved.name} locale={locale} />;
+  }
+
+  if (resolved.status === "not_found") {
+    notFound();
   }
 
   const payload = await fetchPublicShopPagePayload(supabase, { slug });

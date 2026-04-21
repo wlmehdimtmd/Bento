@@ -17,6 +17,7 @@ import {
   type ShopOpeningHoursDoc,
   shopOpeningHoursDocSchema,
 } from "@/lib/openingHours";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 const DAY_ORDER: OpeningDayKey[] = ["1", "2", "3", "4", "5", "6", "0"];
 const DAY_LABELS: Record<OpeningDayKey, string> = {
@@ -60,6 +61,8 @@ export function OpeningHoursSection({
   disabled,
   omitSectionTitle = false,
 }: OpeningHoursSectionProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const showHours =
     hasPhysicalFulfillment(fulfillmentModes) && !isDeliveryOnlyShop(fulfillmentModes);
 
@@ -80,12 +83,13 @@ export function OpeningHoursSection({
         {omitSectionTitle ? (
           <h2 className="sr-only">Horaires vitrine</h2>
         ) : (
-          <h2 className="text-lg font-semibold">Horaires d&apos;ouverture</h2>
+          <h2 className="text-lg font-semibold">{tr("Horaires d'ouverture", "Opening hours")}</h2>
         )}
         <p className="text-sm text-muted-foreground">
-          Les horaires magasin ne s&apos;affichent que si vous proposez au moins un service sur place
-          ou à emporter. Pour une activité 100 % livraison, vos clients commandent en ligne sans
-          horaire de boutique.
+          {tr(
+            "Les horaires magasin ne s'affichent que si vous proposez au moins un service sur place ou à emporter. Pour une activité 100 % livraison, vos clients commandent en ligne sans horaire de boutique.",
+            "Store opening hours are shown only when you offer on-site or takeaway service. For delivery-only activity, customers can order online without store hours."
+          )}
         </p>
       </section>
     );
@@ -166,21 +170,21 @@ export function OpeningHoursSection({
         {omitSectionTitle ? (
           <h2 className="sr-only">Horaires vitrine</h2>
         ) : (
-          <h2 className="text-lg font-semibold">Horaires d&apos;ouverture</h2>
+          <h2 className="text-lg font-semibold">{tr("Horaires d'ouverture", "Opening hours")}</h2>
         )}
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="outline" size="sm" onClick={applyWeekdayTemplate} disabled={disabled}>
-            Lun–Ven 12h–14h, 19h–22h
+            {tr("Lun–Ven 12h–14h, 19h–22h", "Mon-Fri 12:00-14:00, 19:00-22:00")}
           </Button>
           <Button type="button" variant="outline" size="sm" onClick={copyMondayToWeek} disabled={disabled}>
             <Copy className="mr-1.5 h-3.5 w-3.5" />
-            Copier lundi → semaine
+            {tr("Copier lundi → semaine", "Copy Monday -> week")}
           </Button>
         </div>
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Fuseau horaire : <span className="font-medium text-foreground">Europe/Paris</span> (heure de Paris).
+        {tr("Fuseau horaire", "Timezone")} : <span className="font-medium text-foreground">Europe/Paris</span> ({tr("heure de Paris", "Paris time")}).
       </p>
 
       <div className="rounded-lg border border-border divide-y">
@@ -205,7 +209,7 @@ export function OpeningHoursSection({
                     }}
                     disabled={disabled}
                   />
-                  <span className="text-xs text-muted-foreground">{row.closed ? "Fermé" : "Ouvert"}</span>
+                  <span className="text-xs text-muted-foreground">{row.closed ? tr("Fermé", "Closed") : tr("Ouvert", "Open")}</span>
                 </div>
               </div>
 
@@ -236,7 +240,7 @@ export function OpeningHoursSection({
                         onClick={() => removeSlot(day, idx)}
                         disabled={disabled}
                       >
-                        Retirer
+                        {tr("Retirer", "Remove")}
                       </Button>
                     </div>
                   ))}
@@ -248,7 +252,7 @@ export function OpeningHoursSection({
                     onClick={() => addSlot(day)}
                     disabled={disabled || row.slots.length >= 4}
                   >
-                    Ajouter un créneau
+                    {tr("Ajouter un créneau", "Add time slot")}
                   </Button>
                 </div>
               )}
@@ -260,7 +264,7 @@ export function OpeningHoursSection({
       <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4">
         <div className="flex items-center justify-between gap-3">
           <Label htmlFor="open-holidays" className="text-sm font-medium leading-snug cursor-pointer">
-            Ouvert les jours fériés (France métropolitaine)
+            {tr("Ouvert les jours fériés (France métropolitaine)", "Open on public holidays (mainland France)")}
           </Label>
           <Switch
             id="open-holidays"
@@ -270,11 +274,10 @@ export function OpeningHoursSection({
           />
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Si cette option est <strong>désactivée</strong>, la boutique est affichée comme fermée les jours
-          fériés (y compris le <strong>1er mai</strong> et le <strong>25 décembre</strong>). Si elle est{" "}
-          <strong>activée</strong>, ces dates suivent les mêmes créneaux que les autres jours : seule la
-          grille ci-dessus s&apos;applique (par exemple un 25 décembre un dimanche utilise les horaires du
-          dimanche).
+          {tr(
+            "Si cette option est désactivée, la boutique est affichée comme fermée les jours fériés (y compris le 1er mai et le 25 décembre). Si elle est activée, ces dates suivent les mêmes créneaux que les autres jours : seule la grille ci-dessus s'applique (par exemple un 25 décembre un dimanche utilise les horaires du dimanche).",
+            "If this option is disabled, the shop is shown as closed on public holidays (including May 1st and December 25th). If enabled, those dates follow the same slots as regular days: only the grid above applies."
+          )}
         </p>
       </div>
 
@@ -289,23 +292,22 @@ export function OpeningHoursSection({
       >
         {!parsedOk && (
           <p className="text-destructive text-xs">
-            Corrigez les créneaux (chaque fin doit être après le début, pas de passage minuit dans un
-            même créneau).
+            {tr("Corrigez les créneaux (chaque fin doit être après le début, pas de passage minuit dans un même créneau).", "Fix time slots (each end time must be after start time, no midnight crossover in one slot).")}
           </p>
         )}
         {parsedOk && preview.mode === "open" && (
           <p>
-            <span className="font-semibold">Ouvert</span>
+            <span className="font-semibold">{tr("Ouvert", "Open")}</span>
             {preview.subtitle ? ` — ${preview.subtitle}` : ""}
           </p>
         )}
         {parsedOk && preview.mode === "closed" && (
           <p>
-            <span className="font-semibold">Fermé</span>
+            <span className="font-semibold">{tr("Fermé", "Closed")}</span>
             {preview.subtitle ? ` — ${preview.subtitle}` : ""}
           </p>
         )}
-        {parsedOk && preview.mode === "unknown" && <p>{preview.subtitle ?? "Horaires incomplets"}</p>}
+        {parsedOk && preview.mode === "unknown" && <p>{preview.subtitle ?? tr("Horaires incomplets", "Incomplete hours")}</p>}
       </div>
     </section>
   );

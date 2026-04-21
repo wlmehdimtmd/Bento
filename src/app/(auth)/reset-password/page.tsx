@@ -10,13 +10,10 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import { AppBrandMark } from "@/components/layout/AppBrandMark";
-import { cookies } from "next/headers";
-import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 
 export async function generateMetadata() {
-  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
   return {
-    title: locale === "en" ? "New password — Bento Resto" : "Nouveau mot de passe — Bento Resto",
+    title: "New password — Bento Resto",
   };
 }
 
@@ -25,7 +22,7 @@ export default function ResetPasswordPage() {
     <div className="w-full max-w-md space-y-2">
       <Link
         href="/login"
-        aria-label="Retour à la connexion"
+        aria-label="Back to login"
         className={buttonVariants({ variant: "ghost", size: "icon" })}
       >
         <ChevronLeft className="h-5 w-5" />
@@ -35,8 +32,8 @@ export default function ResetPasswordPage() {
           <div className="flex justify-center mb-4">
             <AppBrandMark variant="auth" />
           </div>
-          <CardTitle className="text-2xl">Nouveau mot de passe</CardTitle>
-          <CardDescription>Choisissez un mot de passe fort pour votre compte.</CardDescription>
+          <CardTitle className="text-2xl">New password</CardTitle>
+          <CardDescription>Choose a strong password for your account.</CardDescription>
         </CardHeader>
         <CardContent className="pt-4">
           <ResetPasswordForm />

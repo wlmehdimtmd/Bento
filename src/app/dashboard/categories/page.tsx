@@ -1,12 +1,17 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { CATEGORY_PAGE_DESCRIPTION } from "@/lib/dashboard-catalog-copy";
+import { getDashboardCatalogCopy } from "@/lib/dashboard-catalog-copy";
 import { CategoriesClient } from "@/components/product/CategoriesClient";
 import type { CategoryRow } from "@/components/product/CategoryForm";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 
 export const metadata = { title: "Catégories" };
 
 export default async function CategoriesPage() {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const supabase = await createClient();
 
   const {
@@ -60,11 +65,11 @@ export default async function CategoriesPage() {
           className="text-3xl font-bold"
           style={{ fontFamily: "var(--font-onest)" }}
         >
-          Catégories
+          {tr("Catégories", "Categories")}
         </h1>
         <p className="text-sm text-muted-foreground">{shop.name}</p>
         <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
-          {CATEGORY_PAGE_DESCRIPTION}
+          {getDashboardCatalogCopy(locale, "category")}
         </p>
       </div>
 

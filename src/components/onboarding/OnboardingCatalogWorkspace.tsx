@@ -53,9 +53,9 @@ interface OnboardingCatalogWorkspaceProps {
 }
 
 const SECTIONS: { id: EditingSection; label: string }[] = [
-  { id: "categories", label: "Catégories" },
-  { id: "products", label: "Produits" },
-  { id: "bundles", label: "Formules" },
+  { id: "categories", label: "Categories" },
+  { id: "products", label: "Products" },
+  { id: "bundles", label: "Bundles" },
 ];
 
 export function OnboardingCatalogWorkspace({
@@ -81,7 +81,6 @@ export function OnboardingCatalogWorkspace({
         name: c.name,
         description: c.description,
         icon_emoji: c.icon_emoji,
-        cover_image_url: c.cover_image_url,
         is_active: true,
         display_order: i,
       })),
@@ -116,7 +115,7 @@ export function OnboardingCatalogWorkspace({
 
   async function handleTemplateImport(data: ImportData) {
     if (isPreview) {
-      toast.success("Import simulé (aucune donnée écrite).");
+      toast.success("Simulated import (no data written).");
       setPickerOpen(false);
       return;
     }
@@ -128,11 +127,11 @@ export function OnboardingCatalogWorkspace({
       templateCategoryNames
     );
     const parts: string[] = [];
-    if (categoryCount > 0) parts.push(`${categoryCount} catégorie${categoryCount > 1 ? "s" : ""}`);
-    if (productCount > 0) parts.push(`${productCount} produit${productCount > 1 ? "s" : ""}`);
-    if (bundleCount > 0) parts.push(`${bundleCount} formule${bundleCount > 1 ? "s" : ""}`);
+    if (categoryCount > 0) parts.push(`${categoryCount} categor${categoryCount > 1 ? "ies" : "y"}`);
+    if (productCount > 0) parts.push(`${productCount} product${productCount > 1 ? "s" : ""}`);
+    if (bundleCount > 0) parts.push(`${bundleCount} bundle${bundleCount > 1 ? "s" : ""}`);
     toast.success(
-      parts.length > 0 ? `${parts.join(", ")} importé${parts.length > 1 ? "s" : ""} !` : "Import terminé !"
+      parts.length > 0 ? `Imported: ${parts.join(", ")}.` : "Import complete."
     );
     setPickerOpen(false);
     refresh();
@@ -156,7 +155,7 @@ export function OnboardingCatalogWorkspace({
       )}
     >
       <div className="flex items-center justify-between gap-2 border-b border-border/60 bg-muted/20 px-3 py-2">
-        <span className="text-xs font-medium text-muted-foreground">Aperçu vitrine</span>
+        <span className="text-xs font-medium text-muted-foreground">Storefront preview</span>
       </div>
       <div className="p-2 sm:p-4">
         <div className="mx-auto max-w-5xl">
@@ -181,7 +180,7 @@ export function OnboardingCatalogWorkspace({
     <div
       className="flex rounded-xl border border-border bg-muted/30 p-1 gap-0.5"
       role="tablist"
-      aria-label="Étape d’édition du catalogue"
+      aria-label="Catalog editing step"
     >
       {SECTIONS.map(({ id, label }) => (
         <button
@@ -247,7 +246,7 @@ export function OnboardingCatalogWorkspace({
         className="flex-1 sm:flex-initial gap-1.5"
       >
         <ChevronLeft className="h-4 w-4" />
-        Précédent
+        Previous
       </Button>
       <Button
         type="button"
@@ -255,7 +254,7 @@ export function OnboardingCatalogWorkspace({
         style={{ backgroundColor: "var(--primary)" }}
         className="flex-1 sm:flex-initial text-primary-foreground hover:opacity-90 gap-1.5"
       >
-        Suivant
+        Next
         <ChevronRight className="h-4 w-4" />
       </Button>
     </div>
@@ -286,8 +285,8 @@ export function OnboardingCatalogWorkspace({
               <div className="space-y-5 pt-2 pb-4">
                 <div className="mx-auto w-full max-w-[416px]">
                   <OnboardingStepTitle
-                    title="Votre catalogue"
-                    subtitle="Un seul défilement : aperçu à jour au fil de vos ajouts. Modèle ou saisie manuelle."
+                    title="Your catalog"
+                    subtitle="One continuous flow: live preview as you add items. Start from a template or enter manually."
                   />
                 </div>
 
@@ -299,14 +298,14 @@ export function OnboardingCatalogWorkspace({
                     className="gap-1.5"
                     onClick={() => {
                       if (isPreview) {
-                        toast.message("Simulation : import de modèles désactivé.");
+                        toast.message("Simulation: template import disabled.");
                         return;
                       }
                       setPickerOpen(true);
                     }}
                   >
                     <Sparkles className="h-4 w-4" />
-                    Partir d&apos;un modèle
+                    Start from a template
                   </Button>
                 </div>
 

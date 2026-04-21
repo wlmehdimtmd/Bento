@@ -22,15 +22,15 @@ const resetSchema = z
   .object({
     password: z
       .string()
-      .min(10, "Au moins 10 caractères")
-      .regex(/[A-Z]/, "Au moins une lettre majuscule")
-      .regex(/[a-z]/, "Au moins une lettre minuscule")
-      .regex(/[0-9]/, "Au moins un chiffre")
-      .regex(/[^A-Za-z0-9]/, "Au moins un caractère spécial (!@#$%…)"),
-    confirm: z.string().min(1, "Confirmez le mot de passe"),
+      .min(10, "At least 10 characters")
+      .regex(/[A-Z]/, "At least one uppercase letter")
+      .regex(/[a-z]/, "At least one lowercase letter")
+      .regex(/[0-9]/, "At least one number")
+      .regex(/[^A-Za-z0-9]/, "At least one special character (!@#$%…)"),
+    confirm: z.string().min(1, "Confirm your password"),
   })
   .refine((v) => v.password === v.confirm, {
-    message: "Les mots de passe ne correspondent pas",
+    message: "Passwords do not match",
     path: ["confirm"],
   });
 
@@ -95,27 +95,27 @@ export function ResetPasswordForm() {
           error.message ||
             (locale === "en"
               ? "Unable to update password."
-              : "Impossible de mettre à jour le mot de passe.")
+              : "Unable to update password.")
         );
         return;
       }
       toast.success(
         locale === "en"
           ? "Password updated. Redirecting..."
-          : "Mot de passe mis à jour. Redirection…"
+          : "Password updated. Redirecting..."
       );
       router.push("/dashboard");
       router.refresh();
     } catch (err) {
       console.error("[reset-password] unexpected:", err);
-      toast.error("Une erreur inattendue s'est produite.");
+      toast.error("An unexpected error occurred.");
     }
   }
 
   if (!ready) {
     return (
       <div className="flex justify-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-label="Chargement" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-label="Loading" />
       </div>
     );
   }
@@ -124,13 +124,13 @@ export function ResetPasswordForm() {
     return (
       <div className="space-y-4 text-center text-sm">
         <p className="text-muted-foreground">
-          Session introuvable ou lien expiré. Demandez un nouveau lien depuis la page de connexion.
+          Session not found or link expired. Request a new link from the login page.
         </p>
         <Link
           href="/login"
           className={cn(buttonVariants({ variant: "outline" }), "inline-flex w-full justify-center")}
         >
-          Retour à la connexion
+          Back to login
         </Link>
       </div>
     );
@@ -139,7 +139,7 @@ export function ResetPasswordForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div className="space-y-1.5">
-        <Label htmlFor="password">Nouveau mot de passe</Label>
+        <Label htmlFor="password">New password</Label>
         <Input
           id="password"
           type="password"
@@ -154,7 +154,7 @@ export function ResetPasswordForm() {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="confirm">Confirmer</Label>
+        <Label htmlFor="confirm">Confirm</Label>
         <Input
           id="confirm"
           type="password"
@@ -172,10 +172,10 @@ export function ResetPasswordForm() {
         {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Enregistrement…
+            Saving...
           </>
         ) : (
-          "Enregistrer le mot de passe"
+          "Save password"
         )}
       </Button>
     </form>

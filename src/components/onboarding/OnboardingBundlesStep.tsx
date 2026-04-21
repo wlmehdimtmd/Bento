@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Trash2, GripVertical, Loader2, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { OnboardingStepTitle } from "@/components/onboarding/OnboardingStepTitle";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface CategoryItem {
   id: string;
@@ -71,6 +72,8 @@ export function OnboardingBundlesStep({
   isPreview = false,
   onCatalogChanged,
 }: OnboardingBundlesStepProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const [bundles, setBundles] = useState<BundleItem[]>(initialBundles);
   const [showForm, setShowForm] = useState(false);
   const [formPresentation, setFormPresentation] = useState<"drawer" | "sheet">("sheet");
@@ -122,18 +125,18 @@ export function OnboardingBundlesStep({
 
   async function saveBundle() {
     if (!form.name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error(tr("Le nom est requis", "Name is required"));
       return;
     }
     const price = parseFloat(form.price);
     if (isNaN(price) || price < 0) {
-      toast.error("Prix invalide");
+      toast.error(tr("Prix invalide", "Invalid price"));
       return;
     }
 
     const validSlots = form.slots.filter((s) => s.category_id.trim());
     if (validSlots.length === 0) {
-      toast.error("Ajoutez au moins un choix avec une catégorie");
+      toast.error(tr("Ajoutez au moins un choix avec une catégorie", "Add at least one option with a category"));
       return;
     }
 
@@ -148,7 +151,7 @@ export function OnboardingBundlesStep({
       };
       setBundles((prev) => [...prev, row]);
       setSaving(false);
-      toast.success("Formule créée (simulation) !");
+      toast.success(tr("Formule créée (simulation) !", "Bundle created (preview)!"));
       closeForm();
       notify();
       return;
@@ -177,7 +180,7 @@ export function OnboardingBundlesStep({
     const slotsPayload = validSlots.map((s, i) => ({
       bundle_id: bundle.id,
       category_id: s.category_id,
-      label: catNameById[s.category_id] || "Choix",
+      label: catNameById[s.category_id] || tr("Choix", "Option"),
       quantity: s.quantity,
       display_order: i,
     }));
@@ -190,7 +193,7 @@ export function OnboardingBundlesStep({
       return;
     }
 
-    toast.success("Formule créée !");
+    toast.success(tr("Formule créée !", "Bundle created!"));
     setBundles((prev) => [...prev, bundle as BundleItem]);
     closeForm();
     notify();
@@ -220,7 +223,7 @@ export function OnboardingBundlesStep({
           onClick={closeForm}
         className="flex-1"
       >
-        Annuler
+        {tr("Annuler", "Cancel")}
       </Button>
       <Button
         type="button"
@@ -229,7 +232,7 @@ export function OnboardingBundlesStep({
         style={{ backgroundColor: "var(--primary)" }}
         className="text-primary-foreground hover:opacity-90 flex-1"
       >
-        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Créer la formule"}
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : tr("Créer la formule", "Create bundle")}
       </Button>
       </div>
     </div>
@@ -240,14 +243,14 @@ export function OnboardingBundlesStep({
       <div className="flex-1 space-y-4 pb-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold">Composition *</p>
+            <p className="text-sm font-semibold">{tr("Composition", "Composition")} *</p>
             <p className="text-xs text-muted-foreground">
-              Pour chaque étape, choisissez une catégorie : l’intitulé sera son nom.
+              {tr("Pour chaque étape, choisissez une catégorie : l’intitulé sera son nom.", "For each step, choose a category: its name will be used as label.")}
             </p>
           </div>
           <Button type="button" variant="outline" size="sm" onClick={addSlot}>
             <Plus className="h-3.5 w-3.5 mr-1" />
-            Ajouter un choix
+            {tr("Ajouter un choix", "Add option")}
           </Button>
         </div>
 
@@ -256,7 +259,7 @@ export function OnboardingBundlesStep({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <GripVertical className="h-3.5 w-3.5" />
-                Choix {i + 1}
+                {tr("Choix", "Option")} {i + 1}
               </div>
               {form.slots.length > 1 && (
                 <button
@@ -295,7 +298,7 @@ export function OnboardingBundlesStep({
                   className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
                 >
                   <X className="h-3.5 w-3.5" />
-                  Désélectionner la catégorie
+                  {tr("Désélectionner la catégorie", "Deselect category")}
                 </button>
               ) : null}
             </div>
@@ -309,7 +312,7 @@ export function OnboardingBundlesStep({
           style={{ backgroundColor: "var(--primary)" }}
           className="w-full text-primary-foreground hover:opacity-90"
         >
-          Valider
+          {tr("Valider", "Confirm")}
         </Button>
       </div>
     </div>
@@ -319,27 +322,27 @@ export function OnboardingBundlesStep({
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex-1 space-y-4 pb-4">
         <div className="space-y-1.5">
-          <Label>Nom de la formule *</Label>
+          <Label>{tr("Nom de la formule", "Bundle name")} *</Label>
           <Input
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            placeholder="Menu Midi, Formule Découverte…"
+            placeholder={tr("Menu Midi, Formule Découverte…", "Lunch Menu, Discovery Bundle...")}
             autoFocus
           />
         </div>
 
         <div className="space-y-1.5">
-          <Label>Description</Label>
+          <Label>{tr("Description", "Description")}</Label>
           <Textarea
             value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            placeholder="Décrivez la formule…"
+            placeholder={tr("Décrivez la formule…", "Describe the bundle...")}
             rows={2}
           />
         </div>
 
         <div className="space-y-1.5">
-          <Label>Prix (€) *</Label>
+          <Label>{tr("Prix (€)", "Price (€)")} *</Label>
           <Input
             type="number"
             step="0.01"
@@ -356,9 +359,9 @@ export function OnboardingBundlesStep({
           onClick={() => setSubView("composition")}
           className="h-12 w-full justify-between rounded-xl px-3 text-base"
         >
-          <span>Composition du menu</span>
+          <span>{tr("Composition du menu", "Menu composition")}</span>
           <span className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">{form.slots.length} choix</span>
+            <span className="text-xs text-muted-foreground">{form.slots.length} {tr("choix", "options")}</span>
             <ChevronRight className="h-4 w-4" />
           </span>
         </Button>
@@ -370,8 +373,8 @@ export function OnboardingBundlesStep({
   return (
     <div className="space-y-5 pt-2">
       <OnboardingStepTitle
-        title="Formules"
-        subtitle="Composez des menus ou offres groupées : elles s’affichent comme des tuiles sur votre vitrine."
+        title={tr("Formules", "Bundles")}
+        subtitle={tr("Composez des menus ou offres groupées : elles s’affichent comme des tuiles sur votre vitrine.", "Create menus or bundled offers: they appear as tiles on your storefront.")}
       />
 
       <div className="space-y-2">
@@ -390,7 +393,7 @@ export function OnboardingBundlesStep({
               type="button"
               onClick={() => void deleteBundle(bundle.id)}
               className="text-muted-foreground hover:text-destructive transition-colors"
-              aria-label="Supprimer"
+              aria-label={tr("Supprimer", "Delete")}
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -407,7 +410,7 @@ export function OnboardingBundlesStep({
           className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm text-muted-foreground hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors"
         >
           <Plus className="h-4 w-4" />
-          Créer une formule
+          {tr("Créer une formule", "Create bundle")}
         </button>
       </div>
 
@@ -430,12 +433,12 @@ export function OnboardingBundlesStep({
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => setSubView("main")}
-                  aria-label="Retour"
+                  aria-label={tr("Retour", "Back")}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               ) : null}
-              <DrawerTitle>{subView === "composition" ? "Composition du menu" : "Nouvelle formule"}</DrawerTitle>
+              <DrawerTitle>{subView === "composition" ? tr("Composition du menu", "Menu composition") : tr("Nouvelle formule", "New bundle")}</DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
               {subView === "composition" ? compositionPanel : bundleFormPanel}
@@ -461,12 +464,12 @@ export function OnboardingBundlesStep({
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => setSubView("main")}
-                  aria-label="Retour"
+                  aria-label={tr("Retour", "Back")}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               ) : null}
-              <SheetTitle>{subView === "composition" ? "Composition du menu" : "Nouvelle formule"}</SheetTitle>
+              <SheetTitle>{subView === "composition" ? tr("Composition du menu", "Menu composition") : tr("Nouvelle formule", "New bundle")}</SheetTitle>
             </SheetHeader>
             <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
               {subView === "composition" ? compositionPanel : bundleFormPanel}

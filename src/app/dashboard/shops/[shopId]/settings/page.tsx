@@ -3,13 +3,23 @@ import { createClient } from "@/lib/supabase/server";
 import { ShopForm } from "@/components/shop/ShopForm";
 import type { ShopReviews, SocialLinks } from "@/lib/types";
 import { storefrontPublicUrl } from "@/lib/publicAppUrl";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
+import { cookies } from "next/headers";
+import { MESSAGES } from "@/lib/i18nMessages";
 
 type Params = Promise<{ shopId: string }>;
 
-export const metadata = { title: "Configuration vitrine" };
+export async function generateMetadata() {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  return { title: MESSAGES[locale]["dashboard.shopSettings.metadataTitle"] };
+}
 
 export default async function ShopSettingsPage({ params }: { params: Params }) {
   const { shopId } = await params;
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const t = (key: string, fallback: string) => MESSAGES[locale][key] ?? fallback;
   const supabase = await createClient();
   const {
     data: { user },
@@ -48,7 +58,7 @@ export default async function ShopSettingsPage({ params }: { params: Params }) {
         className="text-3xl font-bold"
         style={{ fontFamily: "var(--font-onest)" }}
       >
-        Configuration vitrine — {shop.name}
+        {t("dashboard.shopSettings.titlePrefix", "Storefront settings -")} {shop.name}
       </h1>
 
       <ShopForm

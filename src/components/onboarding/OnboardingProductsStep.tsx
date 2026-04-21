@@ -31,6 +31,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { MenuImportButton } from "@/components/onboarding/MenuImportButton";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface CategoryItem {
   id: string;
@@ -81,6 +82,8 @@ export function OnboardingProductsStep({
   isPreview = false,
   onCatalogChanged,
 }: OnboardingProductsStepProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(categories[0]?.id ?? "");
   const [products, setProducts] = useState<ProductItem[]>(initialProducts);
@@ -144,12 +147,12 @@ export function OnboardingProductsStep({
 
   async function saveProduct() {
     if (!form.name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error(tr("Le nom est requis", "Name is required"));
       return;
     }
     const price = parseFloat(form.price);
     if (isNaN(price) || price < 0) {
-      toast.error("Prix invalide");
+      toast.error(tr("Prix invalide", "Invalid price"));
       return;
     }
 
@@ -194,7 +197,7 @@ export function OnboardingProductsStep({
       }
       setSaving(false);
       toast.success(
-        editingProduct ? "Produit mis à jour (simulation) !" : "Produit ajouté (simulation) !"
+        editingProduct ? tr("Produit mis à jour (simulation) !", "Product updated (preview)!") : tr("Produit ajouté (simulation) !", "Product added (preview)!")
       );
       closeForm();
       notify();
@@ -238,7 +241,7 @@ export function OnboardingProductsStep({
     }
 
     toast.success(
-      editingProduct ? "Produit mis à jour !" : "Produit ajouté ! Top votre carte prend forme !"
+      editingProduct ? tr("Produit mis à jour !", "Product updated!") : tr("Produit ajouté ! Top votre carte prend forme !", "Product added! Your menu is taking shape!")
     );
     closeForm();
     notify();
@@ -263,7 +266,7 @@ export function OnboardingProductsStep({
     <div className="sticky bottom-0 mt-auto border-t border-border py-3">
       <div className="flex items-center justify-between gap-3">
         <Button variant="outline" type="button" onClick={closeForm} className="flex-1">
-          Annuler
+          {tr("Annuler", "Cancel")}
         </Button>
         <Button
           type="button"
@@ -275,9 +278,9 @@ export function OnboardingProductsStep({
           {saving ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : editingProduct ? (
-            "Enregistrer"
+            tr("Enregistrer", "Save")
           ) : (
-            "Ajouter"
+            tr("Ajouter", "Add")
           )}
         </Button>
       </div>
@@ -300,7 +303,7 @@ export function OnboardingProductsStep({
           style={{ backgroundColor: "var(--primary)" }}
           className="w-full text-primary-foreground hover:opacity-90"
         >
-          Valider
+          {tr("Valider", "Confirm")}
         </Button>
       </div>
     </div>
@@ -311,12 +314,12 @@ export function OnboardingProductsStep({
       <div className="flex-1 pb-4">
         {form.name.trim() ? (
           <p className="mb-3 text-sm text-muted-foreground">
-            Produit : <span className="font-medium text-foreground">{form.name.trim()}</span>
+            {tr("Produit", "Product")} : <span className="font-medium text-foreground">{form.name.trim()}</span>
           </p>
         ) : null}
         <ImageUploader
           bucket="product-images"
-          label="Photo du produit"
+          label={tr("Photo du produit", "Product photo")}
           currentUrl={form.imageUrl}
           onUpload={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
           onRemove={() => setForm((f) => ({ ...f, imageUrl: null }))}
@@ -330,7 +333,7 @@ export function OnboardingProductsStep({
           style={{ backgroundColor: "var(--primary)" }}
           className="w-full text-primary-foreground hover:opacity-90"
         >
-          Valider
+          {tr("Valider", "Confirm")}
         </Button>
       </div>
     </div>
@@ -340,24 +343,24 @@ export function OnboardingProductsStep({
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex-1 space-y-4 pb-4">
         <p className="text-sm text-muted-foreground">
-          Catégorie : {activeCategory?.icon_emoji} {activeCategory?.name}
+          {tr("Catégorie", "Category")} : {activeCategory?.icon_emoji} {activeCategory?.name}
         </p>
 
         <div className="space-y-1.5">
           <Label>
-            Nom du produit <span className="text-destructive">*</span>
+            {tr("Nom du produit", "Product name")} <span className="text-destructive">*</span>
           </Label>
           <Input
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            placeholder="Ex: Ramen tonkotsu"
+            placeholder={tr("Ex: Ramen tonkotsu", "Ex: Tonkotsu ramen")}
             autoFocus
           />
         </div>
 
         <div className="space-y-1.5">
           <Label>
-            Prix (€) <span className="text-destructive">*</span>
+            {tr("Prix (€)", "Price (€)")} <span className="text-destructive">*</span>
           </Label>
           <Input
             type="number"
@@ -370,11 +373,11 @@ export function OnboardingProductsStep({
         </div>
 
         <div className="space-y-1.5">
-          <Label>Description</Label>
+          <Label>{tr("Description", "Description")}</Label>
           <Textarea
             value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            placeholder="Décrivez brièvement votre produit"
+            placeholder={tr("Décrivez brièvement votre produit", "Briefly describe your product")}
             rows={2}
           />
         </div>
@@ -388,14 +391,14 @@ export function OnboardingProductsStep({
           <span className="flex items-center gap-2">
             <span className="relative h-10 w-10 overflow-hidden rounded-md border border-border bg-muted shrink-0">
               {form.imageUrl ? (
-                <Image src={form.imageUrl} alt="Aperçu photo produit" fill className="object-cover" sizes="40px" />
+                <Image src={form.imageUrl} alt={tr("Aperçu photo produit", "Product photo preview")} fill className="object-cover" sizes="40px" />
               ) : (
                 <span className="inline-flex h-full w-full items-center justify-center">
                   <Camera className="h-4 w-4 text-muted-foreground" />
                 </span>
               )}
             </span>
-            {form.imageUrl ? "Modifier la photo" : "Ajouter une photo"}
+            {form.imageUrl ? tr("Modifier la photo", "Edit photo") : tr("Ajouter une photo", "Add photo")}
           </span>
           <ChevronRight className="h-4 w-4" />
         </Button>
@@ -406,7 +409,7 @@ export function OnboardingProductsStep({
           onClick={() => setSubView("tags")}
           className="h-12 w-full justify-between rounded-xl px-3 text-base"
         >
-          <span>Allergènes et labels</span>
+          <span>{tr("Allergènes et labels", "Allergens and labels")}</span>
           <span className="flex items-center gap-2">
             <Badge variant="secondary" className="h-7 min-w-7 rounded-full px-2 text-xs tabular-nums">
               {form.tags.length}
@@ -421,20 +424,20 @@ export function OnboardingProductsStep({
 
   const panelTitle =
     subView === "photo"
-      ? "Photo du produit"
+      ? tr("Photo du produit", "Product photo")
       : subView === "tags"
-        ? "Allergènes et labels"
+        ? tr("Allergènes et labels", "Allergens and labels")
         : editingProduct
-          ? "Modifier le produit"
-          : "Nouveau produit";
+          ? tr("Modifier le produit", "Edit product")
+          : tr("Nouveau produit", "New product");
 
   const panelBody = subView === "photo" ? photoPanel : subView === "tags" ? allergensPanel : productFormPanel;
 
   return (
     <div className="space-y-5 pt-2">
       <OnboardingStepTitle
-        title="Produits"
-        subtitle="Ajoutez des plats par catégorie : ils apparaissent tout de suite sur l’aperçu de votre vitrine."
+        title={tr("Produits", "Products")}
+        subtitle={tr("Ajoutez des plats par catégorie : ils apparaissent tout de suite sur l’aperçu de votre vitrine.", "Add items by category: they appear immediately in your storefront preview.")}
       />
 
       {categories.length > 0 && (
@@ -447,7 +450,7 @@ export function OnboardingProductsStep({
               className={cn(
                 "shrink-0 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap",
                 activeTab === cat.id
-                  ? "bg-[var(--primary)] text-white"
+                  ? "bg-[var(--primary)] text-white dark:text-black"
                   : "bg-muted text-muted-foreground hover:text-foreground"
               )}
             >
@@ -486,7 +489,7 @@ export function OnboardingProductsStep({
                 type="button"
                 onClick={() => openEditForm(product)}
                 className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Modifier"
+                aria-label={tr("Modifier", "Edit")}
               >
                 <X className="h-4 w-4 rotate-0" />
               </button>
@@ -494,7 +497,7 @@ export function OnboardingProductsStep({
                 type="button"
                 onClick={() => void deleteProduct(product.id)}
                 className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
-                aria-label="Supprimer"
+                aria-label={tr("Supprimer", "Delete")}
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -509,7 +512,7 @@ export function OnboardingProductsStep({
           className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm text-muted-foreground hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors disabled:opacity-40"
         >
           <Plus className="h-4 w-4" />
-          Nouveau produit
+          {tr("Nouveau produit", "New product")}
         </button>
       </div>
 
@@ -525,7 +528,7 @@ export function OnboardingProductsStep({
       )}
       {isPreview && (
         <p className="text-xs text-muted-foreground text-center">
-          Import menu masqué en mode simulation.
+          {tr("Import menu masqué en mode simulation.", "Menu import hidden in preview mode.")}
         </p>
       )}
 
@@ -548,7 +551,7 @@ export function OnboardingProductsStep({
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => setSubView("main")}
-                  aria-label="Retour"
+                  aria-label={tr("Retour", "Back")}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -577,7 +580,7 @@ export function OnboardingProductsStep({
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => setSubView("main")}
-                  aria-label="Retour"
+                  aria-label={tr("Retour", "Back")}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>

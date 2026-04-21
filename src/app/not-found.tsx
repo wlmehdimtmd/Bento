@@ -33,8 +33,7 @@ export default function NotFound() {
       <div className="flex gap-3">
         <Link
           href="/"
-          className={buttonVariants()}
-          style={{ backgroundColor: "var(--primary)", color: "white" }}
+          className={buttonVariants({ variant: "default" })}
         >
           Retour à l&apos;accueil
         </Link>

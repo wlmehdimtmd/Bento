@@ -44,6 +44,7 @@ import { PasteJsonImportDialog } from "@/components/import/PasteJsonImportDialog
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface CategoryOption {
   id: string;
@@ -75,6 +76,8 @@ export function BundlesClient({
   onBundlesMenuGroupedChange,
   adminActions,
 }: BundlesClientProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const router = useRouter();
   const [bundles, setBundles] = useState<BundleRow[]>(initialBundles);
   const [bundlesMenuGrouped, setBundlesMenuGrouped] = useState(initialBundlesMenuGrouped);
@@ -113,9 +116,12 @@ export function BundlesClient({
     if (q) {
       return (
         <>
-          {n} résultat{n !== 1 ? "s" : ""} pour &laquo;{q}&raquo;
+          {locale === "en"
+            ? `${n} result${n !== 1 ? "s" : ""} for`
+            : `${n} résultat${n !== 1 ? "s" : ""} pour`}{" "}
+          &laquo;{q}&raquo;
           {total !== n && (
-            <span className="text-muted-foreground/80"> ({total} au total)</span>
+            <span className="text-muted-foreground/80"> ({total} {tr("au total", "total")})</span>
           )}
         </>
       );
@@ -125,13 +131,17 @@ export function BundlesClient({
         {total} formule{total !== 1 ? "s" : ""}
       </>
     );
-  }, [displayedBundles.length, search, bundles.length]);
+  }, [displayedBundles.length, locale, search, bundles.length, tr]);
 
   async function handleTemplateImport(data: ImportData) {
     const supabase = createClient();
     const existing = categories.map((c) => ({ id: c.id, name: c.name }));
     const { bundleCount } = await importTemplatesIntoShop(supabase, shopId, data, existing);
-    toast.success(`${bundleCount} formule${bundleCount !== 1 ? "s" : ""} importée${bundleCount !== 1 ? "s" : ""} !`);
+    toast.success(
+      locale === "en"
+        ? `${bundleCount} bundle${bundleCount !== 1 ? "s" : ""} imported!`
+        : `${bundleCount} formule${bundleCount !== 1 ? "s" : ""} importée${bundleCount !== 1 ? "s" : ""} !`
+    );
     router.refresh();
   }
 
@@ -182,12 +192,12 @@ export function BundlesClient({
       }
       toast.success(
         checked
-          ? "Les formules sont regroupées sous « Menu » sur la vitrine."
-          : "Les formules s’affichent à nouveau en tuiles séparées sur la vitrine."
+          ? tr("Les formules sont regroupées sous « Menu » sur la vitrine.", "Bundles are grouped under Menu on the storefront.")
+          : tr("Les formules s’affichent à nouveau en tuiles séparées sur la vitrine.", "Bundles are displayed again as separate tiles on the storefront.")
       );
       router.refresh();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Impossible d’enregistrer l’option.");
+      toast.error(e instanceof Error ? e.message : tr("Impossible d’enregistrer l’option.", "Unable to save option."));
       setBundlesMenuGrouped(prev);
     }
   }
@@ -212,7 +222,7 @@ export function BundlesClient({
         )
       );
     } else {
-      toast.success(newValue ? "Formule activée" : "Formule désactivée");
+      toast.success(newValue ? tr("Formule activée", "Bundle enabled") : tr("Formule désactivée", "Bundle disabled"));
     }
   }
 
@@ -224,9 +234,9 @@ export function BundlesClient({
       try {
         await adminActions.onDelete(deletingId);
         setBundles((prev) => prev.filter((b) => b.id !== deletingId));
-        toast.success("Formule supprimée.");
+        toast.success(tr("Formule supprimée.", "Bundle deleted."));
       } catch {
-        toast.error("Erreur lors de la suppression.");
+        toast.error(tr("Erreur lors de la suppression.", "Error while deleting."));
       } finally {
         setIsDeleting(false);
         setDeleteOpen(false);
@@ -248,7 +258,7 @@ export function BundlesClient({
       toast.error(error.message);
     } else {
       setBundles((prev) => prev.filter((b) => b.id !== deletingId));
-      toast.success("Formule supprimée.");
+      toast.success(tr("Formule supprimée.", "Bundle deleted."));
       router.refresh();
     }
     setDeletingId(null);
@@ -264,11 +274,13 @@ export function BundlesClient({
         <div className="flex flex-col gap-3 rounded-lg border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-0.5 min-w-0">
             <Label htmlFor="bundles-menu-grouped" className="text-sm font-medium">
-              Carte « Menu » sur la vitrine
+              {tr("Carte « Menu » sur la vitrine", "Menu card on storefront")}
             </Label>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-xl">
-              Une seule tuile type catégorie regroupe vos formules actives ; vos clients ouvrent la liste au
-              clic. Sinon, chaque formule reste une tuile dédiée sur la grille bento.
+              {tr(
+                "Une seule tuile type catégorie regroupe vos formules actives ; vos clients ouvrent la liste au clic. Sinon, chaque formule reste une tuile dédiée sur la grille bento.",
+                "A single category-like tile groups your active bundles; customers open the list on click. Otherwise, each bundle remains a dedicated tile in the bento grid."
+              )}
             </p>
           </div>
           <Switch
@@ -276,7 +288,10 @@ export function BundlesClient({
             checked={bundlesMenuGrouped}
             onCheckedChange={handleBundlesMenuGroupedChange}
             className="shrink-0"
-            aria-label="Regrouper les formules sous la carte Menu sur la vitrine"
+            aria-label={tr(
+              "Regrouper les formules sous la carte Menu sur la vitrine",
+              "Group bundles under the Menu card on storefront"
+            )}
           />
         </div>
 
@@ -284,7 +299,7 @@ export function BundlesClient({
           <div className="relative flex-1 min-w-48">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
-              placeholder="Rechercher une formule…"
+              placeholder={tr("Rechercher une formule…", "Search a bundle...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-8"
@@ -309,7 +324,7 @@ export function BundlesClient({
               className="text-primary-foreground hover:opacity-90"
             >
               <Plus className="mr-1.5 h-4 w-4" />
-              Nouvelle formule
+              {tr("Nouvelle formule", "New bundle")}
             </Button>
           </div>
         </div>
@@ -319,7 +334,10 @@ export function BundlesClient({
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
           <Gift className="h-10 w-10 text-muted-foreground/50" />
           <p className="text-muted-foreground">
-            Aucune formule. Créez-en une pour proposer des menus composés.
+            {tr(
+              "Aucune formule. Créez-en une pour proposer des menus composés.",
+              "No bundles. Create one to offer set menus."
+            )}
           </p>
         </div>
       )}
@@ -328,7 +346,7 @@ export function BundlesClient({
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
           <Gift className="h-10 w-10 text-muted-foreground/50" />
           <p className="text-muted-foreground">
-            Aucune formule ne correspond à votre recherche.
+            {tr("Aucune formule ne correspond à votre recherche.", "No bundles match your search.")}
           </p>
         </div>
       )}
@@ -339,15 +357,15 @@ export function BundlesClient({
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12"></TableHead>
-                <TableHead>Formule</TableHead>
+                <TableHead>{tr("Formule", "Bundle")}</TableHead>
                 <TableHead className="hidden lg:table-cell max-w-[280px]">
-                  Composition
+                  {tr("Composition", "Composition")}
                 </TableHead>
-                <TableHead className="text-right w-28">Prix</TableHead>
+                <TableHead className="text-right w-28">{tr("Prix", "Price")}</TableHead>
                 {!adminActions && (
-                  <TableHead className="text-center w-24">Actif</TableHead>
+                  <TableHead className="text-center w-24">{tr("Actif", "Active")}</TableHead>
                 )}
-                <TableHead className="text-right w-24">Actions</TableHead>
+                <TableHead className="text-right w-24">{tr("Actions", "Actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -399,7 +417,7 @@ export function BundlesClient({
                         checked={bundle.is_active}
                         onCheckedChange={() => handleToggleActive(bundle)}
                         size="sm"
-                        aria-label={bundle.is_active ? "Désactiver" : "Activer"}
+                        aria-label={bundle.is_active ? tr("Désactiver", "Disable") : tr("Activer", "Enable")}
                       />
                     </TableCell>
                   )}
@@ -409,7 +427,7 @@ export function BundlesClient({
                         variant="ghost"
                         size="icon-sm"
                         onClick={() => openEdit(bundle)}
-                        aria-label="Modifier"
+                        aria-label={tr("Modifier", "Edit")}
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
@@ -418,7 +436,7 @@ export function BundlesClient({
                         size="icon-sm"
                         onClick={() => openDelete(bundle.id)}
                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        aria-label="Supprimer"
+                        aria-label={tr("Supprimer", "Delete")}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -466,19 +484,19 @@ export function BundlesClient({
                   size="icon-sm"
                   variant="ghost"
                   onClick={() => setFormSubView("main")}
-                  aria-label="Retour"
+                  aria-label={tr("Retour", "Back")}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               ) : null}
               <DrawerTitle>
                 {formSubView === "photo"
-                  ? "Photo de la formule"
+                  ? tr("Photo de la formule", "Bundle photo")
                   : formSubView === "composition"
-                    ? "Composition du menu"
+                    ? tr("Composition du menu", "Menu composition")
                     : editingBundle
-                      ? "Modifier la formule"
-                      : "Nouvelle formule"}
+                      ? tr("Modifier la formule", "Edit bundle")
+                      : tr("Nouvelle formule", "New bundle")}
               </DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
@@ -511,19 +529,19 @@ export function BundlesClient({
                   size="icon-sm"
                   variant="ghost"
                   onClick={() => setFormSubView("main")}
-                  aria-label="Retour"
+                  aria-label={tr("Retour", "Back")}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               ) : null}
               <SheetTitle>
                 {formSubView === "photo"
-                  ? "Photo de la formule"
+                  ? tr("Photo de la formule", "Bundle photo")
                   : formSubView === "composition"
-                    ? "Composition du menu"
+                    ? tr("Composition du menu", "Menu composition")
                     : editingBundle
-                      ? "Modifier la formule"
-                      : "Nouvelle formule"}
+                      ? tr("Modifier la formule", "Edit bundle")
+                      : tr("Nouvelle formule", "New bundle")}
               </SheetTitle>
             </SheetHeader>
             <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
@@ -546,11 +564,11 @@ export function BundlesClient({
       {/* Delete confirmation */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="sm:max-w-sm">
-          <DialogTitle>Supprimer la formule</DialogTitle>
+          <DialogTitle>{tr("Supprimer la formule", "Delete bundle")}</DialogTitle>
           <DialogDescription>
-            Êtes-vous sûr de vouloir supprimer{" "}
+            {tr("Êtes-vous sûr de vouloir supprimer", "Are you sure you want to delete")}{" "}
             <strong>&laquo;{deletingBundle?.name}&raquo;</strong> ?
-            Cette action est irréversible.
+            {" "}{tr("Cette action est irréversible.", "This action is irreversible.")}
           </DialogDescription>
           <DialogFooter>
             <Button
@@ -558,14 +576,14 @@ export function BundlesClient({
               onClick={() => setDeleteOpen(false)}
               disabled={isDeleting}
             >
-              Annuler
+              {tr("Annuler", "Cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={confirmDelete}
               disabled={isDeleting}
             >
-              {isDeleting ? "Suppression…" : "Supprimer"}
+              {isDeleting ? tr("Suppression…", "Deleting...") : tr("Supprimer", "Delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

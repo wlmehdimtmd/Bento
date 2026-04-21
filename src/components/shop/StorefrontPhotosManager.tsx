@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 type StorefrontPhotoRow = {
   id: string;
@@ -74,6 +75,8 @@ function isPhotoLimitReached(message: string) {
 }
 
 export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps) {
+  const { locale } = useLocale();
+  const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const supabase = useMemo(() => createClient(), []);
   const [photos, setPhotos] = useState<StorefrontPhotoRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,7 +101,7 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
         setLoading(false);
         return;
       }
-      toast.error("Impossible de charger les photos de la vitrine.");
+      toast.error(tr("Impossible de charger les photos de la vitrine.", "Unable to load storefront photos."));
       setLoading(false);
       return;
     }
@@ -116,7 +119,7 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
 
   async function handleInsertPhoto(imageUrl: string) {
     if (!canAddPhoto) {
-      toast.error(`Limite atteinte : ${MAX_PHOTOS} photos maximum.`);
+      toast.error(tr(`Limite atteinte : ${MAX_PHOTOS} photos maximum.`, `Limit reached: ${MAX_PHOTOS} photos max.`));
       return;
     }
 
@@ -137,14 +140,14 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
         return;
       }
       if (isPhotoLimitReached(error.message)) {
-        toast.error(`Limite atteinte : ${MAX_PHOTOS} photos maximum.`);
+        toast.error(tr(`Limite atteinte : ${MAX_PHOTOS} photos maximum.`, `Limit reached: ${MAX_PHOTOS} photos max.`));
         return;
       }
-      toast.error(error.message || "Impossible d'ajouter la photo.");
+      toast.error(error.message || tr("Impossible d'ajouter la photo.", "Unable to add photo."));
       return;
     }
 
-    toast.success("Photo ajoutée à la vitrine.");
+    toast.success(tr("Photo ajoutée à la vitrine.", "Photo added to storefront."));
     void loadPhotos();
   }
 
@@ -159,7 +162,7 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
 
     if (error) {
       console.error(error);
-      toast.error("Mise à jour impossible.");
+      toast.error(tr("Mise à jour impossible.", "Update failed."));
       return;
     }
 
@@ -179,11 +182,11 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
 
     if (error) {
       console.error(error);
-      toast.error("Suppression impossible.");
+      toast.error(tr("Suppression impossible.", "Delete failed."));
       return;
     }
 
-    toast.success("Photo supprimée.");
+    toast.success(tr("Photo supprimée.", "Photo deleted."));
     void loadPhotos();
   }
 
@@ -212,7 +215,7 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
 
     if (errA || errB) {
       console.error(errA || errB);
-      toast.error("Réordonnancement impossible.");
+      toast.error(tr("Réordonnancement impossible.", "Reordering failed."));
       return;
     }
 
@@ -223,41 +226,43 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
     <div className="space-y-5">
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">
-          Importez des photos pour votre vitrine publique. Vous pouvez afficher/masquer chaque photo
-          individuellement.
+          {tr(
+            "Importez des photos pour votre vitrine publique. Vous pouvez afficher/masquer chaque photo individuellement.",
+            "Upload photos for your storefront. You can show/hide each photo individually."
+          )}
         </p>
         <p className="text-xs text-muted-foreground">
-          {photos.length} / {MAX_PHOTOS} photos
+          {photos.length} / {MAX_PHOTOS} {tr("photos", "photos")}
         </p>
       </div>
 
       {canAddPhoto ? (
         <ImageUploader
           bucket="shop-assets"
-          label="Nouvelle photo vitrine"
-          hint="JPG, PNG, WebP"
+          label={tr("Nouvelle photo vitrine", "New storefront photo")}
+          hint={tr("JPG, PNG, WebP", "JPG, PNG, WebP")}
           onUpload={handleInsertPhoto}
         />
       ) : (
         <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
-          Limite atteinte ({MAX_PHOTOS} photos). Supprimez une photo pour en ajouter une nouvelle.
+          {tr(`Limite atteinte (${MAX_PHOTOS} photos). Supprimez une photo pour en ajouter une nouvelle.`, `Limit reached (${MAX_PHOTOS} photos). Delete one to add a new one.`)}
         </div>
       )}
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Chargement des photos…</p>
+        <p className="text-sm text-muted-foreground">{tr("Chargement des photos…", "Loading photos...")}</p>
       ) : photos.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border bg-muted/20 p-6 text-center text-sm text-muted-foreground">
-          Aucune photo importée pour le moment.
+          {tr("Aucune photo importée pour le moment.", "No photos uploaded yet.")}
         </div>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Photo</TableHead>
-              <TableHead>Visible</TableHead>
-              <TableHead>Ordre</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{tr("Photo", "Photo")}</TableHead>
+              <TableHead>{tr("Visible", "Visible")}</TableHead>
+              <TableHead>{tr("Ordre", "Order")}</TableHead>
+              <TableHead className="text-right">{tr("Actions", "Actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -269,7 +274,7 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
                     <div className="relative h-14 w-24 overflow-hidden rounded-md border border-border bg-muted">
                       <Image
                         src={photo.image_url}
-                        alt={photo.caption || `Photo vitrine ${index + 1}`}
+                        alt={photo.caption || tr(`Photo vitrine ${index + 1}`, `Storefront photo ${index + 1}`)}
                         fill
                         className="object-cover"
                         sizes="96px"
@@ -281,7 +286,7 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
                       checked={photo.is_visible}
                       onCheckedChange={(checked) => handleToggleVisibility(photo, checked)}
                       disabled={rowBusy}
-                      aria-label="Afficher cette photo dans la vitrine"
+                      aria-label={tr("Afficher cette photo dans la vitrine", "Show this photo on storefront")}
                     />
                   </TableCell>
                   <TableCell>
@@ -295,7 +300,7 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
                         size="icon"
                         disabled={rowBusy || index === 0}
                         onClick={() => handleMove(photo, -1)}
-                        aria-label="Monter la photo"
+                        aria-label={tr("Monter la photo", "Move photo up")}
                       >
                         <ArrowUp className="h-4 w-4" />
                       </Button>
@@ -305,7 +310,7 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
                         size="icon"
                         disabled={rowBusy || index === photos.length - 1}
                         onClick={() => handleMove(photo, 1)}
-                        aria-label="Descendre la photo"
+                        aria-label={tr("Descendre la photo", "Move photo down")}
                       >
                         <ArrowDown className="h-4 w-4" />
                       </Button>
@@ -315,7 +320,7 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
                         size="icon"
                         disabled={rowBusy}
                         onClick={() => handleDeletePhoto(photo.id)}
-                        aria-label="Supprimer la photo"
+                        aria-label={tr("Supprimer la photo", "Delete photo")}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -329,7 +334,7 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
       )}
 
       {uploading ? (
-        <p className="text-xs text-muted-foreground">Enregistrement de la photo…</p>
+        <p className="text-xs text-muted-foreground">{tr("Enregistrement de la photo…", "Saving photo...")}</p>
       ) : null}
     </div>
   );
