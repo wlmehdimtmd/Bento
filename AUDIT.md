@@ -13,9 +13,9 @@ Ce fichier trace les **décisions structurantes** et l’avancement de l’audit
 | Partie            | Statut audit | Notes |
 |-------------------|--------------|-------|
 | Authentification  | Rapport + correctifs ciblés | AuthGuard retiré ; erreurs callback login ; etc. |
-| Landing Page      | Rapport initial livré | Conversation du 2026-04-21 |
-| Dashboard Client  | Rapport initial livré | Conversation du 2026-04-21 |
-| Vitrine Client    | Rapport initial livré | Conversation du 2026-04-21 |
+| Landing Page      | Rapport + correctifs (copy mono-boutique, footer) | — |
+| Dashboard Client  | Rapport + correctifs (CA, i18n, erreur, sidebar) | — |
+| Vitrine Client    | Rapport + correctifs (select shops, checkout, i18n vide) | — |
 
 ## Journal des décisions
 
@@ -23,21 +23,22 @@ Ce fichier trace les **décisions structurantes** et l’avancement de l’audit
 |------------|--------|--------------------|--------|
 | 2026-04-21 | Auth   | L’audit Auth est traité en premier ; aucune modification applicative n’a été fusionnée sans validation utilisateur. | Fait (rapport) |
 | 2026-04-21 | Auth   | `AuthGuard.tsx` supprimé : la garde session est déjà dans `dashboard/layout.tsx`. | Fait |
-| 2026-04-21 | Auth   | `SUPABASE_REDIRECT_RELATIVE_PATHS` est exporté mais jamais importé : candidat suppression ou usage documenté (README interne). | À décider |
+| 2026-04-21 | Auth   | `SUPABASE_REDIRECT_RELATIVE_PATHS` supprimé ; doc conservée en commentaire dans `authRedirectUrls.ts`. | Fait |
 | 2026-04-21 | Auth   | Les redirections `/login?error=…` : messages affichés sur la page login (FR/EN). | Fait |
-| 2026-04-21 | Landing | Texte i18n **multi-boutiques** (`landing.features.multishop.*`) en contradiction avec la règle métier **mono-boutique** (`CLAUDE.md`) : à aligner (copy ou produit). | À décider |
-| 2026-04-21 | Landing | Clé `landing.footer.rights` définie dans `i18nMessages.ts` mais non utilisée dans le footer de `LandingPageClient`. | Nice to have |
+| 2026-04-21 | Landing | Copy **mono-boutique** pour `landing.features.multishop.*` ; `landing.footer.rights` affiché dans le footer. | Fait |
 | 2026-04-21 | Repo   | Journal `AUDIT.md` initial commité (`docs: ajout du journal d'audit`). | Fait |
-| 2026-04-21 | Dashboard | **`/dashboard/page`** : le CA (« revenue ») est calculé avec `reduce` sur les **mêmes** lignes que la liste « 5 dernières commandes » (`.limit(5)`) — le chiffre affiché n’est pas le CA total de la boutique. | **Bug métier** — à corriger |
+| 2026-04-21 | Dashboard | CA dashboard : somme sur toutes les commandes non annulées (requête dédiée). | Fait |
 | 2026-04-21 | Dashboard | Double familles d’URLs catalogue : `/dashboard/categories` (shop implicite) vs `/dashboard/shops/[shopId]/categories` — même contenu, navigation selon contexte. | Dette / complexité acceptable si voulu ; sinon simplifier |
 | 2026-04-21 | Dashboard | i18n : nombreuses chaînes via `tr(fr, en)` (cookies + `LocaleProvider`) en parallèle de `i18nMessages` / `getDashboardCatalogCopy`. | Refactor progressif possible |
-| 2026-04-21 | Dashboard | `DashboardSidebar` reçoit `user` mais ne l’utilise pas (`_user`). | Nettoyage API props possible |
-| 2026-04-21 | Dashboard | `StatsCard` : `toLocaleString("fr-FR")` pour les compteurs même si `locale === "en"`. | Cosmétique i18n |
+| 2026-04-21 | Dashboard | Props `user` inutilisées retirées (sidebar + layout) ; requête `users.full_name` supprimée du layout. | Fait |
+| 2026-04-21 | Dashboard | `StatsCard` / `RecentOrders` / `error.tsx` : format nombre et libellés selon locale. | Fait |
 | 2026-04-21 | Vitrine | Chaîne FR vide carte : `n&apos;a` dans une string JS affichait l’entité HTML en clair — corrigé en `n'a`. | Corrigé (code) |
-| 2026-04-21 | Vitrine | `fetchPublicShopPagePayload` : plusieurs `select` successifs sur `shops` (layout, theme, bundles_grouped…) — candidat fusion en un select ou vue. | Perf / clarté |
-| 2026-04-21 | Vitrine | `CheckoutForm` : `FULFILLMENT_LABELS` local duplique partiellement `FULFILLMENT_MODES` dans `constants.ts`. | DRY possible |
+| 2026-04-21 | Vitrine | `fetchPublicShopPagePayload` : un seul `select` shops (layout + thème + bundles groupés). | Fait |
+| 2026-04-21 | Vitrine | Checkout : libellés modes depuis `FULFILLMENT_MODES` + `labelEn`. | Fait |
+| 2026-04-21 | Auth/API | Validation Zod register, schéma MDP partagé, `getAuthRequestMeta` (login, register, logout, callback). | Fait |
+| 2026-04-21 | Cart | Bloc no-op retiré dans `cartStore.addItem`. | Fait |
 | 2026-04-21 | Vitrine | Métadonnées `alternates.canonical` utilisent le `slug` d’URL, pas forcément le slug canonique boutique si jamais redirection slug. | À surveiller |
 
 ---
 
-*Dernière mise à jour : 2026-04-21*
+*Dernière mise à jour : 2026-04-21 — vague de correctifs post-audit (commits atomiques).*
