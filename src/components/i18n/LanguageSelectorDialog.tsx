@@ -13,7 +13,7 @@ import {
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
 export function LanguageSelectorDialog() {
-  const { locale, setLocale } = useLocale();
+  const { locale, setLocale, t } = useLocale();
   const [open, setOpen] = useState(false);
   const titleId = useId();
 
@@ -29,7 +29,7 @@ export function LanguageSelectorDialog() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle id={titleId}>Choisir la langue</DialogTitle>
+            <DialogTitle id={titleId}>{t("i18n.dialog.title")}</DialogTitle>
           </DialogHeader>
           <RadioGroup
             value={locale}
