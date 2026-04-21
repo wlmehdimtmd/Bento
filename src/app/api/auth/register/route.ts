@@ -4,13 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logAuthEvent } from "@/lib/auth-logger";
 import { buildAuthEmailConfirmationRedirectUrl } from "@/lib/merchant-bootstrap";
 import { registerBodySchema } from "@/lib/auth/registerBodySchema";
-
-function getClientMeta(request: Request) {
-  return {
-    ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? undefined,
-    userAgent: request.headers.get("user-agent") ?? undefined,
-  };
-}
+import { getAuthRequestMeta } from "@/lib/auth/requestMeta";
 
 export async function POST(request: Request) {
   let body: { email: string; password: string; full_name: string };
@@ -26,7 +20,7 @@ export async function POST(request: Request) {
   }
 
   const { email, password, full_name } = body;
-  const meta = getClientMeta(request);
+  const meta = getAuthRequestMeta(request);
 
   const emailRedirectTo = buildAuthEmailConfirmationRedirectUrl(request);
 

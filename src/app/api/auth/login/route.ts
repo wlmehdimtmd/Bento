@@ -2,18 +2,12 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logAuthEvent } from "@/lib/auth-logger";
 import { resolveIsAdmin } from "@/lib/auth-utils";
-
-function getClientMeta(request: Request) {
-  return {
-    ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? undefined,
-    userAgent: request.headers.get("user-agent") ?? undefined,
-  };
-}
+import { getAuthRequestMeta } from "@/lib/auth/requestMeta";
 
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
-    const meta = getClientMeta(request);
+    const meta = getAuthRequestMeta(request);
 
     if (!email || !password) {
       return NextResponse.json({ error: "Email et mot de passe requis." }, { status: 400 });
