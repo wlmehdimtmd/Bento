@@ -45,6 +45,10 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
 import { useLocale } from "@/components/i18n/LocaleProvider";
+import {
+  CatalogDashboardPageHeader,
+  type CatalogDashboardPageIntro,
+} from "@/components/dashboard/CatalogDashboardPageHeader";
 
 interface CategoryOption {
   id: string;
@@ -66,6 +70,7 @@ interface BundlesClientProps {
   /** Admin ou action serveur : mise à jour du flag boutique (contourne RLS). */
   onBundlesMenuGroupedChange?: (value: boolean) => Promise<void>;
   adminActions?: AdminBundleActions;
+  catalogPageHeader?: CatalogDashboardPageIntro;
 }
 
 export function BundlesClient({
@@ -75,6 +80,7 @@ export function BundlesClient({
   initialBundlesMenuGrouped = false,
   onBundlesMenuGroupedChange,
   adminActions,
+  catalogPageHeader,
 }: BundlesClientProps) {
   const { locale } = useLocale();
   const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
@@ -269,10 +275,43 @@ export function BundlesClient({
   const deletingBundle = bundles.find((b) => b.id === deletingId);
   const catMap = Object.fromEntries(categories.map((c) => [c.id, c]));
 
+  const primaryCreateCtaLabel = isMobile
+    ? locale === "en"
+      ? "New"
+      : "Nouvelle"
+    : tr("Nouvelle formule", "New bundle");
+
+  const headerActions = (
+    <>
+      {!adminActions && (
+        <ImportMenuDropdown
+          onImportTemplate={() => setTemplateOpen(true)}
+          onImportJson={() => setJsonImportOpen(true)}
+        />
+      )}
+      <Button
+        onClick={openCreate}
+        style={{ backgroundColor: "var(--primary)" }}
+        className="text-primary-foreground hover:opacity-90"
+      >
+        <Plus className="mr-1.5 h-4 w-4" />
+        {primaryCreateCtaLabel}
+      </Button>
+    </>
+  );
+
   // ── Render ──────────────────────────────────────────────────
   return (
     <>
-      <div className="space-y-3">
+      {catalogPageHeader ? (
+        <CatalogDashboardPageHeader
+          pageTitle={catalogPageHeader.pageTitle}
+          introCopy={catalogPageHeader.introCopy}
+          actions={headerActions}
+        />
+      ) : null}
+
+      <div className={catalogPageHeader ? "mt-6 space-y-3" : "space-y-3"}>
         <div className="flex flex-col gap-3 rounded-lg border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-0.5 min-w-0">
             <Label htmlFor="bundles-menu-grouped" className="text-sm font-medium">
@@ -309,26 +348,19 @@ export function BundlesClient({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div
+          className={
+            catalogPageHeader
+              ? "flex flex-wrap items-center gap-3"
+              : "flex flex-wrap items-center justify-between gap-3"
+          }
+        >
           <p className="text-sm text-muted-foreground min-w-0 flex-1">
             {listSummaryText}
           </p>
-          <div className="flex gap-2 shrink-0">
-            {!adminActions && (
-              <ImportMenuDropdown
-                onImportTemplate={() => setTemplateOpen(true)}
-                onImportJson={() => setJsonImportOpen(true)}
-              />
-            )}
-            <Button
-              onClick={openCreate}
-              style={{ backgroundColor: "var(--primary)" }}
-              className="text-primary-foreground hover:opacity-90"
-            >
-              <Plus className="mr-1.5 h-4 w-4" />
-              {tr("Nouvelle formule", "New bundle")}
-            </Button>
-          </div>
+          {!catalogPageHeader ? (
+            <div className="flex gap-2 shrink-0">{headerActions}</div>
+          ) : null}
         </div>
 
       {/* Empty state */}

@@ -51,11 +51,16 @@ import { getDefaultCatalogLanguageCode, type TabCompletionStatus } from "@/lib/c
 import { pickLocalized } from "@/lib/i18n";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import {
+  CatalogDashboardPageHeader,
+  type CatalogDashboardPageIntro,
+} from "@/components/dashboard/CatalogDashboardPageHeader";
 
 interface ShopLabelsClientProps {
   shopId: string;
   initialLabels: ShopLabelOption[];
   existingProductTags: string[];
+  catalogPageHeader?: CatalogDashboardPageIntro;
 }
 
 const DEFAULT_COLOR = "#1d4ed8";
@@ -140,6 +145,7 @@ export function ShopLabelsClient({
   shopId,
   initialLabels,
   existingProductTags,
+  catalogPageHeader,
 }: ShopLabelsClientProps) {
   const { locale } = useLocale();
   const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
@@ -337,6 +343,12 @@ export function ShopLabelsClient({
     "This label can be applied to your products."
   );
 
+  const primaryLabelCtaLabel = isMobile
+    ? locale === "en"
+      ? "New"
+      : "Nouveau"
+    : tr("Nouveau label", "New label");
+
   const formFields = (
     <ShopLabelFormFields
       register={register}
@@ -349,6 +361,18 @@ export function ShopLabelsClient({
       onCopyFromFr={copyFromFr}
       tr={tr}
     />
+  );
+
+  const labelHeaderActions = (
+    <Button
+      onClick={openCreate}
+      disabled={isAtLimit}
+      style={{ backgroundColor: "var(--primary)" }}
+      className="text-primary-foreground hover:opacity-90"
+    >
+      <Plus className="mr-1.5 h-4 w-4" />
+      {primaryLabelCtaLabel}
+    </Button>
   );
 
   const editorFooter = (
@@ -370,21 +394,24 @@ export function ShopLabelsClient({
 
   return (
     <>
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">
-            {count} / {MAX_SHOP_LABELS} {tr("labels", "labels")}
-          </p>
-          <Button
-            onClick={openCreate}
-            disabled={isAtLimit}
-            style={{ backgroundColor: "var(--primary)" }}
-            className="text-primary-foreground hover:opacity-90"
-          >
-            <Plus className="mr-1.5 h-4 w-4" />
-            {tr("Nouveau label", "New label")}
-          </Button>
-        </div>
+      {catalogPageHeader ? (
+        <CatalogDashboardPageHeader
+          pageTitle={catalogPageHeader.pageTitle}
+          introCopy={catalogPageHeader.introCopy}
+          titleMeta={`${count} / ${MAX_SHOP_LABELS} ${tr("labels", "labels")}`}
+          actions={labelHeaderActions}
+        />
+      ) : null}
+
+      <div className={catalogPageHeader ? "mt-6 space-y-3" : "space-y-3"}>
+        {!catalogPageHeader ? (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              {count} / {MAX_SHOP_LABELS} {tr("labels", "labels")}
+            </p>
+            {labelHeaderActions}
+          </div>
+        ) : null}
 
         {sorted.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border py-12 text-center text-sm text-muted-foreground">

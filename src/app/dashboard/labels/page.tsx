@@ -56,20 +56,14 @@ export default async function LabelsPage() {
 
   return (
     <div className="p-6 md:p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold" style={{ fontFamily: "var(--font-onest)" }}>
-          Labels
-        </h1>
-        <p className="text-sm text-muted-foreground">{shop.name}</p>
-        <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
-          {getDashboardCatalogCopy(locale, "label")}
-        </p>
-      </div>
-
       <ShopLabelsClient
         shopId={shop.id}
         initialLabels={initialLabels}
         existingProductTags={existingProductTags}
+        catalogPageHeader={{
+          pageTitle: locale === "en" ? "Labels" : "Libellés",
+          introCopy: getDashboardCatalogCopy(locale, "label"),
+        }}
       />
     </div>
   );

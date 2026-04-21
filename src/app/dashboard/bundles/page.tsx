@@ -108,18 +108,19 @@ export default async function BundlesPage() {
 
   return (
     <div className="p-6 md:p-8 space-y-6">
-      <div>
-        <h1
-          className="text-3xl font-bold"
-          style={{ fontFamily: "var(--font-onest)" }}
-        >
-          {locale === "en" ? "Bundles" : "Formules"}
-        </h1>
-        <p className="text-sm text-muted-foreground">{shop.name}</p>
-        <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
-          {getDashboardCatalogCopy(locale, "bundle")}
-        </p>
-      </div>
+      {(categories ?? []).length === 0 ? (
+        <div>
+          <h1
+            className="text-3xl font-bold"
+            style={{ fontFamily: "var(--font-onest)" }}
+          >
+            {locale === "en" ? "Bundles" : "Formules"}
+          </h1>
+          <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
+            {getDashboardCatalogCopy(locale, "bundle")}
+          </p>
+        </div>
+      ) : null}
 
       {(categories ?? []).length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
@@ -136,6 +137,10 @@ export default async function BundlesPage() {
           categories={categories ?? []}
           initialBundles={initialBundles}
           initialBundlesMenuGrouped={initialBundlesMenuGrouped}
+          catalogPageHeader={{
+            pageTitle: locale === "en" ? "Bundles" : "Formules",
+            introCopy: getDashboardCatalogCopy(locale, "bundle"),
+          }}
         />
       )}
     </div>

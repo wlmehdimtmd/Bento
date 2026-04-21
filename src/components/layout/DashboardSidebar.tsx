@@ -41,10 +41,13 @@ function SidebarColumn({
   shops,
   activeOrdersCount = 0,
   className,
+  forSheet = false,
 }: {
   shops: { id: string; name: string }[];
   activeOrdersCount?: number;
   className?: string;
+  /** Panneau mobile : largeur généreuse + cibles type bouton `size="lg"`. */
+  forSheet?: boolean;
 }) {
   const pathname = usePathname();
   const { locale } = useLocale();
@@ -99,6 +102,15 @@ function SidebarColumn({
   const activeItemClass =
     "bg-[var(--primary)] [color:var(--primary-foreground)]";
 
+  const navItemClass = forSheet
+    ? "min-h-[52px] gap-2 px-6 text-base"
+    : "gap-3 px-3 py-2.5 text-sm";
+  const navSubItemClass = forSheet
+    ? "min-h-[48px] gap-2 px-6 py-3 text-base"
+    : "gap-3 px-3 py-2 text-sm";
+  const iconClass = forSheet ? "h-5 w-5 shrink-0" : "h-4 w-4 shrink-0";
+  const chevronClass = forSheet ? "h-5 w-5 shrink-0" : "h-4 w-4 shrink-0";
+
   const carteChildHrefs = [categoriesHref, productsHref, bundlesHref, labelsHref];
   const carteGroupActive = carteChildHrefs.some((h) => isActive(h));
   const vitrineChildHrefs = [vitrineConfigHref, vitrineLayoutHref];
@@ -127,26 +139,32 @@ function SidebarColumn({
 
   return (
     <div className={cn("flex flex-col min-h-0 overflow-hidden bg-sidebar text-sidebar-foreground", className)}>
-      <div className="flex h-16 items-center px-6 border-b border-sidebar-border shrink-0">
+      <div
+        className={cn(
+          "flex items-center border-b border-sidebar-border shrink-0",
+          forSheet ? "h-[52px] px-6" : "h-16 px-6"
+        )}
+      >
         <span
-          className="text-xl font-bold tracking-tight"
+          className={cn("font-bold tracking-tight", forSheet ? "text-2xl" : "text-xl")}
           style={{ fontFamily: "var(--font-onest)" }}
         >
           🍱 Bento Resto
         </span>
       </div>
 
-      <nav className="flex-1 min-h-0 space-y-1 overflow-y-auto px-3 py-4">
+      <nav className={cn("flex-1 min-h-0 space-y-1 overflow-y-auto py-4", forSheet ? "px-2" : "px-3")}>
         <Link
           href="/dashboard"
           className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+            "flex items-center rounded-lg font-medium transition-colors",
+            navItemClass,
             isActive("/dashboard", true)
               ? activeItemClass
               : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           )}
         >
-          <LayoutDashboard className="h-4 w-4 shrink-0" />
+          <LayoutDashboard className={iconClass} />
           {tr("Tableau de bord", "Dashboard")}
         </Link>
 
@@ -156,43 +174,46 @@ function SidebarColumn({
             onClick={() => setVitrineOpen((o) => !o)}
             aria-expanded={vitrineOpen}
             className={cn(
-              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+              "flex w-full items-center rounded-lg font-medium transition-colors",
+              navItemClass,
               vitrineGroupActive && !vitrineOpen
                 ? "bg-sidebar-accent/70 text-sidebar-accent-foreground"
                 : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             )}
           >
-            <Store className="h-4 w-4 shrink-0" />
+            <Store className={iconClass} />
             <span className="flex-1 text-left">{tr("Modifier ma vitrine", "Edit storefront")}</span>
             <ChevronDown
-              className={cn("h-4 w-4 shrink-0 transition-transform", vitrineOpen && "rotate-180")}
+              className={cn(chevronClass, "transition-transform", vitrineOpen && "rotate-180")}
             />
           </button>
 
           {vitrineOpen ? (
-            <div className="mt-1 ml-4 space-y-0.5 border-l border-sidebar-border pl-2">
+            <div className={cn("mt-1 border-l border-sidebar-border", forSheet ? "ml-3 space-y-1 pl-3" : "ml-4 space-y-0.5 pl-2")}>
               <Link
                 href={vitrineConfigHref}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center rounded-lg font-medium transition-colors",
+                  navSubItemClass,
                   isActive(vitrineConfigHref)
                     ? activeItemClass
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
-                <SlidersHorizontal className="h-4 w-4 shrink-0" />
+                <SlidersHorizontal className={iconClass} />
                 {tr("Configuration vitrine", "Storefront settings")}
               </Link>
               <Link
                 href={vitrineLayoutHref}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center rounded-lg font-medium transition-colors",
+                  navSubItemClass,
                   isActive(vitrineLayoutHref) || pathname.includes("/bento")
                     ? activeItemClass
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
-                <LayoutGrid className="h-4 w-4 shrink-0" />
+                <LayoutGrid className={iconClass} />
                 {tr("Mise en page vitrine", "Storefront layout")}
               </Link>
             </div>
@@ -205,67 +226,72 @@ function SidebarColumn({
             onClick={() => setCarteOpen((o) => !o)}
             aria-expanded={carteOpen}
             className={cn(
-              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+              "flex w-full items-center rounded-lg font-medium transition-colors",
+              navItemClass,
               carteGroupActive && !carteOpen
                 ? "bg-sidebar-accent/70 text-sidebar-accent-foreground"
                 : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             )}
           >
-            <Package className="h-4 w-4 shrink-0" />
+            <Package className={iconClass} />
             <span className="flex-1 text-left">{tr("Ma carte", "My menu")}</span>
             <ChevronDown
-              className={cn("h-4 w-4 shrink-0 transition-transform", carteOpen && "rotate-180")}
+              className={cn(chevronClass, "transition-transform", carteOpen && "rotate-180")}
             />
           </button>
 
           {carteOpen ? (
-            <div className="mt-1 ml-4 space-y-0.5 border-l border-sidebar-border pl-2">
+            <div className={cn("mt-1 border-l border-sidebar-border", forSheet ? "ml-3 space-y-1 pl-3" : "ml-4 space-y-0.5 pl-2")}>
               <Link
                 href={categoriesHref}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center rounded-lg font-medium transition-colors",
+                  navSubItemClass,
                   isActive(categoriesHref)
                     ? activeItemClass
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
-                <FolderOpen className="h-4 w-4 shrink-0" />
+                <FolderOpen className={iconClass} />
                 {tr("Catégories", "Categories")}
               </Link>
               <Link
                 href={productsHref}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center rounded-lg font-medium transition-colors",
+                  navSubItemClass,
                   isActive(productsHref)
                     ? activeItemClass
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
-                <Package className="h-4 w-4 shrink-0" />
+                <Package className={iconClass} />
                 {tr("Produits", "Products")}
               </Link>
               <Link
                 href={bundlesHref}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center rounded-lg font-medium transition-colors",
+                  navSubItemClass,
                   isActive(bundlesHref)
                     ? activeItemClass
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
-                <Gift className="h-4 w-4 shrink-0" />
+                <Gift className={iconClass} />
                 {tr("Formules", "Bundles")}
               </Link>
               <Link
                 href={labelsHref}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center rounded-lg font-medium transition-colors",
+                  navSubItemClass,
                   isActive(labelsHref)
                     ? activeItemClass
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
-                <Tags className="h-4 w-4 shrink-0" />
+                <Tags className={iconClass} />
                 {tr("Labels", "Labels")}
               </Link>
             </div>
@@ -275,18 +301,20 @@ function SidebarColumn({
         <Link
           href={ordersHref}
           className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+            "flex items-center rounded-lg font-medium transition-colors",
+            navItemClass,
             isActive(ordersHref)
               ? activeItemClass
               : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           )}
         >
-          <ShoppingCart className="h-4 w-4 shrink-0" />
+          <ShoppingCart className={iconClass} />
           <span className="flex-1 text-left">{tr("Commandes", "Orders")}</span>
           {activeOrdersCount > 0 ? (
             <span
               className={cn(
-                "flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums leading-none",
+                "flex min-w-5 items-center justify-center rounded-full font-bold tabular-nums leading-none",
+                forSheet ? "px-2 py-1 text-xs" : "px-1.5 py-0.5 text-[10px]",
                 isActive(ordersHref)
                   ? "bg-white/20 text-white"
                   : "bg-[var(--primary)] text-white"
@@ -303,10 +331,13 @@ function SidebarColumn({
         </Link>
       </nav>
 
-      <div className="border-t border-sidebar-border shrink-0 px-3 py-3 space-y-2">
+      <div className={cn("border-t border-sidebar-border shrink-0 py-3 space-y-2", forSheet ? "px-2" : "px-3")}>
         {contextualShopName ? (
           <p
-            className="px-3 text-xs font-medium text-muted-foreground truncate"
+            className={cn(
+              "font-medium text-muted-foreground truncate",
+              forSheet ? "px-6 text-sm" : "px-3 text-xs"
+            )}
             title={contextualShopName}
           >
             {contextualShopName}
@@ -316,22 +347,26 @@ function SidebarColumn({
         <Link
           href={settingsHref}
           className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+            "flex items-center rounded-lg font-medium transition-colors",
+            navItemClass,
             settingsActive
               ? activeItemClass
                 : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           )}
         >
-          <Settings className="h-4 w-4 shrink-0" />
+          <Settings className={iconClass} />
           {tr("Paramètres", "Settings")}
         </Link>
 
         <button
           type="button"
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className={cn(
+            "flex w-full items-center rounded-lg font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            navItemClass
+          )}
         >
-          <LogOut className="h-4 w-4 shrink-0" />
+          <LogOut className={iconClass} />
           {tr("Se déconnecter", "Log out")}
         </button>
       </div>
@@ -347,7 +382,12 @@ export function DashboardSidebar({
 }: DashboardSidebarProps) {
   if (forSheet) {
     return (
-      <SidebarColumn shops={shops} activeOrdersCount={activeOrdersCount} className="h-full" />
+      <SidebarColumn
+        shops={shops}
+        activeOrdersCount={activeOrdersCount}
+        className="h-full"
+        forSheet
+      />
     );
   }
 

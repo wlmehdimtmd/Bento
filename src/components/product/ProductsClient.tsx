@@ -61,6 +61,10 @@ import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
 import type { ProductLabelOption } from "@/lib/shop-labels";
 import { useLocale } from "@/components/i18n/LocaleProvider";
+import {
+  CatalogDashboardPageHeader,
+  type CatalogDashboardPageIntro,
+} from "@/components/dashboard/CatalogDashboardPageHeader";
 
 interface CategoryOption {
   id: string;
@@ -79,6 +83,7 @@ interface ProductsClientProps {
   initialProducts: (ProductRow & { categoryName: string })[];
   shopLabels: ProductLabelOption[];
   adminActions?: AdminProductActions;
+  catalogPageHeader?: CatalogDashboardPageIntro;
 }
 
 type ProductWithCategory = ProductRow & { categoryName: string };
@@ -89,6 +94,7 @@ export function ProductsClient({
   initialProducts,
   shopLabels,
   adminActions,
+  catalogPageHeader,
 }: ProductsClientProps) {
   const { locale } = useLocale();
   const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
@@ -299,10 +305,43 @@ export function ProductsClient({
 
   const deletingProduct = products.find((p) => p.id === deletingId);
 
+  const primaryCreateCtaLabel = isMobile
+    ? locale === "en"
+      ? "New"
+      : "Nouveau"
+    : tr("Nouveau produit", "New product");
+
+  const headerActions = (
+    <>
+      {!adminActions && (
+        <ImportMenuDropdown
+          onImportTemplate={() => setTemplateOpen(true)}
+          onImportJson={() => setJsonImportOpen(true)}
+        />
+      )}
+      <Button
+        onClick={openCreate}
+        style={{ backgroundColor: "var(--primary)" }}
+        className="text-primary-foreground hover:opacity-90"
+      >
+        <Plus className="mr-1.5 h-4 w-4" />
+        {primaryCreateCtaLabel}
+      </Button>
+    </>
+  );
+
   // ── Render ──────────────────────────────────────────────────
   return (
     <>
-      <div className="space-y-3">
+      {catalogPageHeader ? (
+        <CatalogDashboardPageHeader
+          pageTitle={catalogPageHeader.pageTitle}
+          introCopy={catalogPageHeader.introCopy}
+          actions={headerActions}
+        />
+      ) : null}
+
+      <div className={catalogPageHeader ? "mt-6 space-y-3" : "space-y-3"}>
         {/* Ligne 1 : recherche + filtre catégorie */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-48">
@@ -335,27 +374,20 @@ export function ProductsClient({
           </Select>
         </div>
 
-        {/* Ligne 2 : résumé + actions */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Ligne 2 : résumé (+ actions si pas d’en-tête page) */}
+        <div
+          className={
+            catalogPageHeader
+              ? "flex flex-wrap items-center gap-3"
+              : "flex flex-wrap items-center justify-between gap-3"
+          }
+        >
           <p className="text-sm text-muted-foreground min-w-0 flex-1">
             {listSummaryText}
           </p>
-          <div className="flex gap-2 shrink-0">
-            {!adminActions && (
-              <ImportMenuDropdown
-                onImportTemplate={() => setTemplateOpen(true)}
-                onImportJson={() => setJsonImportOpen(true)}
-              />
-            )}
-            <Button
-              onClick={openCreate}
-              style={{ backgroundColor: "var(--primary)" }}
-              className="text-primary-foreground hover:opacity-90"
-            >
-              <Plus className="mr-1.5 h-4 w-4" />
-              {tr("Nouveau produit", "New product")}
-            </Button>
-          </div>
+          {!catalogPageHeader ? (
+            <div className="flex gap-2 shrink-0">{headerActions}</div>
+          ) : null}
         </div>
 
       {/* Empty state */}

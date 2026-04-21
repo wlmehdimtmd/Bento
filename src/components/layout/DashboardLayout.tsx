@@ -49,7 +49,10 @@ export function DashboardLayout({ user, shops, activeOrdersCount = 0, children }
 
       {/* Mobile sheet sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="p-0 w-[280px]">
+        <SheetContent
+          side="left"
+          className="p-0 w-[85%] min-w-[280px] max-w-none sm:max-w-none sm:w-[85%]"
+        >
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <DashboardSidebar user={user} shops={shops} activeOrdersCount={activeOrdersCount} forSheet />
         </SheetContent>

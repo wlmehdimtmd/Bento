@@ -60,20 +60,14 @@ export default async function CategoriesPage() {
 
   return (
     <div className="p-6 md:p-8 space-y-6">
-      <div>
-        <h1
-          className="text-3xl font-bold"
-          style={{ fontFamily: "var(--font-onest)" }}
-        >
-          {tr("Catégories", "Categories")}
-        </h1>
-        <p className="text-sm text-muted-foreground">{shop.name}</p>
-        <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
-          {getDashboardCatalogCopy(locale, "category")}
-        </p>
-      </div>
-
-      <CategoriesClient shopId={shop.id} initialCategories={initialCategories} />
+      <CategoriesClient
+        shopId={shop.id}
+        initialCategories={initialCategories}
+        catalogPageHeader={{
+          pageTitle: tr("Catégories", "Categories"),
+          introCopy: getDashboardCatalogCopy(locale, "category"),
+        }}
+      />
     </div>
   );
 }

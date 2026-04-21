@@ -82,24 +82,13 @@ export default async function CategoriesPage({ params }: { params: Params }) {
 
   return (
     <div className="p-6 md:p-8 space-y-6">
-      {/* Header */}
-      <div>
-        <h1
-          className="text-3xl font-bold"
-          style={{ fontFamily: "var(--font-onest)" }}
-        >
-          {t("dashboard.categories.metadataFallback", "Categories")}
-        </h1>
-        <p className="text-sm text-muted-foreground">{shop.name}</p>
-        <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
-          {getDashboardCatalogCopy(locale, "category")}
-        </p>
-      </div>
-
-      {/* Client-side list with all interactions */}
       <CategoriesClient
         shopId={shopId}
         initialCategories={initialCategories}
+        catalogPageHeader={{
+          pageTitle: t("dashboard.categories.metadataFallback", "Categories"),
+          introCopy: getDashboardCatalogCopy(locale, "category"),
+        }}
       />
     </div>
   );

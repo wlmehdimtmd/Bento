@@ -51,6 +51,10 @@ import { PasteJsonImportDialog } from "@/components/import/PasteJsonImportDialog
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
 import { useLocale } from "@/components/i18n/LocaleProvider";
+import {
+  CatalogDashboardPageHeader,
+  type CatalogDashboardPageIntro,
+} from "@/components/dashboard/CatalogDashboardPageHeader";
 
 interface AdminCategoryActions {
   onSave: (payload: CategorySavePayload, isEdit: boolean, existingId?: string) => Promise<CategoryRow>;
@@ -61,6 +65,8 @@ interface CategoriesClientProps {
   shopId: string;
   initialCategories: (CategoryRow & { productCount: number })[];
   adminActions?: AdminCategoryActions;
+  /** Dashboard marchand : titre + actions sur une ligne, puis sous-titres. */
+  catalogPageHeader?: CatalogDashboardPageIntro;
 }
 
 type CategoryWithCount = CategoryRow & { productCount: number };
@@ -69,6 +75,7 @@ export function CategoriesClient({
   shopId,
   initialCategories,
   adminActions,
+  catalogPageHeader,
 }: CategoriesClientProps) {
   const { locale } = useLocale();
   const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
@@ -314,10 +321,43 @@ export function CategoriesClient({
 
   const globalIndex = (id: string) => sorted.findIndex((c) => c.id === id);
 
+  const primaryCreateCtaLabel = isMobile
+    ? locale === "en"
+      ? "New"
+      : "Nouvelle"
+    : tr("Nouvelle catégorie", "New category");
+
+  const headerActions = (
+    <>
+      {!adminActions && (
+        <ImportMenuDropdown
+          onImportTemplate={() => setTemplateOpen(true)}
+          onImportJson={() => setJsonImportOpen(true)}
+        />
+      )}
+      <Button
+        onClick={openCreate}
+        style={{ backgroundColor: "var(--primary)" }}
+        className="text-primary-foreground hover:opacity-90"
+      >
+        <Plus className="mr-1.5 h-4 w-4" />
+        {primaryCreateCtaLabel}
+      </Button>
+    </>
+  );
+
   // ── Render ──────────────────────────────────────────────────
   return (
     <>
-      <div className="space-y-3">
+      {catalogPageHeader ? (
+        <CatalogDashboardPageHeader
+          pageTitle={catalogPageHeader.pageTitle}
+          introCopy={catalogPageHeader.introCopy}
+          actions={headerActions}
+        />
+      ) : null}
+
+      <div className={catalogPageHeader ? "mt-6 space-y-3" : "space-y-3"}>
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-48">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -330,26 +370,19 @@ export function CategoriesClient({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div
+          className={
+            catalogPageHeader
+              ? "flex flex-wrap items-center gap-3"
+              : "flex flex-wrap items-center justify-between gap-3"
+          }
+        >
           <p className="text-sm text-muted-foreground min-w-0 flex-1">
             {listSummaryText}
           </p>
-          <div className="flex gap-2 shrink-0">
-            {!adminActions && (
-              <ImportMenuDropdown
-                onImportTemplate={() => setTemplateOpen(true)}
-                onImportJson={() => setJsonImportOpen(true)}
-              />
-            )}
-            <Button
-              onClick={openCreate}
-              style={{ backgroundColor: "var(--primary)" }}
-              className="text-primary-foreground hover:opacity-90"
-            >
-              <Plus className="mr-1.5 h-4 w-4" />
-              {tr("Nouvelle catégorie", "New category")}
-            </Button>
-          </div>
+          {!catalogPageHeader ? (
+            <div className="flex gap-2 shrink-0">{headerActions}</div>
+          ) : null}
         </div>
 
       {/* Empty state */}

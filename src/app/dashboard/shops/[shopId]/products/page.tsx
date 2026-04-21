@@ -83,19 +83,19 @@ export default async function ProductsPage({ params }: { params: Params }) {
 
   return (
     <div className="p-6 md:p-8 space-y-6">
-      {/* Header */}
-      <div>
-        <h1
-          className="text-3xl font-bold"
-          style={{ fontFamily: "var(--font-onest)" }}
-        >
-          {t("dashboard.products.metadataFallback", "Products")}
-        </h1>
-        <p className="text-sm text-muted-foreground">{shop.name}</p>
-        <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
-          {getDashboardCatalogCopy(locale, "product")}
-        </p>
-      </div>
+      {cats.length === 0 ? (
+        <div>
+          <h1
+            className="text-3xl font-bold"
+            style={{ fontFamily: "var(--font-onest)" }}
+          >
+            {t("dashboard.products.metadataFallback", "Products")}
+          </h1>
+          <p className="text-sm text-muted-foreground max-w-2xl mt-2 leading-relaxed">
+            {getDashboardCatalogCopy(locale, "product")}
+          </p>
+        </div>
+      ) : null}
 
       {cats.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
@@ -117,6 +117,10 @@ export default async function ProductsPage({ params }: { params: Params }) {
           categories={cats}
           initialProducts={initialProducts}
           shopLabels={shopLabels}
+          catalogPageHeader={{
+            pageTitle: t("dashboard.products.metadataFallback", "Products"),
+            introCopy: getDashboardCatalogCopy(locale, "product"),
+          }}
         />
       )}
     </div>
