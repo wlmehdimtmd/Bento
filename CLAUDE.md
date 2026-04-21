@@ -74,7 +74,7 @@ src/
 ├── components/
 │   ├── ui/                      # shadcn/ui — NE PAS modifier manuellement
 │   ├── layout/                  # AppShell, Sidebar, Header, Footer, ThemeToggle
-│   ├── auth/                    # LoginForm, RegisterForm, AuthGuard
+│   ├── auth/                    # LoginForm, RegisterForm, ResetPasswordForm…
 │   ├── bento/                   # BentoGrid, BentoCard, BentoCardCategory…
 │   ├── product/                 # CategoryForm, ProductForm, BundleForm…
 │   ├── cart/                    # CartDrawer, CartItem, CartSummary, CartButton
@@ -82,10 +82,9 @@ src/
 │   ├── order/                   # OrderCard, OrderList, OrderDetail
 │   ├── shop/                    # ShopForm, ShopCard, QRCodeDisplay
 │   └── dashboard/               # StatsCard, QuickActions, RecentOrders
-├── stores/
-│   ├── cartStore.ts             # Zustand — panier (items, quantités, total)
-│   └── uiStore.ts               # Zustand — UI (sidebar, modals…)
 ├── lib/
+│   ├── stores/
+│   │   └── cartStore.ts         # Zustand — panier (items, quantités, total)
 │   ├── supabase/
 │   │   ├── client.ts            # createBrowserClient
 │   │   ├── server.ts            # createServerClient

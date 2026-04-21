@@ -12,7 +12,7 @@ Ce fichier trace les **décisions structurantes** et l’avancement de l’audit
 
 | Partie            | Statut audit | Notes |
 |-------------------|--------------|-------|
-| Authentification  | Rapport initial livré | Pas de correctif code mergé ; sujets ouverts (AuthGuard, `?error=`, etc.). |
+| Authentification  | Rapport + correctifs ciblés | AuthGuard retiré ; erreurs callback login ; etc. |
 | Landing Page      | Rapport initial livré | Conversation du 2026-04-21 |
 | Dashboard Client  | Rapport initial livré | Conversation du 2026-04-21 |
 | Vitrine Client    | Rapport initial livré | Conversation du 2026-04-21 |
@@ -22,7 +22,7 @@ Ce fichier trace les **décisions structurantes** et l’avancement de l’audit
 | Date       | Partie | Décision / constat | Statut |
 |------------|--------|--------------------|--------|
 | 2026-04-21 | Auth   | L’audit Auth est traité en premier ; aucune modification applicative n’a été fusionnée sans validation utilisateur. | Fait (rapport) |
-| 2026-04-21 | Auth   | `AuthGuard.tsx` n’est référencé par aucun module applicatif (seulement la doc `CLAUDE.md`) : candidat **code mort** ou réutilisation future — à trancher. | À décider |
+| 2026-04-21 | Auth   | `AuthGuard.tsx` supprimé : la garde session est déjà dans `dashboard/layout.tsx`. | Fait |
 | 2026-04-21 | Auth   | `SUPABASE_REDIRECT_RELATIVE_PATHS` est exporté mais jamais importé : candidat suppression ou usage documenté (README interne). | À décider |
 | 2026-04-21 | Auth   | Les redirections `/login?error=…` émises par `api/auth/callback` ne sont pas consommées par la page login : **écart UX** à corriger ou documenter. | À décider |
 | 2026-04-21 | Landing | Texte i18n **multi-boutiques** (`landing.features.multishop.*`) en contradiction avec la règle métier **mono-boutique** (`CLAUDE.md`) : à aligner (copy ou produit). | À décider |
