@@ -29,20 +29,23 @@ import {
   parseStorefrontBentoLayout,
 } from "@/lib/storefrontBentoLayout";
 import { BENTO_STAGGER_CONTAINER_VARIANTS } from "@/components/bento/BentoGrid";
-import { BENTO_TILE_ELEVATION_SHADOW_CLASS } from "@/components/bento/bentoGridConstants";
+import { BENTO_TILE_ELEVATION_SHADOW_HOVER_CLASS } from "@/components/bento/bentoGridConstants";
 import { saveStorefrontBentoLayoutAdmin } from "@/app/admin/actions";
 import type { Json } from "@/lib/supabase/database.types";
 import {
   CATEGORY_THEME_KEYS,
   CATEGORY_THEME_TOKENS,
+  STOREFRONT_GLOBAL_ACCENT_HEX,
   type CategoryThemeKey,
 } from "@/lib/categoryThemeTokens";
+import { buildStorefrontSwatchRadialBackground } from "@/lib/storefrontSwatchGradient";
 import { getStorefrontThemePreviewStyle, type StorefrontThemeOverrides } from "@/lib/storefrontTheme";
 import {
   formatLayoutSaveError,
   getSupabaseSqlEditorUrl,
   isMissingStorefrontLayoutColumn,
 } from "@/lib/storefrontSchemaErrors";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 const GridLayoutWithWidth = WidthProvider(ReactGridLayout);
 
@@ -117,6 +120,7 @@ export function StorefrontBentoEditor({
   backHref,
   layoutSaveMode = "owner",
 }: StorefrontBentoEditorProps) {
+  const { t } = useLocale();
   const isMobile = useIsMobile();
   const { resolvedTheme } = useTheme();
   const mounted = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
@@ -208,7 +212,6 @@ export function StorefrontBentoEditor({
           name={cat.name}
           iconEmoji={cat.icon_emoji}
           productCount={cat.productCount}
-          coverImageUrl={cat.cover_image_url}
           size={size}
           omitSizeClasses
         />
@@ -221,7 +224,6 @@ export function StorefrontBentoEditor({
           name="Menu"
           iconEmoji="🍱"
           productCount={bundles.length}
-          coverImageUrl={null}
           size={size}
           omitSizeClasses
         />
@@ -260,9 +262,12 @@ export function StorefrontBentoEditor({
 
   function handleResetToDefault() {
     setLayout(defaults as unknown as Layout);
-    toast("Grille réinitialisée", {
+    toast(t("dashboard.storefrontLayout.gridResetToastTitle", "Grid reset"), {
       description:
-        "Disposition automatique restaurée. Cliquez sur « Enregistrer » pour l’appliquer à la vitrine.",
+        t(
+          "dashboard.storefrontLayout.gridResetToastDescription",
+          "Automatic layout restored. Click Save to apply it."
+        ),
     });
   }
 
@@ -279,7 +284,7 @@ export function StorefrontBentoEditor({
           storefrontThemeKey,
           storefrontThemeOverrides as Json
         );
-        toast.success("Mise en page enregistrée");
+        toast.success(t("dashboard.storefrontLayout.saveSuccess", "Layout saved"));
       } catch (e) {
         const raw = e instanceof Error ? e.message : "Enregistrement impossible";
         const friendly = formatLayoutSaveError(raw);
@@ -289,7 +294,7 @@ export function StorefrontBentoEditor({
           ...(sqlUrl
             ? {
                 action: {
-                  label: "Ouvrir l’éditeur SQL",
+                  label: t("dashboard.storefrontLayout.sqlEditor", "Open SQL editor"),
                   onClick: () => window.open(sqlUrl, "_blank", "noopener,noreferrer"),
                 },
               }
@@ -331,7 +336,7 @@ export function StorefrontBentoEditor({
       });
       return;
     }
-    toast.success("Mise en page enregistrée");
+    toast.success(t("dashboard.storefrontLayout.saveSuccess", "Layout saved"));
   }
 
   return (
@@ -343,17 +348,20 @@ export function StorefrontBentoEditor({
               href={backHref}
               className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "mb-2 -ml-2 inline-flex")}
             >
-              Retour
+              {t("dashboard.storefrontLayout.back", "Back")}
             </Link>
           ) : null}
           <h1
             className="text-3xl font-bold"
             style={{ fontFamily: "var(--font-onest)" }}
           >
-            Mise en page vitrine
+            {t("dashboard.storefrontLayout.title", "Storefront layout")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Glissez et redimensionnez les tuiles (aperçu aligné sur la page publique).
+            {t(
+              "dashboard.storefrontLayout.subtitle",
+              "Drag and resize tiles (preview aligned with public page)."
+            )}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -367,7 +375,7 @@ export function StorefrontBentoEditor({
             )}
           >
             <ExternalLink className="h-4 w-4" />
-            Voir la vitrine
+            {t("dashboard.storefrontLayout.viewStorefront", "View storefront")}
           </Link>
           {!isMobile ? (
             <>
@@ -375,10 +383,13 @@ export function StorefrontBentoEditor({
                 type="button"
                 variant="outline"
                 onClick={handleResetToDefault}
-                title="Rétablit la grille automatique (fiche + catégories + formules), comme avant toute personnalisation."
+                title={t(
+                  "dashboard.storefrontLayout.resetGridTooltip",
+                  "Restore automatic grid."
+                )}
               >
                 <RotateCcw className="h-4 w-4" />
-                Réinitialiser la grille
+                {t("dashboard.storefrontLayout.resetGrid", "Reset grid")}
               </Button>
               <Button
                 onClick={handleSave}
@@ -386,7 +397,7 @@ export function StorefrontBentoEditor({
                 style={{ backgroundColor: "var(--primary)" }}
                 className="text-primary-foreground hover:opacity-90"
               >
-                {saving ? "Enregistrement…" : "Enregistrer"}
+                {saving ? t("dashboard.common.saving", "Saving...") : t("dashboard.common.save", "Save")}
               </Button>
             </>
           ) : null}
@@ -406,7 +417,7 @@ export function StorefrontBentoEditor({
         </div>
       ) : (
         <div className="mx-auto w-full max-w-5xl space-y-4">
-          <section className="rounded-xl border border-border bg-card/50 p-4">
+          <section className="space-y-3">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold">Palette de couleurs (vitrine uniquement)</h2>
@@ -426,39 +437,46 @@ export function StorefrontBentoEditor({
                 Tester en mode {previewDarkMode ? "clair" : "sombre"}
               </Button>
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="flex flex-wrap items-start gap-[16px]">
               {CATEGORY_THEME_KEYS.map((themeKey) => {
                 const token = CATEGORY_THEME_TOKENS[themeKey];
                 const preview = previewDarkMode ? token.dark : token.light;
                 const selected = storefrontThemeKey === themeKey;
+                const accentEdge = previewDarkMode
+                  ? STOREFRONT_GLOBAL_ACCENT_HEX.dark
+                  : STOREFRONT_GLOBAL_ACCENT_HEX.light;
+                const swatchBg =
+                  buildStorefrontSwatchRadialBackground(
+                    preview.background,
+                    previewDarkMode,
+                    themeKey
+                  ) ?? preview.background;
                 return (
                   <button
                     key={themeKey}
                     type="button"
-                    className={cn(
-                      "rounded-xl border p-2 text-left transition-colors",
-                      selected
-                        ? "border-[var(--primary)] bg-accent/30"
-                        : "border-border hover:bg-muted/40"
-                    )}
+                    className="inline-flex w-fit flex-col gap-2 rounded-none border-0 bg-transparent p-0 text-left shadow-none outline-none transition-colors hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     onClick={() => setStorefrontThemeKey(themeKey)}
                     aria-pressed={selected}
                   >
-                    <span className="mb-2 block text-xs font-medium">{token.label}</span>
-                    <span className="flex items-center gap-1.5">
-                      <span
-                        className="h-4 w-4 rounded-full border border-black/10"
-                        style={{ backgroundColor: preview.background }}
-                      />
-                      <span
-                        className="h-4 w-4 rounded-full border border-black/10"
-                        style={{ backgroundColor: preview.surface }}
-                      />
-                      <span
-                        className="h-4 w-4 rounded-full border border-black/10"
-                        style={{ backgroundColor: preview.card }}
-                      />
-                    </span>
+                    <span className="text-xs font-medium">{token.label}</span>
+                    <span
+                      className={cn(
+                        "block h-16 w-16 shrink-0 rounded-[var(--bento-outer-r)] border-0",
+                        selected && "transition-[outline,box-shadow] duration-150"
+                      )}
+                      style={{
+                        background: swatchBg,
+                        ...(selected
+                          ? {
+                              outline: `4px solid ${accentEdge}`,
+                              outlineOffset: "0px",
+                              boxShadow: "inset 0 0 0 1px var(--background)",
+                            }
+                          : { outline: "none" }),
+                      }}
+                      aria-hidden
+                    />
                   </button>
                 );
               })}
@@ -484,7 +502,7 @@ export function StorefrontBentoEditor({
                   key={it.i}
                   className={cn(
                     "h-full rounded-[var(--bento-outer-r)]",
-                    BENTO_TILE_ELEVATION_SHADOW_CLASS
+                    BENTO_TILE_ELEVATION_SHADOW_HOVER_CLASS
                   )}
                 >
                   <motion.div
