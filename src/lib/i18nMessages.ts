@@ -100,6 +100,11 @@ const fr: FlatMessages = {
   "order.status.ready": "Prête",
   "order.status.delivered": "Livrée",
   "order.status.cancelled": "Annulée",
+  "order.pendingPaymentTitle": "Paiement reçu",
+  "order.pendingPaymentBody":
+    "Nous finalisons votre commande. Cette page se met à jour automatiquement dès que la confirmation est enregistrée.",
+  "order.refreshNow": "Rafraîchir maintenant",
+  "order.customerLabel": "Client",
   "legal.privacy.title": "Politique de confidentialité",
   "legal.terms.title": "Conditions d'utilisation",
   "legal.notice.title": "Mentions légales",
@@ -283,6 +288,11 @@ const en: FlatMessages = {
   "order.status.ready": "Ready",
   "order.status.delivered": "Delivered",
   "order.status.cancelled": "Cancelled",
+  "order.pendingPaymentTitle": "Payment received",
+  "order.pendingPaymentBody":
+    "We are finalizing your order. This page updates automatically once confirmation is saved.",
+  "order.refreshNow": "Refresh now",
+  "order.customerLabel": "Customer",
   "legal.privacy.title": "Privacy Policy",
   "legal.terms.title": "Terms of Service",
   "legal.notice.title": "Legal Notice",

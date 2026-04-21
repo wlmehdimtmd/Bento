@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/lib/supabase/database.types";
+import { createServiceRoleClient } from "@/lib/supabase/admin";
 import { buildStripeLineItemsFromOrder } from "@/lib/stripe/checkoutLineItemsFromOrder";
 import { createCheckoutSession } from "@/lib/stripe/server";
-
-function getSupabaseAdmin() {
-  return createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 interface RequestBody {
   orderId: string;
@@ -26,7 +18,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
-    const admin = getSupabaseAdmin();
+    const admin = createServiceRoleClient();
 
     const { data: order, error: orderErr } = await admin
       .from("orders")

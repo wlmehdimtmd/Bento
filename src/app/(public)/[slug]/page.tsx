@@ -4,13 +4,14 @@ import { createClient } from "@/lib/supabase/server";
 import { StoreView } from "@/components/bento/StoreView";
 import { fetchPublicShopPagePayload } from "@/lib/fetchPublicShopPagePayload";
 import { OrderConfirmation } from "@/components/checkout/OrderConfirmation";
+import { loadCheckoutSuccessPayload } from "@/lib/checkout/loadCheckoutSuccessPayload";
 import { InactivePublicStorefront } from "@/components/storefront/InactivePublicStorefront";
 import { LOCALE_COOKIE_NAME, resolveLocale, type AppLocale } from "@/lib/i18n";
 import { MESSAGES } from "@/lib/i18nMessages";
 import { resolvePublicShopSlug } from "@/lib/resolvePublicShopSlug";
 
 type Params = Promise<{ slug: string }>;
-type SearchParams = Promise<{ order?: string; id?: string }>;
+type SearchParams = Promise<{ order?: string; session_id?: string | string[] }>;
 
 export async function generateMetadata({ params }: { params: Params }) {
   const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
@@ -85,20 +86,33 @@ export default async function ShopPage({
 }) {
   const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value) as AppLocale;
   const { slug } = await params;
-  const { order: orderStatus, id: orderId } = await searchParams;
+  const { order: orderStatus, session_id: sessionIdRaw } = await searchParams;
   const supabase = await createClient();
 
-  if (orderStatus === "success" && orderId) {
-    const { data: orderData } = await supabase
-      .from("orders")
-      .select(
-        "id, order_number, total_amount, fulfillment_mode, customer_name, table_number, delivery_address"
-      )
-      .eq("id", orderId)
-      .single();
+  const sessionId =
+    typeof sessionIdRaw === "string"
+      ? sessionIdRaw
+      : Array.isArray(sessionIdRaw)
+        ? sessionIdRaw[0]
+        : undefined;
 
-    if (orderData) {
-      return <OrderConfirmation order={orderData} shopSlug={slug} />;
+  if (orderStatus === "success" && sessionId) {
+    const successPayload = await loadCheckoutSuccessPayload({
+      slug,
+      sessionId,
+      locale,
+      supabaseAnon: supabase,
+    });
+
+    if (successPayload.ok) {
+      return (
+        <OrderConfirmation
+          order={successPayload.order}
+          shopSlug={slug}
+          lineItems={successPayload.lineItems}
+          syncState={successPayload.syncState}
+        />
+      );
     }
   }
 

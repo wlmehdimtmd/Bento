@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/lib/supabase/database.types";
 import { getStripe } from "@/lib/stripe/server";
-
-function getSupabaseAdmin() {
-  return createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
+import { createServiceRoleClient } from "@/lib/supabase/admin";
 
 export async function POST(req: Request) {
   const rawBody = await req.text();
@@ -43,7 +35,7 @@ export async function POST(req: Request) {
         break;
       }
 
-      const admin = getSupabaseAdmin();
+      const admin = createServiceRoleClient();
       const { data: orderRow, error: orderFetchErr } = await admin
         .from("orders")
         .select("id, total_amount, status")
@@ -101,7 +93,7 @@ export async function POST(req: Request) {
       const session = event.data.object as Stripe.Checkout.Session;
       const orderId = session.metadata?.orderId;
       if (orderId) {
-        await getSupabaseAdmin()
+        await createServiceRoleClient()
           .from("orders")
           .update({ status: "cancelled" })
           .eq("id", orderId)
