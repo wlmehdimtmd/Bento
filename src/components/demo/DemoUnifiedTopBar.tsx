@@ -20,19 +20,22 @@ export function DemoUnifiedTopBar() {
         <div
           role="status"
           aria-live="polite"
-          className="w-full overflow-hidden rounded-[var(--bento-outer-r)] bg-background px-[8px] py-[4px] text-center"
+          className="w-fit max-w-full overflow-hidden rounded-[var(--bento-outer-r)] bg-background px-[8px] py-[4px] text-center"
         >
-          <p className="text-balance text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+          <p className="text-balance text-center text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
             <span className="font-semibold text-foreground">
               {locale === "en" ? "Demo storefront." : "Vitrine de démonstration."}
             </span>{" "}
             {locale === "en"
               ? "No real order is recorded from this page."
-              : "Aucune commande réelle n&apos;est enregistrée depuis cette page."}{" "}
+              : "Aucune commande réelle n'est enregistrée depuis cette page."}{" "}
             <Link
               href="/register"
               className={cn(
-                "inline-flex items-center rounded-lg bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground transition-colors hover:bg-[#376cd5] hover:text-white sm:text-xs dark:hover:bg-[#6fa0ff] dark:hover:text-[#111111]",
+                buttonVariants({ variant: "secondary", size: "xs" }),
+                "font-semibold text-[11px] sm:text-xs",
+                "bg-white text-foreground hover:bg-white/90 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80",
+                "border-border dark:border-transparent",
                 "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               )}
             >

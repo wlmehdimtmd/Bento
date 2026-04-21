@@ -144,6 +144,16 @@ export function getStorefrontThemeScaleWithOverrides(
   };
 }
 
+/** Fond page vitrine (même valeur que `--background` dans `getStorefrontThemePreviewStyle`). */
+export function getStorefrontCanvasBackgroundHex(
+  themeKey: CategoryThemeKey,
+  isDark: boolean,
+  overrides?: StorefrontThemeOverrides | null
+): string {
+  const scale = getStorefrontThemeScaleWithOverrides(themeKey, overrides);
+  return isDark ? scale.dark.background : scale.light.background;
+}
+
 function parseThemeOverrideBlock(rawTheme: unknown): StorefrontThemeEditableScalePartial | null {
   if (!rawTheme || typeof rawTheme !== "object" || Array.isArray(rawTheme)) return null;
   const raw = rawTheme as Record<string, unknown>;

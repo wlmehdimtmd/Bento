@@ -8,8 +8,10 @@ import { PublicShopProvider } from "@/components/shop/PublicShopContext";
 import { StoreView } from "@/components/bento/StoreView";
 import type { PublicProduct } from "@/components/product/ProductDetail";
 import type { CategoryInfo, BundleInfo, ShopInfo } from "@/components/bento/StoreView";
-import type { ShopReviews } from "@/lib/types";
+import type { ShopReviews, StorefrontPhoto } from "@/lib/types";
 import { DemoUnifiedTopBar } from "@/components/demo/DemoUnifiedTopBar";
+import { StorefrontThemeScope } from "@/components/bento/StorefrontThemeScope";
+import { DEFAULT_CATEGORY_THEME_KEY } from "@/lib/categoryThemeTokens";
 
 // ── Static demo data ────────────────────────────────────────────
 
@@ -100,6 +102,17 @@ const DEMO_PRODUCTS: Record<string, PublicProduct[]> = {
   ],
 };
 
+/** Photos vitrine (même modèle que Supabase) : sans entrée visible, la tuile galerie n’est pas rendue. */
+const DEMO_STOREFRONT_PHOTOS: StorefrontPhoto[] = [
+  {
+    id: "demo-gallery-1",
+    image_url: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80",
+    caption: "Ambiance salle",
+    is_visible: true,
+    display_order: 0,
+  },
+];
+
 const DEMO_BUNDLES: BundleInfo[] = [
   {
     id: "f1", name: "Formule Midi", description: "1 entrée + 1 plat", price: 19, image_url: null,
@@ -143,26 +156,28 @@ export function DemoView({ reviews }: { reviews?: ShopReviews | null }) {
         }}
       >
         <CartDrawerProvider>
-          <div className="flex min-h-screen flex-col bg-transparent">
-            <div className="sticky top-0 z-50 bg-transparent p-[4px]">
-              <DemoUnifiedTopBar />
+          <StorefrontThemeScope themeKey={DEFAULT_CATEGORY_THEME_KEY} className="min-h-screen">
+            <div className="flex min-h-screen flex-col bg-transparent">
+              <div className="sticky top-0 z-50 bg-transparent p-[4px]">
+                <DemoUnifiedTopBar />
+              </div>
+
+              {/* ── Contenu principal (ISO avec la vraie page) ── */}
+              <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-8 pb-32">
+                <StoreView
+                  shop={DEMO_SHOP}
+                  categories={DEMO_CATEGORIES}
+                  bundles={DEMO_BUNDLES}
+                  storefrontPhotos={DEMO_STOREFRONT_PHOTOS}
+                  reviews={reviews}
+                  savedStorefrontLayout={null}
+                  loadCategoryProducts={(categoryId) =>
+                    Promise.resolve(DEMO_PRODUCTS[categoryId] ?? [])
+                  }
+                />
+              </main>
             </div>
-
-            {/* ── Contenu principal (ISO avec la vraie page) ── */}
-            <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-8 pb-32">
-              <StoreView
-                shop={DEMO_SHOP}
-                categories={DEMO_CATEGORIES}
-                bundles={DEMO_BUNDLES}
-                reviews={reviews}
-                savedStorefrontLayout={null}
-                loadCategoryProducts={(categoryId) =>
-                  Promise.resolve(DEMO_PRODUCTS[categoryId] ?? [])
-                }
-              />
-            </main>
-
-          </div>
+          </StorefrontThemeScope>
 
           {/* ── Panier (composants réels) ── */}
           <CartButton />

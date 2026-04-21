@@ -4,6 +4,7 @@ import { useMemo, useSyncExternalStore, type ReactNode } from "react";
 import { useTheme } from "next-themes";
 
 import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
+import { StorefrontChromeColorSync } from "@/components/bento/StorefrontChromeColorSync";
 import { getStorefrontThemePreviewStyle, type StorefrontThemeOverrides } from "@/lib/storefrontTheme";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +44,12 @@ export function StorefrontThemeScope({
 
   return (
     <div className={cn("relative bg-background", className)} style={style}>
+      <StorefrontChromeColorSync
+        themeKey={themeKey}
+        themeOverrides={themeOverrides}
+        mounted={mounted}
+        isDark={isDark}
+      />
       <div className="relative z-[1]">{children}</div>
       <div
         aria-hidden

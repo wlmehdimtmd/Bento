@@ -2,7 +2,9 @@
 
 import { StoreView } from "@/components/bento/StoreView";
 import type { ShopInfo, CategoryInfo, BundleInfo } from "@/components/bento/StoreView";
-import type { ShopReviews } from "@/lib/types";
+import type { ShopReviews, StorefrontPhoto } from "@/lib/types";
+import type { StorefrontThemeOverrides } from "@/lib/storefrontTheme";
+import type { ProductLabelOption } from "@/lib/shop-labels";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { CartDrawerProvider } from "@/components/cart/CartDrawerContext";
 import { CartButton } from "@/components/cart/CartButton";
@@ -19,8 +21,11 @@ export interface DemoLiveStoreViewProps {
   bundles: BundleInfo[];
   bundlesMenuGrouped?: boolean;
   reviews: ShopReviews | null;
+  storefrontPhotos: StorefrontPhoto[];
   savedStorefrontLayout: unknown | null;
   storefrontThemeKey: CategoryThemeKey;
+  storefrontThemeOverrides: StorefrontThemeOverrides;
+  shopLabels: ProductLabelOption[];
   stripeAccountId: string | null;
 }
 
@@ -30,8 +35,11 @@ export function DemoLiveStoreView({
   bundles,
   bundlesMenuGrouped = false,
   reviews,
+  storefrontPhotos,
   savedStorefrontLayout,
   storefrontThemeKey,
+  storefrontThemeOverrides,
+  shopLabels,
   stripeAccountId,
 }: DemoLiveStoreViewProps) {
   const { locale } = useLocale();
@@ -52,7 +60,11 @@ export function DemoLiveStoreView({
         }}
       >
         <CartDrawerProvider>
-          <StorefrontThemeScope themeKey={storefrontThemeKey} className="min-h-screen">
+          <StorefrontThemeScope
+            themeKey={storefrontThemeKey}
+            themeOverrides={storefrontThemeOverrides}
+            className="min-h-screen"
+          >
             <div className="flex min-h-screen flex-col bg-transparent">
               <div className="sticky top-0 z-50 bg-transparent p-[4px]">
                 <DemoUnifiedTopBar />
@@ -65,8 +77,11 @@ export function DemoLiveStoreView({
                   bundles={bundles}
                   bundlesMenuGrouped={bundlesMenuGrouped}
                   reviews={reviews}
+                  storefrontPhotos={storefrontPhotos}
                   savedStorefrontLayout={savedStorefrontLayout}
                   storefrontThemeKey={storefrontThemeKey}
+                  storefrontThemeOverrides={storefrontThemeOverrides}
+                  shopLabels={shopLabels}
                 />
 
                 {categories.length === 0 && bundles.length === 0 && (
