@@ -54,9 +54,9 @@ const fr: FlatMessages = {
   "landing.features.allergens.title": "Allergènes & options",
   "landing.features.allergens.desc":
     "Affichez les allergènes, proposez des options (taille, cuisson…) et acceptez les notes spéciales.",
-  "landing.features.multishop.title": "Multi-boutiques",
+  "landing.features.multishop.title": "Une boutique, bien rangée",
   "landing.features.multishop.desc":
-    "Gérez plusieurs établissements depuis un seul compte. Idéal pour les groupes de restauration.",
+    "Une seule vitrine par compte : carte à jour, QR code et commandes — sans multiplier les interfaces.",
   "landing.features.noTech.title": "5 minutes, sans technique",
   "landing.features.noTech.desc": "Aucune compétence requise. Votre vitrine en ligne est opérationnelle en moins de 5 minutes.",
   "landing.features.darkMode.title": "Mode sombre inclus",
@@ -225,9 +225,9 @@ const en: FlatMessages = {
   "landing.features.allergens.title": "Allergens & options",
   "landing.features.allergens.desc":
     "Display allergens, offer options (size, doneness...), and accept special notes.",
-  "landing.features.multishop.title": "Multi-shop ready",
+  "landing.features.multishop.title": "One storefront, fully yours",
   "landing.features.multishop.desc":
-    "Manage several locations from one account. Perfect for restaurant groups.",
+    "One public menu per account: keep your offer clear, your QR codes simple, and orders in one place.",
   "landing.features.noTech.title": "5 minutes, zero tech",
   "landing.features.noTech.desc": "No technical skills required. Your online storefront is ready in under 5 minutes.",
   "landing.features.darkMode.title": "Built-in dark mode",
