@@ -120,7 +120,6 @@ export default async function ShopPage({
     categories,
     bundles,
     bundlesMenuGrouped,
-    reviews,
     storefrontPhotos,
     savedStorefrontLayout,
     storefrontThemeKey,
@@ -135,7 +134,6 @@ export default async function ShopPage({
         categories={categories}
         bundles={bundles}
         bundlesMenuGrouped={bundlesMenuGrouped}
-        reviews={reviews}
         storefrontPhotos={storefrontPhotos}
         savedStorefrontLayout={savedStorefrontLayout}
         storefrontThemeKey={storefrontThemeKey}

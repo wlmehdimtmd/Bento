@@ -8,33 +8,6 @@ function getAdmin() {
   );
 }
 
-// ── Google Places refresh ──────────────────────────────────────────────────────
-
-async function refreshGooglePlace(placeId: string) {
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY!;
-  const url = new URL("https://maps.googleapis.com/maps/api/place/details/json");
-  url.searchParams.set("place_id", placeId);
-  url.searchParams.set("fields", "name,formatted_address,rating,user_ratings_total,url");
-  url.searchParams.set("language", "fr");
-  url.searchParams.set("key", apiKey);
-
-  const res = await fetch(url.toString(), { next: { revalidate: 0 } });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-  const data = await res.json();
-  if (data.status !== "OK") throw new Error(`Places API: ${data.status}`);
-
-  const r = data.result;
-  return {
-    google_place_name: r.name ?? null,
-    google_place_address: r.formatted_address ?? null,
-    google_rating: r.rating ?? null,
-    google_review_count: r.user_ratings_total ?? null,
-    google_url: r.url ?? null,
-    google_last_fetched: new Date().toISOString(),
-  };
-}
-
 // ── TripAdvisor scrape ────────────────────────────────────────────────────────
 
 interface JsonLdRating {
@@ -117,7 +90,7 @@ export async function GET(req: Request) {
 
   const { data: rows, error } = await admin
     .from("shop_reviews")
-    .select("shop_id, google_enabled, google_place_id, tripadvisor_enabled, tripadvisor_url, tripadvisor_last_fetched");
+    .select("shop_id, tripadvisor_enabled, tripadvisor_url, tripadvisor_last_fetched");
 
   if (error) {
     console.error("[cron/refresh-reviews] Fetch error:", error.message);
@@ -125,25 +98,9 @@ export async function GET(req: Request) {
   }
 
   const now = new Date();
-  const results = { google: { ok: 0, fail: 0 }, tripadvisor: { ok: 0, fail: 0 } };
+  const results = { tripadvisor: { ok: 0, fail: 0 } };
 
   for (const row of rows ?? []) {
-    // ── Google (refresh daily) ──
-    if (row.google_enabled && row.google_place_id) {
-      try {
-        const patch = await refreshGooglePlace(row.google_place_id);
-        await admin
-          .from("shop_reviews")
-          .update({ ...patch, updated_at: now.toISOString() })
-          .eq("shop_id", row.shop_id);
-        results.google.ok++;
-      } catch (err) {
-        console.error(`[cron] Google refresh failed for shop ${row.shop_id}:`, err);
-        results.google.fail++;
-      }
-    }
-
-    // ── TripAdvisor (refresh weekly) ──
     if (row.tripadvisor_enabled && row.tripadvisor_url) {
       const lastFetched = row.tripadvisor_last_fetched
         ? new Date(row.tripadvisor_last_fetched)

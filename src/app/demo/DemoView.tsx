@@ -8,7 +8,7 @@ import { PublicShopProvider } from "@/components/shop/PublicShopContext";
 import { StoreView } from "@/components/bento/StoreView";
 import type { PublicProduct } from "@/components/product/ProductDetail";
 import type { CategoryInfo, BundleInfo, ShopInfo } from "@/components/bento/StoreView";
-import type { ShopReviews, StorefrontPhoto } from "@/lib/types";
+import type { StorefrontPhoto } from "@/lib/types";
 import { DemoUnifiedTopBar } from "@/components/demo/DemoUnifiedTopBar";
 import { StorefrontThemeScope } from "@/components/bento/StorefrontThemeScope";
 import { DEFAULT_CATEGORY_THEME_KEY } from "@/lib/categoryThemeTokens";
@@ -142,7 +142,7 @@ const DEMO_BUNDLES: BundleInfo[] = [
 
 // ── Main DemoView ───────────────────────────────────────────────
 
-export function DemoView({ reviews }: { reviews?: ShopReviews | null }) {
+export function DemoView() {
   return (
     <CartProvider shopSlug="demo">
       <PublicShopProvider
@@ -169,7 +169,6 @@ export function DemoView({ reviews }: { reviews?: ShopReviews | null }) {
                   categories={DEMO_CATEGORIES}
                   bundles={DEMO_BUNDLES}
                   storefrontPhotos={DEMO_STOREFRONT_PHOTOS}
-                  reviews={reviews}
                   savedStorefrontLayout={null}
                   loadCategoryProducts={(categoryId) =>
                     Promise.resolve(DEMO_PRODUCTS[categoryId] ?? [])

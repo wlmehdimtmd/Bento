@@ -1,6 +1,6 @@
 "use client";
 
-import { Braces, ChevronDown, Layers, Sparkles } from "lucide-react";
+import { Braces, ChevronDown, Layers } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -12,23 +12,12 @@ import {
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
-/** Réactiver l’import IA depuis ce menu quand la fonctionnalité sera prête. */
-export const AI_MENU_IMPORT_ENABLED = false;
-
 interface ImportMenuDropdownProps {
   onImportTemplate: () => void;
   onImportJson?: () => void;
-  /** Si true, l’entrée IA devient active (utiliser avec `onImportAi`). */
-  aiEnabled?: boolean;
-  onImportAi?: () => void;
 }
 
-export function ImportMenuDropdown({
-  onImportTemplate,
-  onImportJson,
-  aiEnabled = AI_MENU_IMPORT_ENABLED,
-  onImportAi,
-}: ImportMenuDropdownProps) {
+export function ImportMenuDropdown({ onImportTemplate, onImportJson }: ImportMenuDropdownProps) {
   const { t } = useLocale();
   return (
     <DropdownMenu>
@@ -59,16 +48,6 @@ export function ImportMenuDropdown({
         >
           <Braces />
           {t("dashboard.import.fromJson", "Paste JSON")}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          className="whitespace-nowrap"
-          disabled={!aiEnabled}
-          onClick={() => {
-            if (aiEnabled) onImportAi?.();
-          }}
-        >
-          <Sparkles />
-          {t("dashboard.import.fromAi", "Import my menu with AI")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

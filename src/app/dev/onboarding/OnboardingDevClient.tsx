@@ -28,7 +28,6 @@ const MOCK_SHOP_INITIAL = {
   email_contact: "",
   logo_url: null as string | null,
   cover_image_url: null as string | null,
-  google_maps_url: "",
   social_links: {} as Record<string, unknown>,
   fulfillment_modes: ["takeaway"] as string[],
 };
@@ -68,7 +67,6 @@ const MOCK_CATALOG_PAYLOAD: PublicShopPagePayload = {
   ],
   bundles: [],
   bundlesMenuGrouped: false,
-  reviews: null,
   storefrontPhotos: [],
   savedStorefrontLayout: null,
   storefrontThemeKey: "turquoise",

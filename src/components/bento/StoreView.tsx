@@ -20,7 +20,7 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useCartStore } from "@/lib/stores/cartStore";
-import type { SocialLinks, ShopReviews } from "@/lib/types";
+import type { SocialLinks } from "@/lib/types";
 
 import {
   BentoGrid,
@@ -107,7 +107,6 @@ interface StoreViewProps {
   bundles: BundleInfo[];
   /** Si vrai, une tuile « Menu » regroupe les formules (niveau 1) au lieu d’une tuile par formule. */
   bundlesMenuGrouped?: boolean;
-  reviews?: ShopReviews | null;
   storefrontPhotos?: StorefrontPhoto[];
   /** JSON `storefront_bento_layout` depuis Supabase (fusionné avec la carte courante). */
   savedStorefrontLayout?: unknown | null;
@@ -190,7 +189,6 @@ export function StoreView({
   categories,
   bundles,
   bundlesMenuGrouped = false,
-  reviews,
   storefrontPhotos = [],
   savedStorefrontLayout,
   loadCategoryProducts: loadCategoryProductsProp,
@@ -448,7 +446,6 @@ export function StoreView({
           phone={shop.phone}
           emailContact={shop.email_contact}
           socialLinks={shop.social_links}
-          reviews={reviews}
           fulfillmentModes={shop.fulfillment_modes}
           openingHoursJson={shop.opening_hours ?? null}
           openingTimezone={shop.opening_timezone ?? "Europe/Paris"}

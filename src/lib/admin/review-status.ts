@@ -11,7 +11,7 @@ export function staleDaysSinceFetch(
 }
 
 /**
- * Statut d’une intégration d’avis (Google / TripAdvisor) pour l’admin.
+ * Statut d’une intégration d’avis TripAdvisor pour l’admin.
  * `null` si la source est désactivée.
  */
 export function getReviewIntegrationStatus(

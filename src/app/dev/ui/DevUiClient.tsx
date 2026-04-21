@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Loader2, Mail, Pencil, Plus, Settings, Trash2 } from "lucide-react";
@@ -101,8 +101,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import type { ShopReviews } from "@/lib/types";
-
 function Section({
   title,
   description,
@@ -159,28 +157,6 @@ const DEMO_BUNDLE_SLOTS = [
 ] as const;
 
 export function DevUiClient() {
-  const demoGoogleReviews = useMemo((): ShopReviews => {
-    const t = new Date().toISOString();
-    return {
-      shop_id: "00000000-0000-4000-8000-000000000099",
-      google_enabled: true,
-      google_place_id: "ChIJdemo",
-      google_place_name: "Bento Resto Démo",
-      google_place_address: null,
-      google_rating: 4.7,
-      google_review_count: 214,
-      google_url: "https://www.google.com/maps",
-      google_last_fetched: t,
-      tripadvisor_enabled: false,
-      tripadvisor_url: null,
-      tripadvisor_name: null,
-      tripadvisor_rating: null,
-      tripadvisor_review_count: null,
-      tripadvisor_last_fetched: null,
-      updated_at: t,
-    };
-  }, []);
-
   const [selectValue, setSelectValue] = useState<string>("a");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -646,7 +622,6 @@ export function DevUiClient() {
                   website: "https://example.com",
                 }}
                 fulfillmentModes={["takeaway"]}
-                reviews={demoGoogleReviews}
               />
               <BentoCardCategory
                 name="Catégorie A"

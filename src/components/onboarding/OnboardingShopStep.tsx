@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { ImageUploader } from "@/components/product/ImageUploader";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { OnboardingStepTitle } from "@/components/onboarding/OnboardingStepTitle";
 import { createClient } from "@/lib/supabase/client";
+import type { Json } from "@/lib/supabase/database.types";
 import { SHOP_DESCRIPTION_MAX_CHARS } from "@/lib/constants";
 import { cn, slugify } from "@/lib/utils";
 import { mainStepIndex } from "@/lib/onboarding-flow";
@@ -49,7 +50,6 @@ const schema = z.object({
     .refine((v) => !v || z.string().email().safeParse(v).success, {
       message: "Invalid email",
     }),
-  google_maps_url: z.string().optional(),
   fulfillment_modes: z
     .array(z.string())
     .min(1, "Select at least one service mode"),
@@ -66,7 +66,6 @@ interface InitialData {
   email_contact?: string | null;
   logo_url?: string | null;
   cover_image_url?: string | null;
-  google_maps_url?: string;
   social_links?: Record<string, unknown>;
   fulfillment_modes?: string[];
 }
@@ -120,7 +119,6 @@ export function OnboardingShopStep({
       address: initialData.address ?? "",
       phone: initialData.phone ?? "",
       email_contact: initialData.email_contact ?? "",
-      google_maps_url: initialData.google_maps_url ?? "",
       fulfillment_modes: initialData.fulfillment_modes?.length
         ? initialData.fulfillment_modes
         : ["takeaway"],
@@ -163,11 +161,11 @@ export function OnboardingShopStep({
     const supabase = createClient();
 
     const existingLinks = initialData.social_links ?? {};
-    const newLinks = {
+    const newLinks: Record<string, unknown> = {
       ...existingLinks,
-      google_maps_url: values.google_maps_url || undefined,
       _ob_vitrine: 1,
     };
+    delete newLinks.google_maps_url;
 
     const { error } = await supabase
       .from("shops")
@@ -180,7 +178,7 @@ export function OnboardingShopStep({
         email_contact: values.email_contact || null,
         logo_url: logoUrl,
         cover_image_url: coverUrl,
-        social_links: newLinks,
+        social_links: newLinks as Json,
         fulfillment_modes: values.fulfillment_modes,
       })
       .eq("id", shopId);
@@ -376,21 +374,6 @@ export function OnboardingShopStep({
           {errors.email_contact && (
             <p className="text-xs text-destructive">{errors.email_contact.message}</p>
           )}
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="google_maps_url">
-            <span className="flex items-center gap-1.5">
-              <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-              {tr("Lien Google Maps", "Google Maps link")}
-            </span>
-          </Label>
-          <Input
-            id="google_maps_url"
-            {...register("google_maps_url")}
-            placeholder="https://maps.google.com/..."
-            disabled={isSubmitting}
-          />
         </div>
       </div>
     </form>

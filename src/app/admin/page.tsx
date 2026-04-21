@@ -41,9 +41,7 @@ export default async function AdminPage() {
   const { data: reviewRows } = shopIds.length
     ? await service
         .from("shop_reviews")
-        .select(
-          "shop_id, google_enabled, google_last_fetched, tripadvisor_enabled, tripadvisor_last_fetched"
-        )
+        .select("shop_id, tripadvisor_enabled, tripadvisor_last_fetched")
         .in("shop_id", shopIds)
     : { data: [] };
 

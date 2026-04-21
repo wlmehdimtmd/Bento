@@ -10,8 +10,6 @@ import {
 } from "@/lib/admin/review-status";
 
 type ReviewRow = {
-  google_enabled?: boolean;
-  google_last_fetched?: string | null;
   tripadvisor_enabled?: boolean;
   tripadvisor_last_fetched?: string | null;
 };
@@ -22,36 +20,27 @@ interface AdminShopReviewBadgesProps {
 
 export function AdminShopReviewBadges({ rev }: AdminShopReviewBadgesProps) {
   const [nowMs] = useState(() => Date.now());
-  const g = getReviewIntegrationStatus(rev?.google_enabled, rev?.google_last_fetched, nowMs);
   const ta = getReviewIntegrationStatus(
     rev?.tripadvisor_enabled,
     rev?.tripadvisor_last_fetched,
     nowMs
   );
 
-  if (!g && !ta) {
+  if (!ta) {
     return <span className="text-xs text-muted-foreground">—</span>;
   }
 
   return (
     <ul className="flex flex-col gap-1.5 text-xs">
-      {g ? (
-        <li className="flex items-center gap-1.5">
-          <span className="w-6 shrink-0 font-medium text-muted-foreground">G</span>
-          <ReviewBadge state={g} channel="Google" lastFetched={rev?.google_last_fetched} nowMs={nowMs} />
-        </li>
-      ) : null}
-      {ta ? (
-        <li className="flex items-center gap-1.5">
-          <span className="w-6 shrink-0 font-medium text-muted-foreground">TA</span>
-          <ReviewBadge
-            state={ta}
-            channel="TripAdvisor"
-            lastFetched={rev?.tripadvisor_last_fetched}
-            nowMs={nowMs}
-          />
-        </li>
-      ) : null}
+      <li className="flex items-center gap-1.5">
+        <span className="w-6 shrink-0 font-medium text-muted-foreground">TA</span>
+        <ReviewBadge
+          state={ta}
+          channel="TripAdvisor"
+          lastFetched={rev?.tripadvisor_last_fetched}
+          nowMs={nowMs}
+        />
+      </li>
     </ul>
   );
 }
@@ -63,7 +52,7 @@ function ReviewBadge({
   nowMs,
 }: {
   state: ReviewSyncState;
-  channel: "Google" | "TripAdvisor";
+  channel: "TripAdvisor";
   lastFetched: string | null | undefined;
   nowMs: number;
 }) {

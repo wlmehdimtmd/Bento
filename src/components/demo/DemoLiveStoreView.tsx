@@ -2,7 +2,7 @@
 
 import { StoreView } from "@/components/bento/StoreView";
 import type { ShopInfo, CategoryInfo, BundleInfo } from "@/components/bento/StoreView";
-import type { ShopReviews, StorefrontPhoto } from "@/lib/types";
+import type { StorefrontPhoto } from "@/lib/types";
 import type { StorefrontThemeOverrides } from "@/lib/storefrontTheme";
 import type { ProductLabelOption } from "@/lib/shop-labels";
 import { CartProvider } from "@/components/cart/CartProvider";
@@ -20,7 +20,6 @@ export interface DemoLiveStoreViewProps {
   categories: CategoryInfo[];
   bundles: BundleInfo[];
   bundlesMenuGrouped?: boolean;
-  reviews: ShopReviews | null;
   storefrontPhotos: StorefrontPhoto[];
   savedStorefrontLayout: unknown | null;
   storefrontThemeKey: CategoryThemeKey;
@@ -34,7 +33,6 @@ export function DemoLiveStoreView({
   categories,
   bundles,
   bundlesMenuGrouped = false,
-  reviews,
   storefrontPhotos,
   savedStorefrontLayout,
   storefrontThemeKey,
@@ -76,7 +74,6 @@ export function DemoLiveStoreView({
                   categories={categories}
                   bundles={bundles}
                   bundlesMenuGrouped={bundlesMenuGrouped}
-                  reviews={reviews}
                   storefrontPhotos={storefrontPhotos}
                   savedStorefrontLayout={savedStorefrontLayout}
                   storefrontThemeKey={storefrontThemeKey}

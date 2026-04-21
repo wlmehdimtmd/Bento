@@ -67,7 +67,6 @@ function emptyPayloadFromShop(shop: {
     categories: [],
     bundles: [],
     bundlesMenuGrouped: false,
-    reviews: null,
     storefrontPhotos: [],
     savedStorefrontLayout: null,
     storefrontThemeKey: DEFAULT_CATEGORY_THEME_KEY,

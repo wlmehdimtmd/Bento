@@ -16,8 +16,6 @@ export type AdminShopMobileRow = {
   shopUrl: string;
   rev:
     | {
-        google_enabled?: boolean;
-        google_last_fetched?: string | null;
         tripadvisor_enabled?: boolean;
         tripadvisor_last_fetched?: string | null;
       }

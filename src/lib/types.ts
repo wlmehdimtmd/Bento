@@ -26,8 +26,6 @@ export interface SocialLinks {
   twitter?: string;
   tiktok?: string;
   website?: string;
-  /** Lien fiche Google Maps / avis (formulaire vitrine). */
-  google_maps_url?: string;
   /** Si `false`, adresse / téléphone / email ne s’affichent pas sur la carte vitrine. */
   show_contact_on_storefront?: boolean;
 }
@@ -276,15 +274,4 @@ export interface CartItem {
   notes?: string;
   bundle_selections?: Record<string, string[]>;
   image_url?: string | null;
-}
-
-/** Produit extrait par l’IA (import menu) — avant insertion en base */
-export interface ExtractedProduct {
-  name: string;
-  description: string;
-  price: number;
-  category_suggestion: string;
-  tags: string[];
-  option_label?: string | null;
-  confidence: "high" | "medium" | "low";
 }

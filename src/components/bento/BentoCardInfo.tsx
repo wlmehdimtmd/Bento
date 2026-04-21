@@ -11,9 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { BentoCard, type BentoSize } from "./BentoCard";
-import { ReviewsDisplay } from "./ReviewsDisplay";
 import { ShopOpenStatus } from "./ShopOpenStatus";
-import type { SocialLinks, ShopReviews } from "@/lib/types";
+import type { SocialLinks } from "@/lib/types";
 import { SHOP_INFO_DESCRIPTION_MOBILE_MAX_CHARS } from "@/lib/constants";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
@@ -31,7 +30,6 @@ interface BentoCardInfoProps {
   phone?: string | null;
   emailContact?: string | null;
   socialLinks?: SocialLinks;
-  reviews?: ShopReviews | null;
   fulfillmentModes?: string[];
   openingHoursJson?: unknown | null;
   openingTimezone?: string;
@@ -60,7 +58,6 @@ export function BentoCardInfo({
   phone,
   emailContact,
   socialLinks: _socialLinks = {},
-  reviews,
   fulfillmentModes = [],
   openingHoursJson = null,
   openingTimezone = "Europe/Paris",
@@ -104,13 +101,6 @@ export function BentoCardInfo({
               style={{ backgroundColor: "var(--primary)" }}
             />
           )}
-          <div className="pointer-events-auto absolute right-2 bottom-2 z-10 max-w-[min(100%-0.75rem,16rem)]">
-            <ReviewsDisplay
-              reviews={reviews ?? null}
-              compact
-              className="justify-end drop-shadow-md"
-            />
-          </div>
         </div>
       )}
 

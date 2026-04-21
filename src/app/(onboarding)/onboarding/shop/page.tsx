@@ -62,9 +62,6 @@ export default async function OnboardingShopPage({ searchParams }: Props) {
         email_contact: shop.email_contact,
         logo_url: shop.logo_url,
         cover_image_url: shop.cover_image_url,
-        google_maps_url:
-          (typeof socialLinks.google_maps_url === "string" ? socialLinks.google_maps_url : "") ||
-          "",
         social_links: socialLinks,
         fulfillment_modes: fulfillmentModes,
       }}

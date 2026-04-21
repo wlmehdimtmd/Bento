@@ -5,7 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import { assertAdminOrRedirect } from "@/lib/admin/requireAdmin";
 import { ShopForm } from "@/components/shop/ShopForm";
 import { buttonVariants } from "@/components/ui/button";
-import type { ShopReviews, SocialLinks } from "@/lib/types";
+import type { SocialLinks } from "@/lib/types";
 import { storefrontPublicUrl } from "@/lib/publicAppUrl";
 
 type Params = Promise<{ id: string }>;
@@ -19,12 +19,6 @@ export default async function AdminShopSettingsPage({ params }: { params: Params
   const { data: shop } = await service.from("shops").select("*").eq("id", shopId).maybeSingle();
 
   if (!shop) notFound();
-
-  const { data: shopReviews } = await service
-    .from("shop_reviews")
-    .select("*")
-    .eq("shop_id", shopId)
-    .maybeSingle();
 
   const storeUrl = storefrontPublicUrl(shop.slug);
 
@@ -57,8 +51,6 @@ export default async function AdminShopSettingsPage({ params }: { params: Params
           vitrineTabbed
           shopId={shopId}
           storeUrl={storeUrl}
-          initialReviews={(shopReviews ?? null) as ShopReviews | null}
-          reviewsMutateApiBase="/api/admin/reviews"
           initialData={{
             id: shop.id,
             name: shop.name,

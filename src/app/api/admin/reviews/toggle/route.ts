@@ -5,20 +5,19 @@ export async function POST(req: Request) {
   try {
     const service = await requireAdmin();
 
-    const { shopId, provider, enabled } = (await req.json()) as {
+    const { shopId, enabled } = (await req.json()) as {
       shopId: string;
-      provider: "google" | "tripadvisor";
       enabled: boolean;
     };
 
-    if (!shopId || !provider) {
-      return NextResponse.json({ error: "shopId and provider required" }, { status: 400 });
+    if (!shopId || typeof enabled !== "boolean") {
+      return NextResponse.json({ error: "shopId and enabled required" }, { status: 400 });
     }
 
     const { data: shop } = await service.from("shops").select("id").eq("id", shopId).maybeSingle();
     if (!shop) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const field = provider === "google" ? "google_enabled" : "tripadvisor_enabled";
+    const field = "tripadvisor_enabled";
 
     const { error } = await service.from("shop_reviews").upsert(
       { shop_id: shopId, [field]: enabled, updated_at: new Date().toISOString() },

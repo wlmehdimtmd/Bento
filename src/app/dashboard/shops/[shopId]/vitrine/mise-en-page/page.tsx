@@ -63,7 +63,6 @@ export default async function ShopVitrineMiseEnPagePage({ params }: { params: Pa
         categories={payload.categories}
         bundles={payload.bundles}
         bundlesMenuGrouped={payload.bundlesMenuGrouped}
-        reviews={payload.reviews}
         storefrontPhotos={payload.storefrontPhotos}
         initialLayout={payload.storefrontBentoLayout}
         initialStorefrontThemeKey={payload.storefrontThemeKey}

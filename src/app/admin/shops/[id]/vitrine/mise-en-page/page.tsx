@@ -32,7 +32,7 @@ export default async function AdminShopVitrineMiseEnPagePage({ params }: { param
           categories={payload.categories}
           bundles={payload.bundles}
           bundlesMenuGrouped={payload.bundlesMenuGrouped}
-          reviews={payload.reviews}
+          storefrontPhotos={payload.storefrontPhotos}
           initialLayout={payload.storefrontBentoLayout}
           initialStorefrontThemeKey={payload.storefrontThemeKey}
           initialStorefrontThemeOverrides={payload.storefrontThemeOverrides}

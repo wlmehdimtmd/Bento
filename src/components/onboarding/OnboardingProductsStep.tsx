@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Plus, Trash2, Loader2, Camera, X, ChevronRight, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
@@ -29,7 +28,6 @@ import { TagSelector } from "@/components/product/TagSelector";
 import { DEFAULT_PRODUCT_LABELS } from "@/lib/shop-labels";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { createClient } from "@/lib/supabase/client";
-import { MenuImportButton } from "@/components/onboarding/MenuImportButton";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
@@ -52,7 +50,6 @@ interface ProductItem {
 }
 
 interface OnboardingProductsStepProps {
-  shopId: string;
   categories: CategoryItem[];
   initialProducts: ProductItem[];
   isPreview?: boolean;
@@ -76,7 +73,6 @@ const EMPTY_FORM: ProductFormState = {
 };
 
 export function OnboardingProductsStep({
-  shopId,
   categories,
   initialProducts,
   isPreview = false,
@@ -84,7 +80,6 @@ export function OnboardingProductsStep({
 }: OnboardingProductsStepProps) {
   const { locale } = useLocale();
   const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState(categories[0]?.id ?? "");
   const [products, setProducts] = useState<ProductItem[]>(initialProducts);
   const [showForm, setShowForm] = useState(false);
@@ -515,22 +510,6 @@ export function OnboardingProductsStep({
           {tr("Nouveau produit", "New product")}
         </button>
       </div>
-
-      {!isPreview && (
-        <MenuImportButton
-          shopId={shopId}
-          categories={categories.map((c) => ({ id: c.id, name: c.name }))}
-          onImported={() => {
-            router.refresh();
-            notify();
-          }}
-        />
-      )}
-      {isPreview && (
-        <p className="text-xs text-muted-foreground text-center">
-          {tr("Import menu masqué en mode simulation.", "Menu import hidden in preview mode.")}
-        </p>
-      )}
 
       {parentUsesDrawer ? (
         <Drawer

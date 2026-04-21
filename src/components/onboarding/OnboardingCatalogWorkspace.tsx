@@ -164,7 +164,6 @@ export function OnboardingCatalogWorkspace({
             categories={payload.categories}
             bundles={payload.bundles}
             bundlesMenuGrouped={payload.bundlesMenuGrouped}
-            reviews={payload.reviews}
             storefrontPhotos={payload.storefrontPhotos}
             savedStorefrontLayout={payload.savedStorefrontLayout}
             storefrontThemeKey={payload.storefrontThemeKey}
@@ -217,7 +216,6 @@ export function OnboardingCatalogWorkspace({
         )}
         {editingSection === "products" && (
           <OnboardingProductsStep
-            shopId={shopId}
             categories={categoryTabs}
             initialProducts={initialProducts}
             isPreview={isPreview}

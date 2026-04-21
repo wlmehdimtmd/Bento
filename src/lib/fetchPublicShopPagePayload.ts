@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { ShopInfo, CategoryInfo, BundleInfo, SlotSummary } from "@/components/bento/StoreView";
-import type { SocialLinks, ShopReviews, StorefrontPhoto } from "@/lib/types";
+import type { SocialLinks, StorefrontPhoto } from "@/lib/types";
 import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
 import { coerceStorefrontThemeKey, coerceStorefrontThemeOverrides, type StorefrontThemeOverrides } from "@/lib/storefrontTheme";
 import { fetchShopLabelsForPublic, type ProductLabelOption } from "@/lib/shop-labels";
@@ -12,7 +12,6 @@ export type PublicShopPagePayload = {
   categories: CategoryInfo[];
   bundles: BundleInfo[];
   bundlesMenuGrouped: boolean;
-  reviews: ShopReviews | null;
   storefrontPhotos: StorefrontPhoto[];
   savedStorefrontLayout: unknown | null;
   storefrontThemeKey: CategoryThemeKey;
@@ -258,12 +257,6 @@ export async function fetchPublicShopPagePayload(
     })),
   }));
 
-  const { data: shopReviews } = await supabase
-    .from("shop_reviews")
-    .select("*")
-    .eq("shop_id", s.id)
-    .single();
-
   const { data: storefrontPhotos } = await supabase
     .from("shop_storefront_photos")
     .select("id, image_url, caption, is_visible, display_order")
@@ -305,7 +298,6 @@ export async function fetchPublicShopPagePayload(
     categories,
     bundles,
     bundlesMenuGrouped,
-    reviews: (shopReviews ?? null) as ShopReviews | null,
     storefrontPhotos: (storefrontPhotos ?? []) as StorefrontPhoto[],
     savedStorefrontLayout,
     storefrontThemeKey,

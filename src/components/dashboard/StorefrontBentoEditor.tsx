@@ -19,7 +19,7 @@ import { BentoCardCategory } from "@/components/bento/BentoCardCategory";
 import { BentoCardBundle } from "@/components/bento/BentoCardBundle";
 import { BentoCardGallery } from "@/components/bento/BentoCardGallery";
 import type { BundleInfo, CategoryInfo, ShopInfo } from "@/components/bento/StoreView";
-import type { ShopReviews, StorefrontPhoto } from "@/lib/types";
+import type { StorefrontPhoto } from "@/lib/types";
 import type { BentoSize } from "@/components/bento/BentoCard";
 import {
   BUNDLES_MENU_TILE_ID,
@@ -83,7 +83,6 @@ export interface StorefrontBentoEditorProps {
   categories: CategoryInfo[];
   bundles: BundleInfo[];
   bundlesMenuGrouped?: boolean;
-  reviews?: ShopReviews | null;
   storefrontPhotos?: StorefrontPhoto[];
   initialLayout: unknown;
   initialStorefrontThemeKey: CategoryThemeKey;
@@ -112,7 +111,6 @@ export function StorefrontBentoEditor({
   categories,
   bundles,
   bundlesMenuGrouped = false,
-  reviews,
   storefrontPhotos = [],
   initialLayout,
   initialStorefrontThemeKey,
@@ -193,8 +191,8 @@ export function StorefrontBentoEditor({
           logoUrl={shop.logo_url}
           address={shop.address}
           phone={shop.phone}
+          emailContact={shop.email_contact}
           socialLinks={shop.social_links}
-          reviews={reviews}
           fulfillmentModes={shop.fulfillment_modes}
           openingHoursJson={shop.opening_hours ?? null}
           openingTimezone={shop.opening_timezone ?? "Europe/Paris"}

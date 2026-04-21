@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ShopForm } from "@/components/shop/ShopForm";
-import type { ShopReviews, SocialLinks } from "@/lib/types";
+import type { SocialLinks } from "@/lib/types";
 import { storefrontPublicUrl } from "@/lib/publicAppUrl";
 import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 import { cookies } from "next/headers";
@@ -35,12 +35,6 @@ export default async function ShopSettingsPage({ params }: { params: Params }) {
 
   if (!shop) notFound();
 
-  const { data: shopReviews } = await supabase
-    .from("shop_reviews")
-    .select("*")
-    .eq("shop_id", shopId)
-    .single();
-
   const storeUrl = storefrontPublicUrl(shop.slug);
 
   const socialLinks: SocialLinks =
@@ -67,7 +61,6 @@ export default async function ShopSettingsPage({ params }: { params: Params }) {
         vitrineTabbed
         shopId={shopId}
         storeUrl={storeUrl}
-        initialReviews={(shopReviews ?? null) as ShopReviews | null}
         initialData={{
           id: shop.id,
           name: shop.name,

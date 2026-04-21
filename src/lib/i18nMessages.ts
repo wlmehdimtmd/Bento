@@ -171,7 +171,6 @@ const fr: FlatMessages = {
   "dashboard.import.trigger": "Importer",
   "dashboard.import.fromTemplate": "Importer depuis un modèle",
   "dashboard.import.fromJson": "Coller du JSON",
-  "dashboard.import.fromAi": "Importer mon menu avec l'IA",
 };
 
 const en: FlatMessages = {
@@ -343,7 +342,6 @@ const en: FlatMessages = {
   "dashboard.import.trigger": "Import",
   "dashboard.import.fromTemplate": "Import from template",
   "dashboard.import.fromJson": "Paste JSON",
-  "dashboard.import.fromAi": "Import my menu with AI",
 };
 
 export const MESSAGES: Record<AppLocale, FlatMessages> = {

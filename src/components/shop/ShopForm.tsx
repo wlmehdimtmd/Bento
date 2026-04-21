@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,6 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImageUploader } from "@/components/product/ImageUploader";
 import { QRCodeDisplay } from "./QRCodeDisplay";
-import { ReviewsSettings } from "./ReviewsSettings";
 import { StorefrontPhotosManager } from "./StorefrontPhotosManager";
 import { createClient } from "@/lib/supabase/client";
 import type { Json } from "@/lib/supabase/database.types";
@@ -33,7 +32,7 @@ import {
   type ShopOpeningHoursDoc,
 } from "@/lib/openingHours";
 import { slugify, cn } from "@/lib/utils";
-import type { ShopReviews, SocialLinks } from "@/lib/types";
+import type { SocialLinks } from "@/lib/types";
 import { seedEnglishText } from "@/lib/translationSeed";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
@@ -65,7 +64,6 @@ const shopSchema = z.object({
     .refine((v) => !v || v === "" || z.string().email().safeParse(v).success, {
       message: "Email invalide",
     }),
-  google_maps_url: z.string().optional(),
   fulfillment_modes: z
     .array(z.string())
     .min(1, "Sélectionnez au moins un mode de service"),
@@ -107,8 +105,6 @@ interface ShopFormProps {
   vitrineTabbed?: boolean;
   shopId?: string;
   storeUrl?: string;
-  initialReviews?: ShopReviews | null;
-  reviewsMutateApiBase?: string;
 }
 
 const FULFILLMENT_OPTIONS = [
@@ -131,8 +127,6 @@ export function ShopForm({
   vitrineTabbed = false,
   shopId,
   storeUrl,
-  initialReviews = null,
-  reviewsMutateApiBase = "/api/reviews",
 }: ShopFormProps) {
   const { locale } = useLocale();
   const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
@@ -172,8 +166,6 @@ export function ShopForm({
       address: initialData?.address ?? "",
       phone: initialData?.phone ?? "",
       email_contact: initialData?.email_contact ?? "",
-      google_maps_url:
-        (initialData?.social_links as SocialLinks | undefined)?.google_maps_url ?? "",
       fulfillment_modes: (initialData?.fulfillment_modes as string[]) ?? ["takeaway"],
     },
   });
@@ -214,9 +206,9 @@ export function ShopForm({
     const existingLinks = (initialData?.social_links ?? {}) as Record<string, unknown>;
     const newLinks: Record<string, unknown> = {
       ...existingLinks,
-      google_maps_url: values.google_maps_url || undefined,
       show_contact_on_storefront: showContactOnStorefront,
     };
+    delete newLinks.google_maps_url;
 
     if (submitAsAdmin) {
       if (!isEdit || !initialData?.id) {
@@ -481,22 +473,6 @@ export function ShopForm({
           )}
         </div>
       </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="google_maps_url" className="flex items-center gap-1.5">
-          <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-          {tr("Lien Google Avis", "Google reviews link")}
-        </Label>
-        <Input
-          id="google_maps_url"
-          {...register("google_maps_url")}
-          placeholder="Ex : https://maps.google.com/..."
-          disabled={isSubmitting}
-        />
-        <p className="text-xs text-muted-foreground">
-          Copiez le lien de votre fiche Google Maps pour afficher vos avis.
-        </p>
-      </div>
     </div>
   );
 
@@ -619,16 +595,7 @@ export function ShopForm({
           </TabsContent>
 
           <TabsContent value="contact" keepMounted className="min-h-0 flex-1 pt-1 outline-none">
-            <div className="space-y-8">
-              {contactSection}
-              <Separator />
-              <ReviewsSettings
-                shopId={shopId!}
-                initialReviews={initialReviews}
-                reviewsMutateApiBase={reviewsMutateApiBase}
-                omitOuterChrome
-              />
-            </div>
+            {contactSection}
           </TabsContent>
 
           <TabsContent value="horaires" keepMounted className="min-h-0 flex-1 pt-1 outline-none">
