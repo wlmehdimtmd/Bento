@@ -39,7 +39,7 @@ export function BentoCardCategory({
       {/* Background image ou fond carte */}
       {showCoverImage ? (
         <Image
-          src={coverImageUrl}
+          src={coverImageUrl!}
           alt={name}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
