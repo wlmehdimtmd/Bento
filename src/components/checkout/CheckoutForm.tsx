@@ -14,17 +14,9 @@ import { Separator } from "@/components/ui/separator";
 import { useCartStore } from "@/lib/stores/cartStore";
 import { usePublicShop } from "@/components/shop/PublicShopContext";
 import { createClient } from "@/lib/supabase/client";
-import { STOREFRONT_CART_CTA_CLASSNAME } from "@/lib/constants";
+import { FULFILLMENT_MODES, STOREFRONT_CART_CTA_CLASSNAME } from "@/lib/constants";
 import { cn, formatPrice } from "@/lib/utils";
 import { useLocale } from "@/components/i18n/LocaleProvider";
-
-// ── Fulfillment labels ─────────────────────────────────────────
-
-const FULFILLMENT_LABELS: Record<string, Record<"fr" | "en", string>> = {
-  dine_in: { fr: "Sur place", en: "Dine-in" },
-  takeaway: { fr: "À emporter", en: "Takeaway" },
-  delivery: { fr: "Livraison", en: "Delivery" },
-};
 
 type CheckoutValues = {
   fulfillment_mode: string;
@@ -48,8 +40,8 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
   const total = useCartStore((s) => s.getTotal());
   const count = useCartStore((s) => s.getCount());
 
-  const fulfillmentModes = shop.fulfillmentModes.filter(
-    (m) => m in FULFILLMENT_LABELS
+  const fulfillmentModes = shop.fulfillmentModes.filter((m) =>
+    FULFILLMENT_MODES.some((f) => f.value === m)
   );
 
   const {
@@ -201,7 +193,11 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
         <div className="space-y-2">
           <Label>{locale === "en" ? "Pickup method *" : "Mode de retrait *"}</Label>
           <div className="grid gap-2">
-            {fulfillmentModes.map((mode) => (
+            {fulfillmentModes.map((mode) => {
+              const def = FULFILLMENT_MODES.find((f) => f.value === mode);
+              const label =
+                def != null ? (locale === "en" ? def.labelEn : def.label) : mode;
+              return (
               <label
                 key={mode}
                 className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 cursor-pointer transition-colors ${
@@ -220,10 +216,11 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
                   className="accent-[var(--primary)]"
                 />
                 <span className="text-sm font-medium">
-                  {FULFILLMENT_LABELS[mode][locale === "en" ? "en" : "fr"]}
+                  {label}
                 </span>
               </label>
-            ))}
+            );
+            })}
           </div>
           {errors.fulfillment_mode && (
             <p className="text-xs text-destructive">

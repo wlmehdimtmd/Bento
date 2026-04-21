@@ -63,11 +63,12 @@ export const ORDER_STATUSES: {
 export const FULFILLMENT_MODES: {
   value: FulfillmentMode;
   label: string;
+  labelEn: string;
   icon: string;
 }[] = [
-  { value: "dine_in", label: "Sur place", icon: "UtensilsCrossed" },
-  { value: "takeaway", label: "À emporter", icon: "ShoppingBag" },
-  { value: "delivery", label: "Livraison", icon: "Truck" },
+  { value: "dine_in", label: "Sur place", labelEn: "Dine-in", icon: "UtensilsCrossed" },
+  { value: "takeaway", label: "À emporter", labelEn: "Takeaway", icon: "ShoppingBag" },
+  { value: "delivery", label: "Livraison", labelEn: "Delivery", icon: "Truck" },
 ];
 
 /**
