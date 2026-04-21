@@ -18,7 +18,7 @@ const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/;
 const STOREFRONT_ORB_COLORS: Record<CategoryThemeKey, { light: string; dark: string }> = {
   neutral: { light: "#c9e1f9", dark: "#6fa0ff" },
   blue: { light: "#cae1f8", dark: "#00315e" },
-  indigo: { light: "#accfd6", dark: "#004c5a" },
+  turquoise: { light: "#accfd6", dark: "#004c5a" },
   emerald: { light: "#abd5ce", dark: "#124941" },
   rose: { light: "#ceb0d8", dark: "#381e45" },
   amber: { light: "#dfc4b5", dark: "#51250f" },
@@ -76,10 +76,12 @@ export function getStorefrontThemePreviewStyle(
   const lightestLevelColor = pickLightestHexColor(level.background, level.surface, level.card);
   const globalAccent = isDark ? STOREFRONT_GLOBAL_ACCENT_HEX.dark : STOREFRONT_GLOBAL_ACCENT_HEX.light;
   const globalAccentFg = isDark ? "#ffffff" : "#111111";
+  const secondaryBg = isDark ? "#181818" : "#f7f7f7";
+  const secondaryFg = isDark ? "oklch(0.985 0 0)" : "oklch(0.205 0 0)";
 
   return {
     "--background": level.background,
-    "--secondary": level.surface,
+    "--secondary": secondaryBg,
     "--muted": level.surface,
     "--accent": level.surface,
     "--card": level.card,
@@ -87,7 +89,9 @@ export function getStorefrontThemePreviewStyle(
     "--foreground": level.text,
     "--card-foreground": level.text,
     "--popover-foreground": level.text,
-    "--secondary-foreground": level.text,
+    "--secondary-foreground": secondaryFg,
+    "--button-secondary": secondaryBg,
+    "--button-secondary-foreground": secondaryFg,
     "--muted-foreground": isDark ? "rgba(255,255,255,0.75)" : "rgba(17,17,17,0.72)",
     "--accent-foreground": level.text,
     "--border": isDark ? "rgba(255,255,255,0.12)" : "#d4d4d8",

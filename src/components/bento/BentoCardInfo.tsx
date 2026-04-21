@@ -73,8 +73,8 @@ export function BentoCardInfo({
   const extraActionCount = (canDirections ? 1 : 0) + (canMail ? 1 : 0);
 
   const iconActionClass = cn(
-    buttonVariants({ variant: "outline", size: "icon" }),
-    "shrink-0 text-foreground"
+    buttonVariants({ variant: "secondary", size: "icon" }),
+    "shrink-0"
   );
 
   return (
@@ -207,7 +207,7 @@ export function BentoCardInfo({
                 href={`tel:${phone.replace(/\s/g, "")}`}
                 onClick={(e) => e.stopPropagation()}
                 className={cn(
-                  buttonVariants({ variant: "outline", size: "default" }),
+                  buttonVariants({ variant: "secondary", size: "default" }),
                   "inline-flex min-h-11 min-w-0 flex-1 justify-center gap-2 px-4"
                 )}
               >

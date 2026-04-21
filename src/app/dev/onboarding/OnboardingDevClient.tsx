@@ -73,7 +73,7 @@ const MOCK_CATALOG_PAYLOAD: PublicShopPagePayload = {
   reviews: null,
   storefrontPhotos: [],
   savedStorefrontLayout: null,
-  storefrontThemeKey: "indigo",
+  storefrontThemeKey: "turquoise",
   storefrontThemeOverrides: coerceStorefrontThemeOverrides(null),
   shopLabels: [],
   stripeAccountId: null,

@@ -27,7 +27,7 @@ const PRIMARY_DARK_TEXT = "#111111";
 export const CATEGORY_THEME_KEYS = [
   "neutral",
   "blue",
-  "indigo",
+  "turquoise",
   "emerald",
   "rose",
   "amber",
@@ -38,7 +38,8 @@ export type CategoryThemeKey = (typeof CATEGORY_THEME_KEYS)[number];
 /** Anciennes clés `storefront_theme_key` / JSON overrides → clés actuelles. */
 export const CATEGORY_THEME_LEGACY_KEY_MAP: Record<string, CategoryThemeKey> = {
   brandMono: "neutral",
-  violet: "indigo",
+  violet: "turquoise",
+  indigo: "turquoise",
   teal: "emerald",
   slate: "neutral",
 };
@@ -72,7 +73,7 @@ export type CategoryThemeScale = {
   };
 };
 
-export const DEFAULT_CATEGORY_THEME_KEY: CategoryThemeKey = "indigo";
+export const DEFAULT_CATEGORY_THEME_KEY: CategoryThemeKey = "turquoise";
 
 const sharedButtons = {
   light: {
@@ -111,22 +112,6 @@ export const CATEGORY_THEME_TOKENS: Record<CategoryThemeKey, CategoryThemeScale>
   blue: {
     label: "Bleu",
     light: {
-      background: "#ffffff",
-      surface: "#f6f6f6",
-      card: CATEGORY_THEME_CARD_SEMI,
-      text: TEXT_LIGHT,
-    },
-    dark: {
-      background: "#000000",
-      surface: "#141414",
-      card: CATEGORY_THEME_CARD_DARK_SEMI,
-      text: TEXT_DARK,
-    },
-    buttons: { ...sharedButtons },
-  },
-  indigo: {
-    label: "Indigo",
-    light: {
       background: "#e9f1fb",
       surface: "#f1f6fd",
       card: CATEGORY_THEME_CARD_SEMI,
@@ -134,6 +119,22 @@ export const CATEGORY_THEME_TOKENS: Record<CategoryThemeKey, CategoryThemeScale>
     },
     dark: {
       background: "#000d19",
+      surface: "#011627",
+      card: CATEGORY_THEME_CARD_DARK_SEMI,
+      text: TEXT_DARK,
+    },
+    buttons: { ...sharedButtons },
+  },
+  turquoise: {
+    label: "Turquoise",
+    light: {
+      background: "#E4F2F5",
+      surface: "#f1f6fd",
+      card: CATEGORY_THEME_CARD_SEMI,
+      text: TEXT_LIGHT,
+    },
+    dark: {
+      background: "#001114",
       surface: "#011627",
       card: CATEGORY_THEME_CARD_DARK_SEMI,
       text: TEXT_DARK,

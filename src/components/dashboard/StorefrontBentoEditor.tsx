@@ -482,7 +482,7 @@ export function StorefrontBentoEditor({
                 <div
                   key={it.i}
                   className={cn(
-                    "h-full overflow-hidden rounded-[var(--bento-outer-r)]",
+                    "h-full rounded-[var(--bento-outer-r)]",
                     BENTO_TILE_ELEVATION_SHADOW_CLASS
                   )}
                 >
@@ -490,7 +490,7 @@ export function StorefrontBentoEditor({
                     variants={BENTO_STAGGER_CONTAINER_VARIANTS}
                     initial="hidden"
                     animate="show"
-                    className="pointer-events-none h-full w-full select-none"
+                    className="pointer-events-none h-full w-full select-none overflow-hidden rounded-[var(--bento-outer-r)]"
                   >
                     {renderPreview(it.i)}
                   </motion.div>

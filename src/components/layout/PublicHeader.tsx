@@ -37,12 +37,12 @@ export function PublicHeader({
 
   return (
     <header className="sticky top-0 z-40 flex w-full justify-center px-4 py-2 text-foreground">
-      <div className="inline-flex h-12 max-w-[416px] min-w-0 items-center gap-2 rounded-[999px] bg-card/90 px-2 py-1 shadow-sm backdrop-blur-[4px] sm:gap-3 sm:px-3 md:max-w-[512px]">
+      <div className="inline-flex h-12 w-fit max-w-[416px] min-w-0 items-center gap-2 rounded-[999px] bg-card/90 px-2 py-1 shadow-sm backdrop-blur-[4px] dark:bg-[rgba(0,0,0,0.7)] dark:text-[rgba(255,255,255,1)] sm:gap-3 sm:px-3 md:max-w-[512px]">
         {/* Logo + Shop name — même URL : retour grille catégories (StoreView écoute l’événement). */}
         <Link
           href={href}
           onClick={handleLogoClick}
-          className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden text-foreground transition-colors hover:text-foreground/80 sm:gap-3"
+          className="flex w-full min-w-0 flex-1 items-center gap-2 overflow-hidden text-foreground transition-colors hover:text-foreground/80 sm:gap-3"
         >
           {shopLogo ? (
             <Image

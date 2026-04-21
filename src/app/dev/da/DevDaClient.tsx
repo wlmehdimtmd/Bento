@@ -98,7 +98,7 @@ type EditableColorField = "background" | "surface" | "card" | "text" | "primaryB
 
 export function DevDaClient() {
   const supabase = useMemo(() => createClient(), []);
-  const [selectedThemeKey, setSelectedThemeKey] = useState<CategoryThemeKey>("indigo");
+  const [selectedThemeKey, setSelectedThemeKey] = useState<CategoryThemeKey>("turquoise");
   const [previewMode, setPreviewMode] = useState<PreviewMode>("light");
   const [shopId, setShopId] = useState<string | null>(null);
   const [shopName, setShopName] = useState<string | null>(null);
@@ -783,7 +783,7 @@ export function DevDaClient() {
 
         <Section
           title="Palette catégories (shared tokens)"
-          description="Six familles partagées (Neutre, Bleu, Indigo, Emerald, Rose, Ambre), avec niveaux background, surface et carte par thème."
+          description="Six familles partagées (Neutre, Bleu, Turquoise, Emerald, Rose, Ambre), avec niveaux background, surface et carte par thème."
         >
           <div className="grid gap-4 md:grid-cols-2">
             {CATEGORY_THEME_KEYS.map((key) => (
