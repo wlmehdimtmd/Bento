@@ -206,7 +206,6 @@ export interface Database {
           name: string;
           description: string | null;
           icon_emoji: string;
-          cover_image_url: string | null;
           display_order: number;
           is_active: boolean;
           name_fr: string | null;
@@ -221,7 +220,6 @@ export interface Database {
           name: string;
           description?: string | null;
           icon_emoji?: string;
-          cover_image_url?: string | null;
           display_order?: number;
           is_active?: boolean;
           name_fr?: string | null;
@@ -236,7 +234,6 @@ export interface Database {
           name?: string;
           description?: string | null;
           icon_emoji?: string;
-          cover_image_url?: string | null;
           display_order?: number;
           is_active?: boolean;
           name_fr?: string | null;

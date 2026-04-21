@@ -59,7 +59,6 @@ create table if not exists public.categories (
   name            text not null,
   description     text,
   icon_emoji      text not null default '📦',
-  cover_image_url text,
   display_order   integer not null default 0,
   is_active       boolean not null default true,
   created_at      timestamptz not null default now()
@@ -269,6 +268,7 @@ create or replace function public.is_shop_owner(p_shop_id uuid)
 returns boolean
 language sql
 security definer
+set search_path = public
 stable
 as $$
   select exists (
@@ -289,6 +289,10 @@ create policy "categories: public select (active shop)"
          and shops.is_active = true
     )
   );
+
+create policy "categories: owner select own"
+  on public.categories for select
+  using (public.is_shop_owner(shop_id));
 
 create policy "categories: owner insert"
   on public.categories for insert
@@ -313,6 +317,17 @@ create policy "products: public select (active shop)"
         join public.shops s on s.id = c.shop_id
        where c.id = products.category_id
          and s.is_active = true
+    )
+  );
+
+create policy "products: owner select own"
+  on public.products for select
+  using (
+    exists (
+      select 1
+        from public.categories c
+       where c.id = products.category_id
+         and public.is_shop_owner(c.shop_id)
     )
   );
 
@@ -361,6 +376,10 @@ create policy "shop_labels: public select (active shop)"
     )
   );
 
+create policy "shop_labels: owner select own"
+  on public.shop_labels for select
+  using (public.is_shop_owner(shop_id));
+
 create policy "shop_labels: owner insert"
   on public.shop_labels for insert
   with check (public.is_shop_owner(shop_id));
@@ -386,6 +405,10 @@ create policy "bundles: public select (active shop)"
     )
   );
 
+create policy "bundles: owner select own"
+  on public.bundles for select
+  using (public.is_shop_owner(shop_id));
+
 create policy "bundles: owner insert"
   on public.bundles for insert
   with check (public.is_shop_owner(shop_id));
@@ -409,6 +432,17 @@ create policy "bundle_slots: public select"
         join public.shops s on s.id = b.shop_id
        where b.id = bundle_slots.bundle_id
          and s.is_active = true
+    )
+  );
+
+create policy "bundle_slots: owner select own"
+  on public.bundle_slots for select
+  using (
+    exists (
+      select 1
+        from public.bundles b
+       where b.id = bundle_slots.bundle_id
+         and public.is_shop_owner(b.shop_id)
     )
   );
 
