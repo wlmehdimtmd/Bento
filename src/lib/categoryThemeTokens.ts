@@ -96,7 +96,7 @@ export const CATEGORY_THEME_TOKENS: Record<CategoryThemeKey, CategoryThemeScale>
   neutral: {
     label: "Neutre",
     light: {
-      background: "#ffffff",
+      background: "#f7f7f7",
       surface: "#f6f6f6",
       card: CATEGORY_THEME_CARD_SEMI,
       text: TEXT_LIGHT,
