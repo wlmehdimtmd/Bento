@@ -65,7 +65,7 @@ export interface BundleRow {
   price: number;
   image_url: string | null;
   is_active: boolean;
-  created_at: string;
+  created_at: string | null;
   slots: BundleSlotData[];
 }
 
@@ -425,13 +425,9 @@ export function BundleForm({
         label: s.label,
         label_fr: s.label_fr ?? s.label,
         label_en: s.label_en ?? null,
-        quantity: s.quantity,
-        display_order: s.display_order,
-        excluded_product_ids: Array.isArray(
-          (s as { excluded_product_ids?: string[] | null }).excluded_product_ids
-        )
-          ? ((s as { excluded_product_ids: string[] }).excluded_product_ids ?? [])
-          : [],
+        quantity: s.quantity ?? 1,
+        display_order: s.display_order ?? 0,
+        excluded_product_ids: s.excluded_product_ids ?? [],
       })),
     });
   }

@@ -27,7 +27,7 @@ export interface OrderRow {
   stripe_payment_intent_id: string | null;
   stripe_payment_status: string | null;
   notes: string | null;
-  created_at: string;
+  created_at: string | null;
 }
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -54,7 +54,8 @@ const FULFILLMENT_LABELS: Record<string, string> = {
   delivery: "Livraison",
 };
 
-function timeAgo(dateStr: string): string {
+function timeAgo(dateStr: string | null): string {
+  if (!dateStr) return "—";
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "À l'instant";

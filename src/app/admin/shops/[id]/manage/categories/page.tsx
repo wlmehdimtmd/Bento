@@ -41,10 +41,10 @@ export default async function AdminManageCategoriesPage({ params }: { params: Pa
     shop_id: c.shop_id,
     name: c.name,
     description: c.description,
-    icon_emoji: c.icon_emoji,
-    is_active: c.is_active,
-    display_order: c.display_order,
-    created_at: c.created_at,
+    icon_emoji: c.icon_emoji ?? "",
+    is_active: c.is_active ?? true,
+    display_order: c.display_order ?? 0,
+    created_at: c.created_at ?? null,
     productCount: productCountMap[c.id] ?? 0,
   }));
 

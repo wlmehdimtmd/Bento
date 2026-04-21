@@ -19,7 +19,7 @@ interface OrderRow {
   customer_name: string;
   total_amount: number;
   status: string;
-  created_at: string;
+  created_at: string | null;
 }
 
 interface RecentOrdersProps {
@@ -38,7 +38,8 @@ function StatusBadge({ status, label }: { status: string; label: string }) {
   );
 }
 
-function relativeTime(iso: string, locale: "fr" | "en") {
+function relativeTime(iso: string | null, locale: "fr" | "en") {
+  if (!iso) return "—";
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60_000);
   if (mins < 1) return locale === "en" ? "just now" : "à l'instant";

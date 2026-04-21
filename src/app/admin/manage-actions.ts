@@ -274,8 +274,8 @@ export async function adminSaveBundle(
       label: s.label,
       label_fr: (s as { label_fr?: string | null }).label_fr ?? s.label,
       label_en: (s as { label_en?: string | null }).label_en ?? null,
-      quantity: s.quantity,
-      display_order: s.display_order,
+      quantity: s.quantity ?? 1,
+      display_order: s.display_order ?? 0,
       excluded_product_ids: Array.isArray(
         (s as { excluded_product_ids?: string[] | null }).excluded_product_ids
       )

@@ -59,6 +59,11 @@ export default async function ProductsPage({ params }: { params: Params }) {
     .order("display_order");
 
   const cats = categories ?? [];
+  const categoriesForClient = cats.map((c) => ({
+    id: c.id,
+    name: c.name,
+    icon_emoji: c.icon_emoji ?? "",
+  }));
 
   // Fetch products (only for categories in this shop)
   let initialProducts: (ProductRow & { categoryName: string })[] = [];
@@ -75,6 +80,9 @@ export default async function ProductsPage({ params }: { params: Params }) {
     initialProducts = (products ?? []).map((p) => ({
       ...(p as ProductRow),
       tags: Array.isArray(p.tags) ? (p.tags as string[]) : [],
+      is_available: p.is_available ?? true,
+      display_order: p.display_order ?? 0,
+      created_at: p.created_at ?? null,
       categoryName: catMap[p.category_id]?.name ?? "—",
     }));
   }
@@ -114,7 +122,7 @@ export default async function ProductsPage({ params }: { params: Params }) {
       ) : (
         <ProductsClient
           shopId={shopId}
-          categories={cats}
+          categories={categoriesForClient}
           initialProducts={initialProducts}
           shopLabels={shopLabels}
           catalogPageHeader={{

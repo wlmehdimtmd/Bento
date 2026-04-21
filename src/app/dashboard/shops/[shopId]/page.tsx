@@ -77,6 +77,15 @@ export default async function ShopDashboardPage({ params }: { params: Params }) 
   const orderCount = count ?? 0;
   const revenue = (revenueRows ?? []).reduce((sum, o) => sum + Number(o.total_amount), 0);
 
+  const recentOrdersList = (orders ?? []).map((o) => ({
+    id: o.id,
+    order_number: o.order_number,
+    customer_name: o.customer_name,
+    total_amount: Number(o.total_amount),
+    status: o.status ?? "pending",
+    created_at: o.created_at ?? null,
+  }));
+
   return (
     <div className="p-6 md:p-8 space-y-8">
       {/* Header */}
@@ -139,7 +148,7 @@ export default async function ShopDashboardPage({ params }: { params: Params }) 
             {tr("Voir tout", "View all")}
           </Link>
         </div>
-        <RecentOrders orders={orders ?? []} />
+        <RecentOrders orders={recentOrdersList} />
       </div>
     </div>
   );

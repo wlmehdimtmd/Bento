@@ -45,6 +45,12 @@ export default async function AdminManageBundlesPage({ params }: { params: Param
     .eq("shop_id", shopId)
     .order("display_order");
 
+  const categoriesForClient = (categories ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    icon_emoji: c.icon_emoji ?? "",
+  }));
+
   const categoryIds = (categories ?? []).map((c) => c.id);
   const { data: rawProducts } = await service
     .from("products")
@@ -59,8 +65,8 @@ export default async function AdminManageBundlesPage({ params }: { params: Param
     name_fr: p.name_fr ?? null,
     name_en: p.name_en ?? null,
     price: Number(p.price),
-    is_available: p.is_available,
-    display_order: p.display_order,
+    is_available: p.is_available ?? true,
+    display_order: p.display_order ?? 0,
   }));
 
   if (!categories?.length) {
@@ -96,13 +102,9 @@ export default async function AdminManageBundlesPage({ params }: { params: Param
         label: s.label,
         label_fr: (s as { label_fr?: string | null }).label_fr ?? s.label,
         label_en: (s as { label_en?: string | null }).label_en ?? null,
-        quantity: s.quantity,
-        display_order: s.display_order,
-        excluded_product_ids: Array.isArray(
-          (s as { excluded_product_ids?: string[] | null }).excluded_product_ids
-        )
-          ? ((s as { excluded_product_ids: string[] }).excluded_product_ids ?? [])
-          : [],
+        quantity: s.quantity ?? 1,
+        display_order: s.display_order ?? 0,
+        excluded_product_ids: s.excluded_product_ids ?? [],
       });
       return acc;
     }, {});
@@ -126,8 +128,8 @@ export default async function AdminManageBundlesPage({ params }: { params: Param
       description_en: br.description_en ?? null,
       price: Number(b.price),
       image_url: b.image_url,
-      is_active: b.is_active,
-      created_at: b.created_at,
+      is_active: b.is_active ?? false,
+      created_at: b.created_at ?? null,
       slots: slotsMap[b.id] ?? [],
     };
   });
@@ -150,7 +152,7 @@ export default async function AdminManageBundlesPage({ params }: { params: Param
   return (
     <BundlesClient
       shopId={shopId}
-      categories={categories}
+      categories={categoriesForClient}
       productsForBundlesForm={productsForBundlesForm}
       initialBundles={initialBundles}
       initialBundlesMenuGrouped={initialBundlesMenuGrouped}

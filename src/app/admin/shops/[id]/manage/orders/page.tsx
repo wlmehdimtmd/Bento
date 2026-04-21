@@ -50,7 +50,8 @@ export default async function AdminManageOrdersPage({ params }: { params: Params
             </thead>
             <tbody>
               {orders.map((o) => {
-                const s = STATUS_LABELS[o.status] ?? { label: o.status, cls: "bg-zinc-100 text-zinc-500" };
+                const statusKey = o.status ?? "";
+                const s = STATUS_LABELS[statusKey] ?? { label: statusKey || "—", cls: "bg-zinc-100 text-zinc-500" };
                 return (
                   <tr key={o.id} className="border-b border-border last:border-0 hover:bg-muted/30">
                     <td className="px-4 py-3 font-mono font-medium">#{o.order_number}</td>
@@ -62,7 +63,14 @@ export default async function AdminManageOrdersPage({ params }: { params: Params
                       </span>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
-                      {new Date(o.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      {o.created_at
+                        ? new Date(o.created_at).toLocaleDateString("fr-FR", {
+                            day: "2-digit",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "—"}
                     </td>
                   </tr>
                 );

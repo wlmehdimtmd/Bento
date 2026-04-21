@@ -59,7 +59,7 @@ export interface ProductRow {
   option_label_en?: string | null;
   is_available: boolean;
   display_order: number;
-  created_at: string;
+  created_at: string | null;
 }
 
 interface CategoryOption {

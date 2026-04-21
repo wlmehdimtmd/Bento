@@ -214,7 +214,17 @@ export function OnboardingProductsStep({
       setProducts((prev) =>
         prev.map((p) =>
           p.id === editingProduct.id
-            ? { ...data, tags: Array.isArray(data.tags) ? (data.tags as string[]) : [] }
+            ? {
+                id: data.id,
+                category_id: data.category_id,
+                name: data.name,
+                description: data.description,
+                price: Number(data.price),
+                image_url: data.image_url,
+                tags: Array.isArray(data.tags) ? (data.tags as string[]) : [],
+                is_available: data.is_available ?? true,
+                display_order: data.display_order ?? 0,
+              }
             : p
         )
       );
@@ -231,7 +241,17 @@ export function OnboardingProductsStep({
       }
       setProducts((prev) => [
         ...prev,
-        { ...data, tags: Array.isArray(data.tags) ? (data.tags as string[]) : [] },
+        {
+          id: data.id,
+          category_id: data.category_id,
+          name: data.name,
+          description: data.description,
+          price: Number(data.price),
+          image_url: data.image_url,
+          tags: Array.isArray(data.tags) ? (data.tags as string[]) : [],
+          is_available: data.is_available ?? true,
+          display_order: data.display_order ?? 0,
+        },
       ]);
     }
 

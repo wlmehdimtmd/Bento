@@ -122,8 +122,8 @@ export default async function OnboardingCatalogPage({ searchParams }: Props) {
       price: p.price,
       image_url: p.image_url,
       tags: normalizeTags(p.tags),
-      is_available: p.is_available,
-      display_order: p.display_order,
+      is_available: p.is_available ?? true,
+      display_order: p.display_order ?? 0,
     }));
   }
 

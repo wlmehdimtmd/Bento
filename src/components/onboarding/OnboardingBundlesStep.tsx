@@ -156,8 +156,8 @@ export function OnboardingBundlesStep({
             name_fr: p.name_fr ?? null,
             name_en: p.name_en ?? null,
             price: Number(p.price),
-            is_available: p.is_available,
-            display_order: p.display_order,
+            is_available: p.is_available ?? true,
+            display_order: p.display_order ?? 0,
           }))
         );
       }

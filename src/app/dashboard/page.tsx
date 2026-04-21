@@ -38,7 +38,7 @@ export default async function DashboardPage() {
     customer_name: string;
     total_amount: number;
     status: string;
-    created_at: string;
+    created_at: string | null;
   }[] = [];
 
   if (primaryShop) {
@@ -72,7 +72,14 @@ export default async function DashboardPage() {
     ]);
 
     orderCount = count ?? 0;
-    recentOrders = orders ?? [];
+    recentOrders = (orders ?? []).map((o) => ({
+      id: o.id,
+      order_number: o.order_number,
+      customer_name: o.customer_name,
+      total_amount: Number(o.total_amount),
+      status: o.status ?? "pending",
+      created_at: o.created_at ?? null,
+    }));
     revenue = (revenueRows ?? []).reduce((sum, o) => sum + Number(o.total_amount), 0);
   }
 

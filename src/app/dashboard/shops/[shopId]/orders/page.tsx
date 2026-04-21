@@ -67,12 +67,12 @@ export default async function OrdersPage({ params }: { params: Params }) {
     fulfillment_mode: o.fulfillment_mode,
     table_number: o.table_number,
     delivery_address: o.delivery_address,
-    status: o.status,
+    status: o.status ?? "pending",
     total_amount: Number(o.total_amount),
     stripe_payment_intent_id: o.stripe_payment_intent_id,
     stripe_payment_status: o.stripe_payment_status,
     notes: o.notes,
-    created_at: o.created_at,
+    created_at: o.created_at ?? null,
   }));
 
   return (

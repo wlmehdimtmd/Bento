@@ -295,7 +295,7 @@ export function StoreView({
           en: row.option_label_en,
           legacy: row.option_label,
         }),
-        is_available: row.is_available,
+        is_available: row.is_available ?? false,
       };
     });
   }

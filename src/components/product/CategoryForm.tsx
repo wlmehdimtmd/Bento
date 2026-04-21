@@ -41,7 +41,7 @@ export interface CategoryRow {
   icon_emoji: string;
   display_order: number;
   is_active: boolean;
-  created_at: string;
+  created_at: string | null;
 }
 
 export type CategorySavePayload = {

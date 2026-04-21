@@ -27,6 +27,11 @@ export default async function AdminManageProductsPage({ params }: { params: Para
     .order("display_order");
 
   const cats = categories ?? [];
+  const categoriesForClient = cats.map((c) => ({
+    id: c.id,
+    name: c.name,
+    icon_emoji: c.icon_emoji ?? "",
+  }));
 
   if (cats.length === 0) {
     return (
@@ -56,9 +61,9 @@ export default async function AdminManageProductsPage({ params }: { params: Para
     image_url: p.image_url,
     tags: Array.isArray(p.tags) ? (p.tags as string[]) : [],
     option_label: p.option_label,
-    is_available: p.is_available,
-    display_order: p.display_order,
-    created_at: p.created_at,
+    is_available: p.is_available ?? true,
+    display_order: p.display_order ?? 0,
+    created_at: p.created_at ?? null,
     categoryName: catMap[p.category_id]?.name ?? "—",
   }));
 
@@ -78,7 +83,7 @@ export default async function AdminManageProductsPage({ params }: { params: Para
   return (
     <ProductsClient
       shopId={shopId}
-      categories={cats}
+      categories={categoriesForClient}
       initialProducts={initialProducts}
       shopLabels={shopLabels}
       adminActions={{ onSave, onDelete }}

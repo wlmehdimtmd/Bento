@@ -19,6 +19,7 @@ export type Database = {
           bundle_id: string
           category_id: string
           display_order: number | null
+          excluded_product_ids: string[]
           id: string
           label: string
           label_en: string | null
@@ -29,6 +30,7 @@ export type Database = {
           bundle_id: string
           category_id: string
           display_order?: number | null
+          excluded_product_ids?: string[]
           id?: string
           label: string
           label_en?: string | null
@@ -39,6 +41,7 @@ export type Database = {
           bundle_id?: string
           category_id?: string
           display_order?: number | null
+          excluded_product_ids?: string[]
           id?: string
           label?: string
           label_en?: string | null
@@ -225,6 +228,33 @@ export type Database = {
           name?: string
           position?: number | null
           slug?: string
+        }
+        Relationships: []
+      }
+      auth_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          ip: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          ip?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          ip?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
