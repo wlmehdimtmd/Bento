@@ -12,19 +12,22 @@ Ce fichier trace les **décisions structurantes** et l’avancement de l’audit
 
 | Partie            | Statut audit | Notes |
 |-------------------|--------------|-------|
-| Authentification  | En cours     | Rapport initial : conversation du 2026-04-21 |
-| Landing Page      | Non démarré  |       |
-| Dashboard Client  | Non démarré  |       |
+| Authentification  | Rapport initial livré | Pas de correctif code mergé ; sujets ouverts (AuthGuard, `?error=`, etc.). |
+| Landing Page      | Rapport initial livré | Conversation du 2026-04-21 |
+| Dashboard Client  | Non démarré  | Prochaine étape après validation |
 | Vitrine Client    | Non démarré  |       |
 
 ## Journal des décisions
 
 | Date       | Partie | Décision / constat | Statut |
 |------------|--------|--------------------|--------|
-| 2026-04-21 | Auth   | L’audit Auth est traité en premier ; aucune modification applicative n’a été fusionnée sans validation utilisateur. | En attente validation |
+| 2026-04-21 | Auth   | L’audit Auth est traité en premier ; aucune modification applicative n’a été fusionnée sans validation utilisateur. | Fait (rapport) |
 | 2026-04-21 | Auth   | `AuthGuard.tsx` n’est référencé par aucun module applicatif (seulement la doc `CLAUDE.md`) : candidat **code mort** ou réutilisation future — à trancher. | À décider |
 | 2026-04-21 | Auth   | `SUPABASE_REDIRECT_RELATIVE_PATHS` est exporté mais jamais importé : candidat suppression ou usage documenté (README interne). | À décider |
 | 2026-04-21 | Auth   | Les redirections `/login?error=…` émises par `api/auth/callback` ne sont pas consommées par la page login : **écart UX** à corriger ou documenter. | À décider |
+| 2026-04-21 | Landing | Texte i18n **multi-boutiques** (`landing.features.multishop.*`) en contradiction avec la règle métier **mono-boutique** (`CLAUDE.md`) : à aligner (copy ou produit). | À décider |
+| 2026-04-21 | Landing | Clé `landing.footer.rights` définie dans `i18nMessages.ts` mais non utilisée dans le footer de `LandingPageClient`. | Nice to have |
+| 2026-04-21 | Repo   | Journal `AUDIT.md` initial commité (`docs: ajout du journal d'audit`). | Fait |
 
 ---
 
