@@ -24,16 +24,16 @@ export function CartButton() {
     : "bg-white text-[10px] font-bold text-neutral-950 ring-1 ring-black/10 dark:bg-neutral-900 dark:text-white dark:ring-white/25";
 
   return (
-    <AnimatePresence>
-      {count > 0 && (
-        <motion.div
-          className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
-          initial={{ y: 80, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 80, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 380, damping: 28 }}
-        >
-          <div className="pointer-events-auto w-max max-w-[min(100%,416px)]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex flex-col items-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <AnimatePresence>
+        {count > 0 && (
+          <motion.div
+            className="pointer-events-auto mb-2 w-max max-w-[min(100%,416px)]"
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 380, damping: 28 }}
+          >
             <div
               className={cn(
                 "flex items-center gap-4 rounded-full bg-white/90 p-1 pr-4 shadow-xl backdrop-blur-[4px]",
@@ -63,12 +63,12 @@ export function CartButton() {
                 {formatPrice(total)}
               </span>
             </div>
-            <div className="mt-2 flex justify-center">
-              <LocaleSwitcher />
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className="pointer-events-auto flex justify-center">
+        <LocaleSwitcher />
+      </div>
+    </div>
   );
 }
