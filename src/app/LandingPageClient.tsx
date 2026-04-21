@@ -343,7 +343,7 @@ const PRICING_POINTS = [
 ];
 
 export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
