@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { Inter, Onest } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { RecoveryHashHandler } from "@/components/auth/RecoveryHashHandler";
 import { LocaleClientProvider } from "@/components/i18n/LocaleClientProvider";
 import { resolveLocale, LOCALE_COOKIE_NAME } from "@/lib/i18n";
@@ -63,10 +64,12 @@ export default async function RootLayout({
         </a>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <LocaleClientProvider initialLocale={locale}>
-            {/* Avant le contenu : session recovery (hash / PKCE) avant les useEffect des pages. */}
-            <RecoveryHashHandler />
-            {children}
-            <Toaster richColors closeButton />
+            <TooltipProvider delay={200}>
+              {/* Avant le contenu : session recovery (hash / PKCE) avant les useEffect des pages. */}
+              <RecoveryHashHandler />
+              {children}
+              <Toaster richColors closeButton />
+            </TooltipProvider>
           </LocaleClientProvider>
         </ThemeProvider>
       </body>

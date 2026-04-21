@@ -3,34 +3,41 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { TranslatableTabs } from "@/components/catalog/TranslatableTabs";
+import {
+  catalogSheetScrollClass,
+  mobileCatalogDrawerScrollClass,
+} from "@/components/catalog/mobileCatalogDrawerClasses";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { createClient } from "@/lib/supabase/client";
+import {
+  categoryCompletion,
+  categoryDefaultFormValues,
+  categoryFormSchema,
+  categoryFormToSavePayload,
+  type CategoryFormValues,
+} from "@/lib/catalogFormAdapters";
+import { getDefaultCatalogLanguageCode } from "@/lib/catalogLanguages";
+import { cn } from "@/lib/utils";
 import { useLocale } from "@/components/i18n/LocaleProvider";
-
-// ─── Schema ───────────────────────────────────────────────────
-const categorySchema = z.object({
-  name: z.string().min(1, "Nom requis"),
-  description: z.string().max(32, "Maximum 32 caractères").optional(),
-  icon_emoji: z.string().optional(),
-  is_active: z.boolean(),
-});
-
-type CategoryFormValues = z.infer<typeof categorySchema>;
 
 // ─── Types ────────────────────────────────────────────────────
 export interface CategoryRow {
   id: string;
   shop_id: string;
   name: string;
+  name_fr?: string | null;
+  name_en?: string | null;
   description: string | null;
+  description_fr?: string | null;
+  description_en?: string | null;
   icon_emoji: string;
   display_order: number;
   is_active: boolean;
@@ -40,7 +47,11 @@ export interface CategoryRow {
 export type CategorySavePayload = {
   shop_id: string;
   name: string;
+  name_fr: string;
+  name_en: string | null;
   description: string | null;
+  description_fr: string | null;
+  description_en: string | null;
   icon_emoji: string;
   is_active: boolean;
   display_order: number;
@@ -56,6 +67,10 @@ interface CategoryFormProps {
   sheetCtasFullWidth?: boolean;
   subViewOverride?: "main" | "icon";
   onSubViewChange?: (subView: "main" | "icon") => void;
+  /** Drawer mobile : formulaire scrollable, CTA fixes, pleine largeur utile. */
+  stickyMobileActions?: boolean;
+  /** Sheet desktop catalogue : même layout (header/footer fixes, corps scrollable). */
+  stickySheetActions?: boolean;
 }
 
 const CATEGORY_ICONS = ["🥗","🍽️","🍰","🥤","🍕","🍔","🍜","🥩","🐟","🌮","🍣","🧁","🍷","🍺","☕","🌿","🔥","⭐"];
@@ -71,30 +86,35 @@ export function CategoryForm({
   sheetCtasFullWidth = false,
   subViewOverride,
   onSubViewChange,
+  stickyMobileActions = false,
+  stickySheetActions = false,
 }: CategoryFormProps) {
   const { locale } = useLocale();
   const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const isEdit = !!initialData;
+  const stickyLayout = stickyMobileActions || stickySheetActions;
+  const ctasFullWidth = sheetCtasFullWidth || stickyLayout;
+
+  const [catalogTab, setCatalogTab] = useState(getDefaultCatalogLanguageCode());
+  const [subView, setSubView] = useState<"main" | "icon">("main");
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<CategoryFormValues>({
-    resolver: zodResolver(categorySchema),
-    defaultValues: {
-      name: initialData?.name ?? "",
-      description: initialData?.description ?? "",
-      icon_emoji: initialData?.icon_emoji ?? "📦",
-      is_active: initialData?.is_active ?? true,
-    },
+    resolver: zodResolver(categoryFormSchema),
+    defaultValues: categoryDefaultFormValues(initialData),
   });
 
   const iconEmoji = watch("icon_emoji") || "📦";
   const isActive = watch("is_active");
-  const [subView, setSubView] = useState<"main" | "icon">("main");
+  const watched = watch();
+  const completionByLang = categoryCompletion(watched);
+  const completeCount = Object.values(completionByLang).filter((s) => s === "complete").length;
 
   useEffect(() => {
     if (subViewOverride && subViewOverride !== subView) {
@@ -108,14 +128,26 @@ export function CategoryForm({
     onSubViewChange?.(next);
   }
 
+  function copyFromFr() {
+    if (catalogTab === "fr") return;
+    const fr = getValues("translations.fr");
+    if (catalogTab === "en") {
+      const enName = (getValues("translations.en.name") ?? "").trim();
+      const enDesc = (getValues("translations.en.description") ?? "").trim();
+      const frName = (fr?.name ?? "").trim();
+      const frDesc = (fr?.description ?? "").trim();
+      if (!enName && frName) {
+        setValue("translations.en.name", frName, { shouldValidate: true, shouldDirty: true });
+      }
+      if (!enDesc && frDesc) {
+        setValue("translations.en.description", frDesc, { shouldValidate: true, shouldDirty: true });
+      }
+    }
+  }
+
   async function onSubmit(values: CategoryFormValues) {
     const payload: CategorySavePayload = {
-      shop_id: shopId,
-      name: values.name,
-      description: values.description || null,
-      icon_emoji: values.icon_emoji || "📦",
-      is_active: values.is_active,
-      display_order: initialData?.display_order ?? nextOrder,
+      ...categoryFormToSavePayload(values, shopId, initialData?.display_order ?? nextOrder),
     };
 
     if (onSave) {
@@ -130,11 +162,21 @@ export function CategoryForm({
     }
 
     const supabase = createClient();
+    const dbRow = {
+      name: payload.name,
+      name_fr: payload.name_fr,
+      name_en: payload.name_en,
+      description: payload.description,
+      description_fr: payload.description_fr,
+      description_en: payload.description_en,
+      icon_emoji: payload.icon_emoji,
+      is_active: payload.is_active,
+    };
 
     if (isEdit) {
       const { data, error } = await supabase
         .from("categories")
-        .update(payload)
+        .update(dbRow)
         .eq("id", initialData!.id)
         .select()
         .single();
@@ -145,7 +187,11 @@ export function CategoryForm({
     } else {
       const { data, error } = await supabase
         .from("categories")
-        .insert(payload)
+        .insert({
+          shop_id: shopId,
+          ...dbRow,
+          display_order: payload.display_order,
+        })
         .select()
         .single();
 
@@ -155,10 +201,27 @@ export function CategoryForm({
     }
   }
 
+  const iconScrollClass = stickyMobileActions
+    ? cn(mobileCatalogDrawerScrollClass, "px-4 py-4")
+    : stickySheetActions
+      ? cn(catalogSheetScrollClass, "px-4 py-4")
+      : "flex-1 pb-4";
+  const iconFooterClass = cn(
+    "border-t border-border py-3",
+    stickyLayout
+      ? "shrink-0 bg-background/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md supports-[backdrop-filter]:bg-background/80"
+      : "mt-auto"
+  );
+
+  const shellClass = cn(
+    "flex w-full flex-col",
+    stickyLayout ? "min-h-0 flex-1" : "h-full min-h-0 flex-1"
+  );
+
   if (subView === "icon") {
     return (
-      <div className="flex h-full min-h-0 flex-col">
-        <div className="flex-1 pb-4">
+      <div className={shellClass}>
+        <div className={iconScrollClass}>
           <div className="grid grid-cols-9 gap-1">
             {CATEGORY_ICONS.map((emoji) => (
               <button
@@ -173,7 +236,7 @@ export function CategoryForm({
             ))}
           </div>
         </div>
-        <div className="mt-auto border-t border-border py-3">
+        <div className={iconFooterClass}>
           <Button
             type="button"
             onClick={() => changeSubView("main")}
@@ -187,23 +250,104 @@ export function CategoryForm({
     );
   }
 
+  const descLenFr = (watch("translations.fr.description") ?? "").length;
+  const descLenEn = (watch("translations.en.description") ?? "").length;
+
+  const mainScrollClass = stickyMobileActions
+    ? cn(mobileCatalogDrawerScrollClass, "space-y-5 px-4 py-4")
+    : stickySheetActions
+      ? cn(catalogSheetScrollClass, "space-y-5 px-4 py-4")
+      : "flex-1 space-y-5 pb-4";
+  const mainFooterClass = cn(
+    "flex w-full gap-2 border-t border-border py-3",
+    stickyLayout &&
+      "shrink-0 bg-background/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md supports-[backdrop-filter]:bg-background/80",
+    !stickyLayout && "mt-auto",
+    ctasFullWidth ? "" : "md:justify-end"
+  );
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex h-full min-h-0 flex-col">
-      <div className="flex-1 space-y-5 pb-4">
-        {/* Name */}
-        <div className="space-y-1.5">
-        <Label htmlFor="name">{tr("Nom", "Name")} *</Label>
-        <Input
-          id="name"
-          {...register("name")}
-          placeholder={tr("Entrées, Plats, Desserts…", "Starters, Mains, Desserts...")}
-          disabled={isSubmitting}
-          autoFocus
-        />
-        {errors.name && (
-          <p className="text-xs text-destructive">{errors.name.message}</p>
-        )}
-        </div>
+    <form onSubmit={handleSubmit(onSubmit)} className={shellClass}>
+      <div className={mainScrollClass}>
+        <TranslatableTabs
+          value={catalogTab}
+          onValueChange={setCatalogTab}
+          completionByLang={completionByLang}
+          completeCount={completeCount}
+          sectionTitle={tr("Contenu multilingue", "Multilingual content")}
+          footerSlot={
+            catalogTab !== "fr" ? (
+              <Button type="button" variant="outline" size="sm" onClick={copyFromFr} disabled={isSubmitting}>
+                {tr("Copier depuis FR (champs vides uniquement)", "Copy from FR (empty fields only)")}
+              </Button>
+            ) : null
+          }
+        >
+          {(langCode) =>
+            langCode === "fr" ? (
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="cat-fr-name">{tr("Nom", "Name")} *</Label>
+                  <Input
+                    id="cat-fr-name"
+                    {...register("translations.fr.name")}
+                    placeholder={tr("Entrées, Plats, Desserts…", "Starters, Mains, Desserts...")}
+                    disabled={isSubmitting}
+                    autoFocus
+                  />
+                  {errors.translations?.fr?.name && (
+                    <p className="text-xs text-destructive">{errors.translations.fr.name.message}</p>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="cat-fr-desc">{tr("Description", "Description")}</Label>
+                  <Textarea
+                    id="cat-fr-desc"
+                    {...register("translations.fr.description")}
+                    placeholder={tr("Description optionnelle de la catégorie…", "Optional category description...")}
+                    rows={2}
+                    maxLength={32}
+                    disabled={isSubmitting}
+                  />
+                  <p className="text-xs text-muted-foreground text-right">{descLenFr}/32</p>
+                  {errors.translations?.fr?.description && (
+                    <p className="text-xs text-destructive">{errors.translations.fr.description.message}</p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="cat-en-name">{tr("Nom (anglais)", "Name (English)")}</Label>
+                  <Input
+                    id="cat-en-name"
+                    {...register("translations.en.name")}
+                    placeholder={tr("Optionnel", "Optional")}
+                    disabled={isSubmitting}
+                  />
+                  {errors.translations?.en?.name && (
+                    <p className="text-xs text-destructive">{errors.translations.en.name.message}</p>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="cat-en-desc">{tr("Description (anglais)", "Description (English)")}</Label>
+                  <Textarea
+                    id="cat-en-desc"
+                    {...register("translations.en.description")}
+                    placeholder={tr("Optionnel, 32 caractères max", "Optional, 32 characters max")}
+                    rows={2}
+                    maxLength={32}
+                    disabled={isSubmitting}
+                  />
+                  <p className="text-xs text-muted-foreground text-right">{descLenEn}/32</p>
+                  {errors.translations?.en?.description && (
+                    <p className="text-xs text-destructive">{errors.translations.en.description.message}</p>
+                  )}
+                </div>
+              </div>
+            )
+          }
+        </TranslatableTabs>
 
         <div className="space-y-1.5">
           <Label>{tr("Icône", "Icon")}</Label>
@@ -213,26 +357,6 @@ export function CategoryForm({
           </Button>
         </div>
 
-      {/* Description */}
-        <div className="space-y-1.5">
-          <Label htmlFor="description">{tr("Description", "Description")}</Label>
-          <Textarea
-            id="description"
-            {...register("description")}
-            placeholder={tr("Description optionnelle de la catégorie…", "Optional category description...")}
-            rows={2}
-            maxLength={32}
-            disabled={isSubmitting}
-          />
-          <p className="text-xs text-muted-foreground text-right">
-            {(watch("description") ?? "").length}/32
-          </p>
-          {errors.description && (
-            <p className="text-xs text-destructive">{errors.description.message}</p>
-          )}
-        </div>
-
-      {/* Active toggle */}
         <div className="flex items-center justify-between rounded-lg border border-border p-3">
           <div>
             <p className="text-sm font-medium">{tr("Catégorie active", "Active category")}</p>
@@ -250,18 +374,13 @@ export function CategoryForm({
         </div>
       </div>
 
-      {/* Actions */}
-      <div
-        className={`mt-auto flex w-full gap-2 border-t border-border py-3 ${
-          sheetCtasFullWidth ? "" : "md:justify-end"
-        }`}
-      >
+      <div className={mainFooterClass}>
         <Button
           type="button"
           variant="outline"
           onClick={onCancel}
           disabled={isSubmitting}
-          className={sheetCtasFullWidth ? "flex-1" : "flex-1 md:flex-none"}
+          className={ctasFullWidth ? "flex-1" : "flex-1 md:flex-none"}
         >
           {tr("Annuler", "Cancel")}
         </Button>
@@ -269,7 +388,7 @@ export function CategoryForm({
           type="submit"
           disabled={isSubmitting}
           style={{ backgroundColor: "var(--primary)" }}
-          className={sheetCtasFullWidth ? "flex-1 text-primary-foreground hover:opacity-90" : "flex-1 text-primary-foreground hover:opacity-90 md:flex-none"}
+          className={ctasFullWidth ? "flex-1 text-primary-foreground hover:opacity-90" : "flex-1 text-primary-foreground hover:opacity-90 md:flex-none"}
         >
           {isSubmitting ? (
             <>

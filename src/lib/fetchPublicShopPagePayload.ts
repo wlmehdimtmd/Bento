@@ -5,7 +5,7 @@ import type { SocialLinks, ShopReviews, StorefrontPhoto } from "@/lib/types";
 import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
 import { coerceStorefrontThemeKey, coerceStorefrontThemeOverrides, type StorefrontThemeOverrides } from "@/lib/storefrontTheme";
 import { fetchShopLabelsForPublic, type ProductLabelOption } from "@/lib/shop-labels";
-import type { AppLocale } from "@/lib/i18n";
+import { pickLocalized, type AppLocale } from "@/lib/i18n";
 
 export type PublicShopPagePayload = {
   shop: ShopInfo;
@@ -43,14 +43,6 @@ type ShopRow = {
   description_fr?: string | null;
   description_en?: string | null;
 };
-
-function pickLocalized(
-  locale: AppLocale,
-  opts: { fr?: string | null; en?: string | null; legacy?: string | null }
-) {
-  if (locale === "en") return opts.en ?? opts.fr ?? opts.legacy ?? null;
-  return opts.fr ?? opts.en ?? opts.legacy ?? null;
-}
 
 /**
  * Données vitrine publique (aligné sur `/(public)/[slug]/page.tsx`) par slug ou par id.
@@ -224,7 +216,18 @@ export async function fetchPublicShopPagePayload(
   }
 
   const catMap = Object.fromEntries(
-    catList.map((c) => [c.id, { name: c.name, emoji: c.icon_emoji }])
+    catList.map((c) => [
+      c.id,
+      {
+        name:
+          pickLocalized(locale, {
+            fr: c.name_fr,
+            en: c.name_en,
+            legacy: c.name,
+          }) ?? c.name,
+        emoji: c.icon_emoji,
+      },
+    ])
   );
 
   const bundles: BundleInfo[] = bundleList.map((b) => ({
@@ -273,7 +276,7 @@ export async function fetchPublicShopPagePayload(
     ? (s.fulfillment_modes as string[])
     : [];
 
-  const shopLabels = await fetchShopLabelsForPublic(supabase, s.id);
+  const shopLabels = await fetchShopLabelsForPublic(supabase, s.id, locale);
 
   const shopInfo: ShopInfo = {
     id: s.id,

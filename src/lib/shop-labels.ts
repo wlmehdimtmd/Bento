@@ -1,12 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { LABELS } from "@/lib/constants";
+import { pickLocalized, type AppLocale } from "@/lib/i18n";
 
 export interface ShopLabelOption {
   id: string;
   shop_id: string;
   value: string;
   label: string;
+  label_fr?: string | null;
+  label_en?: string | null;
   color: string;
   display_order: number;
 }
@@ -52,6 +55,8 @@ export async function seedDefaultShopLabels(
     shop_id: shopId,
     value: item.value,
     label: item.label,
+    label_fr: item.label,
+    label_en: null,
     color: item.color,
     display_order: index,
   }));
@@ -73,7 +78,7 @@ export async function fetchShopLabelsForDashboard(
 
   const { data, error } = await supabase
     .from("shop_labels")
-    .select("id, shop_id, value, label, color, display_order")
+    .select("id, shop_id, value, label, label_fr, label_en, color, display_order")
     .eq("shop_id", shopId)
     .order("display_order", { ascending: true })
     .order("created_at", { ascending: true });
@@ -88,11 +93,12 @@ export async function fetchShopLabelsForDashboard(
 
 export async function fetchShopLabelsForPublic(
   supabase: SupabaseClient,
-  shopId: string
+  shopId: string,
+  locale: AppLocale = "fr"
 ): Promise<ProductLabelOption[]> {
   const { data, error } = await supabase
     .from("shop_labels")
-    .select("value, label, color")
+    .select("value, label, label_fr, label_en, color")
     .eq("shop_id", shopId)
     .order("display_order", { ascending: true })
     .order("created_at", { ascending: true });
@@ -102,7 +108,24 @@ export async function fetchShopLabelsForPublic(
     return [];
   }
 
-  return ((data ?? []) as ProductLabelOption[]).filter(
-    (row) => row.value && row.label && row.color
-  );
+  type Row = {
+    value: string;
+    label: string;
+    label_fr?: string | null;
+    label_en?: string | null;
+    color: string;
+  };
+
+  return ((data ?? []) as Row[])
+    .filter((row) => row.value && row.color)
+    .map((row) => ({
+      value: row.value,
+      label:
+        pickLocalized(locale, {
+          fr: row.label_fr,
+          en: row.label_en,
+          legacy: row.label,
+        }) ?? row.label,
+      color: row.color,
+    }));
 }

@@ -51,6 +51,7 @@ import type { StorefrontPhoto } from "@/lib/types";
 import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
 import { getStorefrontThemePreviewStyle, type StorefrontThemeOverrides } from "@/lib/storefrontTheme";
 import type { ProductLabelOption } from "@/lib/shop-labels";
+import { pickLocalized } from "@/lib/i18n";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
 // ── Types ──────────────────────────────────────────────────────
@@ -259,15 +260,44 @@ export function StoreView({
     const { data } = await supabase
       .from("products")
       .select(
-        "id, name, description, price, image_url, tags, option_label, is_available, display_order"
+        "id, name, name_fr, name_en, description, description_fr, description_en, price, image_url, tags, option_label, option_label_fr, option_label_en, is_available, display_order"
       )
       .eq("category_id", categoryId)
       .eq("is_available", true)
       .order("display_order");
-    return (data ?? []).map((p) => ({
-      ...p,
-      tags: Array.isArray(p.tags) ? (p.tags as string[]) : [],
-    }));
+    return (data ?? []).map((p) => {
+      const row = p as typeof p & {
+        name_fr?: string | null;
+        name_en?: string | null;
+        description_fr?: string | null;
+        description_en?: string | null;
+        option_label_fr?: string | null;
+        option_label_en?: string | null;
+      };
+      return {
+        id: row.id,
+        name:
+          pickLocalized(locale, {
+            fr: row.name_fr,
+            en: row.name_en,
+            legacy: row.name,
+          }) ?? row.name,
+        description: pickLocalized(locale, {
+          fr: row.description_fr,
+          en: row.description_en,
+          legacy: row.description,
+        }),
+        price: row.price,
+        image_url: row.image_url,
+        tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
+        option_label: pickLocalized(locale, {
+          fr: row.option_label_fr,
+          en: row.option_label_en,
+          legacy: row.option_label,
+        }),
+        is_available: row.is_available,
+      };
+    });
   }
 
   // ── Navigation ─────────────────────────────────────────────

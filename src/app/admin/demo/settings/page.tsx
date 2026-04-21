@@ -2,8 +2,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
 import { assertAdminOrRedirect } from "@/lib/admin/requireAdmin";
-import { DEMO_TEMPLATE_SHOP_SLUG } from "@/lib/demoTemplateShop";
-import { ensureDemoTemplateShop, setDemoShopId } from "@/app/admin/actions";
+import { setDemoShopId } from "@/app/admin/actions";
 import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -44,10 +43,7 @@ export default async function AdminDemoSettingsPage() {
     is_active: boolean;
   }[];
 
-  const templateRow = shopList.find((s) => s.slug === DEMO_TEMPLATE_SHOP_SLUG);
-  const hasTemplate = !!templateRow;
-
-  const mirrorOptions = shopList.filter((s) => s.is_active && s.slug !== DEMO_TEMPLATE_SHOP_SLUG);
+  const mirrorOptions = shopList.filter((s) => s.is_active);
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -61,60 +57,12 @@ export default async function AdminDemoSettingsPage() {
               Paramètres démo
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Choisissez la vitrine affichée sur <code className="text-xs">/demo</code>. Sans miroir
-              explicite, une boutique modèle <strong>Maison Kanpai</strong> (
-              <code className="text-xs">{DEMO_TEMPLATE_SHOP_SLUG}</code>) est utilisée si elle existe ;
-              sinon la démo intégrée (données React) sert de repli.
+              Choisissez la vitrine affichée sur <code className="text-xs">/demo</code> et dans le bloc
+              démo de la page d&apos;accueil. Sans miroir, la démo intégrée (données React) est utilisée.
+              Avec un miroir, le contenu provient d&apos;une boutique réelle (active) en base.
             </p>
           </div>
         </div>
-
-        {!hasTemplate ? (
-          <section className="space-y-3 rounded-lg border border-border bg-card p-6">
-            <h2 className="text-lg font-semibold">Boutique modèle Maison Kanpai</h2>
-            <p className="text-sm text-muted-foreground">
-              Créez la boutique réservée au slug <code className="text-xs">{DEMO_TEMPLATE_SHOP_SLUG}</code>{" "}
-              pour pouvoir modifier textes, carte et mise en page depuis l&apos;admin (comme les autres
-              vitrines). Elle sera rattachée au premier utilisateur en base.
-            </p>
-            <form
-              action={async () => {
-                "use server";
-                await ensureDemoTemplateShop();
-              }}
-            >
-              <button
-                type="submit"
-                className={cn(
-                  buttonVariants(),
-                  "text-primary-foreground hover:opacity-90"
-                )}
-                style={{ backgroundColor: "var(--primary)" }}
-              >
-                Créer la boutique modèle Maison Kanpai
-              </button>
-            </form>
-          </section>
-        ) : (
-          <section className="space-y-2 rounded-lg border border-border bg-muted/30 p-4 text-sm">
-            <p className="font-medium text-foreground">Boutique modèle présente</p>
-            <p className="text-muted-foreground">
-              <Link
-                href={`/admin/shops/${templateRow.id}/settings`}
-                className="underline underline-offset-2 font-medium text-foreground"
-              >
-                Ouvrir la configuration
-              </Link>{" "}
-              ·{" "}
-              <Link
-                href={`/admin/shops/${templateRow.id}/manage`}
-                className="underline underline-offset-2 font-medium text-foreground"
-              >
-                Gérer le contenu
-              </Link>
-            </p>
-          </section>
-        )}
 
         <form
           action={async (fd: FormData) => {
@@ -126,7 +74,7 @@ export default async function AdminDemoSettingsPage() {
         >
           <div className="space-y-2">
             <label htmlFor="demo_shop_id" className="text-sm font-medium">
-              Miroir explicite sur <code className="text-xs">/demo</code>{" "}
+              Miroir sur <code className="text-xs">/demo</code>{" "}
               <span className="text-destructive">*</span>
             </label>
             <select
@@ -135,11 +83,7 @@ export default async function AdminDemoSettingsPage() {
               defaultValue={currentId ?? "__static__"}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
-              <option value="__static__">
-                {hasTemplate
-                  ? "Par défaut — Maison Kanpai (boutique modèle en base)"
-                  : "Par défaut — démo intégrée (sans boutique modèle)"}
-              </option>
+              <option value="__static__">Par défaut — démo intégrée (sans boutique miroir)</option>
               {mirrorOptions.map((s) => (
                 <option key={s.id} value={s.id}>
                   Miroir : {s.name} (/{s.slug})
@@ -148,9 +92,7 @@ export default async function AdminDemoSettingsPage() {
             </select>
             <p className="text-xs text-muted-foreground">
               « Par défaut » laisse <code className="text-xs">demo_shop_id</code> vide :{" "}
-              {hasTemplate
-                ? "/demo charge la boutique modèle active."
-                : "/demo utilise la vitrine statique tant que la boutique modèle n’existe pas."}{" "}
+              <code className="text-xs">/demo</code> et le hero landing utilisent la vitrine statique.
               Seules les boutiques <strong>actives</strong> peuvent servir de miroir.
             </p>
           </div>

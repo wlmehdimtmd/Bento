@@ -24,7 +24,11 @@ export async function adminSaveCategory(
   shopId: string,
   payload: {
     name: string;
+    name_fr: string;
+    name_en: string | null;
     description: string | null;
+    description_fr: string | null;
+    description_en: string | null;
     icon_emoji: string;
     is_active: boolean;
     display_order: number;
@@ -34,15 +38,21 @@ export async function adminSaveCategory(
 ): Promise<CategoryRow> {
   const service = await requireAdmin();
 
+  const row = {
+    name: payload.name,
+    name_fr: payload.name_fr,
+    name_en: payload.name_en,
+    description: payload.description,
+    description_fr: payload.description_fr,
+    description_en: payload.description_en,
+    icon_emoji: payload.icon_emoji || "📦",
+    is_active: payload.is_active,
+  };
+
   if (isEdit && existingId) {
     const { data, error } = await service
       .from("categories")
-      .update({
-        name: payload.name,
-        description: payload.description,
-        icon_emoji: payload.icon_emoji || "📦",
-        is_active: payload.is_active,
-      })
+      .update(row)
       .eq("id", existingId)
       .select()
       .single();
@@ -59,10 +69,7 @@ export async function adminSaveCategory(
     .from("categories")
     .insert({
       shop_id: shopId,
-      name: payload.name,
-      description: payload.description,
-      icon_emoji: payload.icon_emoji || "📦",
-      is_active: payload.is_active,
+      ...row,
       display_order: payload.display_order ?? (count ?? 0) + 1,
     })
     .select()
@@ -92,11 +99,17 @@ export async function adminSaveProduct(
   payload: {
     category_id: string;
     name: string;
+    name_fr: string;
+    name_en: string | null;
     description: string | null;
+    description_fr: string | null;
+    description_en: string | null;
     price: number;
     image_url: string | null;
     tags: string[];
     option_label: string | null;
+    option_label_fr: string | null;
+    option_label_en: string | null;
     is_available: boolean;
     display_order: number;
   },
@@ -105,19 +118,27 @@ export async function adminSaveProduct(
 ): Promise<ProductRow> {
   const service = await requireAdmin();
 
+  const row = {
+    category_id: payload.category_id,
+    name: payload.name,
+    name_fr: payload.name_fr,
+    name_en: payload.name_en,
+    description: payload.description,
+    description_fr: payload.description_fr,
+    description_en: payload.description_en,
+    price: payload.price,
+    image_url: payload.image_url,
+    tags: payload.tags,
+    option_label: payload.option_label,
+    option_label_fr: payload.option_label_fr,
+    option_label_en: payload.option_label_en,
+    is_available: payload.is_available,
+  };
+
   if (isEdit && existingId) {
     const { data, error } = await service
       .from("products")
-      .update({
-        category_id: payload.category_id,
-        name: payload.name,
-        description: payload.description,
-        price: payload.price,
-        image_url: payload.image_url,
-        tags: payload.tags,
-        option_label: payload.option_label,
-        is_available: payload.is_available,
-      })
+      .update(row)
       .eq("id", existingId)
       .select()
       .single();
@@ -133,14 +154,7 @@ export async function adminSaveProduct(
   const { data, error } = await service
     .from("products")
     .insert({
-      category_id: payload.category_id,
-      name: payload.name,
-      description: payload.description,
-      price: payload.price,
-      image_url: payload.image_url,
-      tags: payload.tags,
-      option_label: payload.option_label,
-      is_available: payload.is_available,
+      ...row,
       display_order: payload.display_order ?? (count ?? 0) + 1,
     })
     .select()
@@ -163,11 +177,23 @@ export async function adminSaveBundle(
   shopId: string,
   payload: {
     name: string;
+    name_fr: string;
+    name_en: string | null;
     description: string | null;
+    description_fr: string | null;
+    description_en: string | null;
     price: number;
     image_url: string | null;
     is_active: boolean;
-    slots: Array<{ id?: string; category_id: string; label: string; quantity: number; display_order: number }>;
+    slots: Array<{
+      id?: string;
+      category_id: string;
+      label: string;
+      label_fr: string;
+      label_en: string | null;
+      quantity: number;
+      display_order: number;
+    }>;
   },
   isEdit: boolean,
   existingId?: string,
@@ -176,16 +202,22 @@ export async function adminSaveBundle(
 
   let bundleId: string;
 
+  const bundleRow = {
+    name: payload.name,
+    name_fr: payload.name_fr,
+    name_en: payload.name_en,
+    description: payload.description,
+    description_fr: payload.description_fr,
+    description_en: payload.description_en,
+    price: payload.price,
+    image_url: payload.image_url,
+    is_active: payload.is_active,
+  };
+
   if (isEdit && existingId) {
     const { error } = await service
       .from("bundles")
-      .update({
-        name: payload.name,
-        description: payload.description,
-        price: payload.price,
-        image_url: payload.image_url,
-        is_active: payload.is_active,
-      })
+      .update(bundleRow)
       .eq("id", existingId);
     if (error) throw new Error(error.message);
     bundleId = existingId;
@@ -200,11 +232,7 @@ export async function adminSaveBundle(
       .from("bundles")
       .insert({
         shop_id: shopId,
-        name: payload.name,
-        description: payload.description,
-        price: payload.price,
-        image_url: payload.image_url,
-        is_active: payload.is_active,
+        ...bundleRow,
       })
       .select("id")
       .single();
@@ -215,7 +243,9 @@ export async function adminSaveBundle(
   const slotsPayload = payload.slots.map((s, i) => ({
     bundle_id: bundleId,
     category_id: s.category_id,
-    label: s.label,
+    label: s.label_fr,
+    label_fr: s.label_fr,
+    label_en: s.label_en,
     quantity: s.quantity,
     display_order: i,
   }));
@@ -240,6 +270,8 @@ export async function adminSaveBundle(
       id: s.id,
       category_id: s.category_id,
       label: s.label,
+      label_fr: (s as { label_fr?: string | null }).label_fr ?? s.label,
+      label_en: (s as { label_en?: string | null }).label_en ?? null,
       quantity: s.quantity,
       display_order: s.display_order,
     })),

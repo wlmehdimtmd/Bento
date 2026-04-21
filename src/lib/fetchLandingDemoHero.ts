@@ -62,7 +62,7 @@ function padShopTilesToSix(tiles: LandingDemoHeroTile[]): LandingDemoHeroTile[] 
 }
 
 /**
- * Données hero landing : même source que `/demo` (platform_settings + repli boutique modèle).
+ * Données hero landing : même source que `/demo` (`platform_settings.demo_shop_id`).
  */
 export async function fetchLandingDemoHero(supabase: SupabaseClient): Promise<LandingDemoHeroData> {
   const shopId = await resolveDemoSourceShopId(supabase);

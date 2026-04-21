@@ -116,7 +116,9 @@ export function CategoriesClient({
     return sorted.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
-        (c.description ?? "").toLowerCase().includes(q)
+        (c.description ?? "").toLowerCase().includes(q) ||
+        (c.name_en ?? "").toLowerCase().includes(q) ||
+        (c.description_en ?? "").toLowerCase().includes(q)
     );
   }, [sorted, search]);
 
@@ -507,8 +509,14 @@ export function CategoriesClient({
             if (!open) setFormSubView("main");
           }}
         >
-          <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden">
-            <DrawerHeader className={formSubView !== "main" ? "flex-row items-center gap-2" : undefined}>
+          <DrawerContent className="flex h-auto max-h-[92vh] min-h-0 flex-col overflow-hidden p-0">
+            <DrawerHeader
+              className={
+                formSubView !== "main"
+                  ? "shrink-0 flex-row items-center gap-2 border-b border-border px-4 pb-3 pt-2 text-left"
+                  : "shrink-0 border-b border-border px-4 pb-3 pt-2"
+              }
+            >
               {formSubView !== "main" ? (
                 <Button type="button" variant="ghost" size="icon-sm" onClick={() => setFormSubView("main")} aria-label={tr("Retour", "Back")}>
                   <ChevronLeft className="h-4 w-4" />
@@ -522,7 +530,7 @@ export function CategoriesClient({
                     : tr("Nouvelle catégorie", "New category")}
               </DrawerTitle>
             </DrawerHeader>
-            <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
+            <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
               <CategoryForm
                 shopId={shopId}
                 nextOrder={nextOrder}
@@ -532,6 +540,7 @@ export function CategoriesClient({
                 onSave={adminActions?.onSave}
                 subViewOverride={formSubView}
                 onSubViewChange={setFormSubView}
+                stickyMobileActions
               />
             </div>
           </DrawerContent>
@@ -544,8 +553,17 @@ export function CategoriesClient({
             if (!open) setFormSubView("main");
           }}
         >
-          <SheetContent side="right" className="w-full sm:max-w-lg h-full overflow-hidden">
-            <SheetHeader className={formSubView !== "main" ? "flex-row items-center gap-2" : undefined}>
+          <SheetContent
+            side="right"
+            className="flex h-full min-h-0 w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-lg"
+          >
+            <SheetHeader
+              className={
+                formSubView !== "main"
+                  ? "shrink-0 flex-row items-center gap-2 border-b border-border"
+                  : "shrink-0 border-b border-border"
+              }
+            >
               {formSubView !== "main" ? (
                 <Button
                   type="button"
@@ -565,7 +583,7 @@ export function CategoriesClient({
                     : tr("Nouvelle catégorie", "New category")}
               </SheetTitle>
             </SheetHeader>
-            <div className="h-full min-h-0 overflow-y-auto px-4 pb-4">
+            <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
               <CategoryForm
                 shopId={shopId}
                 nextOrder={nextOrder}
@@ -573,9 +591,9 @@ export function CategoriesClient({
                 onSuccess={handleFormSuccess}
                 onCancel={() => setFormOpen(false)}
                 onSave={adminActions?.onSave}
-                sheetCtasFullWidth
                 subViewOverride={formSubView}
                 onSubViewChange={setFormSubView}
+                stickySheetActions
               />
             </div>
           </SheetContent>

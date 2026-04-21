@@ -65,7 +65,7 @@ export default async function BundlesPage({ params }: { params: Params }) {
   // Fetch categories
   const { data: categories } = await supabase
     .from("categories")
-    .select("id, name, icon_emoji")
+    .select("id, name, name_fr, icon_emoji")
     .eq("shop_id", shopId)
     .order("display_order");
 
@@ -94,6 +94,8 @@ export default async function BundlesPage({ params }: { params: Params }) {
           id: s.id,
           category_id: s.category_id,
           label: s.label,
+          label_fr: (s as { label_fr?: string | null }).label_fr ?? s.label,
+          label_en: (s as { label_en?: string | null }).label_en ?? null,
           quantity: s.quantity,
           display_order: s.display_order,
         });
@@ -103,17 +105,29 @@ export default async function BundlesPage({ params }: { params: Params }) {
     );
   }
 
-  const initialBundles: BundleRow[] = (bundles ?? []).map((b) => ({
-    id: b.id,
-    shop_id: b.shop_id,
-    name: b.name,
-    description: b.description,
-    price: Number(b.price),
-    image_url: b.image_url,
-    is_active: b.is_active,
-    created_at: b.created_at,
-    slots: slotsMap[b.id] ?? [],
-  }));
+  const initialBundles: BundleRow[] = (bundles ?? []).map((b) => {
+    const br = b as typeof b & {
+      name_fr?: string | null;
+      name_en?: string | null;
+      description_fr?: string | null;
+      description_en?: string | null;
+    };
+    return {
+      id: b.id,
+      shop_id: b.shop_id,
+      name: b.name,
+      name_fr: br.name_fr ?? b.name,
+      name_en: br.name_en ?? null,
+      description: b.description,
+      description_fr: br.description_fr ?? b.description,
+      description_en: br.description_en ?? null,
+      price: Number(b.price),
+      image_url: b.image_url,
+      is_active: b.is_active,
+      created_at: b.created_at,
+      slots: slotsMap[b.id] ?? [],
+    };
+  });
 
   return (
     <div className="p-6 md:p-8 space-y-6">

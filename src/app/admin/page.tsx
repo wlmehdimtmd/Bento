@@ -1,10 +1,5 @@
-import Link from "next/link";
 import { assertAdminOrRedirect } from "@/lib/admin/requireAdmin";
-import { DEMO_TEMPLATE_SHOP_SLUG } from "@/lib/demoTemplateShop";
 import { normalizeShopOwner } from "@/lib/admin/normalizeShopUser";
-import { Plus } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { AdminLogoutButton } from "./AdminLogoutButton";
 import { AdminDemoBanner } from "./AdminDemoBanner";
 import { AdminShopsDesktopTable } from "./AdminShopsDesktopTable";
@@ -39,16 +34,8 @@ export default async function AdminPage() {
       ? (platformRow as { demo_shop_id: string | null }).demo_shop_id
       : null;
 
-  const templateShop = shopRows.find((s) => s.slug === DEMO_TEMPLATE_SHOP_SLUG) ?? null;
-
-  const demoSourceId =
-    configuredDemoId ?? (templateShop?.is_active ? templateShop.id : null);
-
-  const demoShop = demoSourceId ? (shopRows.find((s) => s.id === demoSourceId) ?? null) : null;
-
-  const demoOwner = demoShop ? normalizeShopOwner(demoShop.users) : null;
-
-  const tableShops = shopRows.filter((s) => s.slug !== DEMO_TEMPLATE_SHOP_SLUG);
+  const mirroredShop =
+    configuredDemoId != null ? (shopRows.find((s) => s.id === configuredDemoId) ?? null) : null;
 
   const shopIds = shopRows.map((s) => s.id);
   const { data: reviewRows } = shopIds.length
@@ -64,7 +51,7 @@ export default async function AdminPage() {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
 
-  const adminRows: AdminShopMobileRow[] = tableShops.map((shop) => {
+  const adminRows: AdminShopMobileRow[] = shopRows.map((shop) => {
     const owner = normalizeShopOwner(shop.users);
     const rev = reviewMap[shop.id] as AdminShopMobileRow["rev"];
     return {
@@ -80,21 +67,14 @@ export default async function AdminPage() {
     };
   });
 
-  const n = tableShops.length;
-  const hasTpl = !!templateShop;
+  const n = shopRows.length;
   let subtitle: string;
-  if (shopRows.length === 0) {
-    subtitle = "Aucune boutique en base — la carte démo /demo reste disponible";
-  } else if (n === 0 && !hasTpl) {
-    subtitle = "Uniquement la vitrine modèle réservée (hors tableau)";
-  } else if (n === 0 && hasTpl) {
-    subtitle = "Boutique modèle réservée (hors tableau) ; aucune autre vitrine";
-  } else if (n === 1 && !hasTpl) {
-    subtitle = "1 boutique + vitrine /demo (carte ci-dessus)";
-  } else if (hasTpl) {
-    subtitle = `${n} vitrine(s) + modèle démo réservé ; source /demo dans la carte ci-dessus`;
+  if (n === 0) {
+    subtitle = "Aucune boutique en base — /demo reste disponible en démo intégrée";
+  } else if (n === 1) {
+    subtitle = "1 boutique ; raccourcis /demo ci-dessous";
   } else {
-    subtitle = `${n} boutiques ; source /demo dans la carte ci-dessus`;
+    subtitle = `${n} boutiques ; raccourcis /demo ci-dessous`;
   }
 
   return (
@@ -108,29 +88,24 @@ export default async function AdminPage() {
             <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
           </div>
           <div className="flex flex-shrink-0 items-center gap-2">
-            <Link
-              href="/admin/shops/new"
-              className={cn(buttonVariants(), "text-primary-foreground hover:opacity-90")}
-              style={{ backgroundColor: "var(--primary)" }}
-            >
-              <Plus className="mr-1.5 h-4 w-4" />
-              Nouvelle boutique
-            </Link>
             <AdminLogoutButton />
           </div>
         </div>
 
         <AdminDemoBanner
-          demoShop={demoShop ? { id: demoShop.id, name: demoShop.name, slug: demoShop.slug } : null}
-          demoOwner={demoOwner}
-          configuredDemoId={configuredDemoId}
           appUrl={appUrl}
+          configuredDemoId={configuredDemoId}
+          mirroredShop={
+            mirroredShop
+              ? { name: mirroredShop.name, slug: mirroredShop.slug, isActive: mirroredShop.is_active }
+              : null
+          }
         />
 
         {shopRows.length === 0 ? (
           <p className="rounded-2xl border border-border bg-card px-4 py-6 text-center text-sm text-muted-foreground">
-            Aucune entrée dans <span className="font-mono">shops</span>. Créez une boutique ou
-            inscrivez un utilisateur pour commencer.
+            Aucune entrée dans <span className="font-mono">shops</span>. Les boutiques sont créées
+            lors de l&apos;inscription commerçant.
           </p>
         ) : null}
 

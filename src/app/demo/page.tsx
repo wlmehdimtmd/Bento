@@ -68,7 +68,7 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   }
 
-  const payload = await fetchPublicShopPagePayload(supabase, { id: demoShopId });
+  const payload = await fetchPublicShopPagePayload(supabase, { id: demoShopId }, locale);
   if (!payload) {
     return {
       title: locale === "en" ? "Demo | Bento Resto" : "Démo | Bento Resto",
@@ -113,10 +113,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function DemoPage() {
   const supabase = await createClient();
+  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
   const demoShopId = await resolveDemoSourceShopId(supabase);
 
   if (demoShopId) {
-    const payload = await fetchPublicShopPagePayload(supabase, { id: demoShopId });
+    const payload = await fetchPublicShopPagePayload(supabase, { id: demoShopId }, locale);
     if (payload) {
       return (
         <DemoLiveStoreView

@@ -38,7 +38,7 @@ export function AdminShopsMobileList({ rows, className }: AdminShopsMobileListPr
           className
         )}
       >
-        Aucune boutique dans le tableau (hors modèle démo réservé).
+        Aucune boutique enregistrée.
       </div>
     );
   }

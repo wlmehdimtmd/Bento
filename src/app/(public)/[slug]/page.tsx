@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: Params }) {
   }
 
   const supabase = await createClient();
-  const payload = await fetchPublicShopPagePayload(supabase, { slug });
+  const payload = await fetchPublicShopPagePayload(supabase, { slug }, locale);
 
   if (!payload) return { title: locale === "en" ? "Storefront not found" : "Vitrine introuvable" };
 
@@ -111,7 +111,7 @@ export default async function ShopPage({
     notFound();
   }
 
-  const payload = await fetchPublicShopPagePayload(supabase, { slug });
+  const payload = await fetchPublicShopPagePayload(supabase, { slug }, locale);
 
   if (!payload) notFound();
 

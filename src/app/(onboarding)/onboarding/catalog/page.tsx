@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import type { ShopInfo } from "@/components/bento/StoreView";
 import type { SocialLinks } from "@/lib/types";
@@ -16,6 +17,7 @@ import {
   redirectIfOnboardingFinished,
   redirectIfVitrineNotDone,
 } from "@/lib/onboarding-load-shop";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 
 export const metadata = { title: "Your catalog — Bento Resto" };
 
@@ -96,8 +98,11 @@ export default async function OnboardingCatalogPage({ searchParams }: Props) {
 
   redirectIfVitrineNotDone(shop.id, shop.social_links);
 
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
   const payload =
-    (await fetchPublicShopPagePayload(supabase, { id: shop.id })) ?? emptyPayloadFromShop(shop);
+    (await fetchPublicShopPagePayload(supabase, { id: shop.id }, locale)) ??
+    emptyPayloadFromShop(shop);
 
   const catIds = payload.categories.map((c) => c.id);
   let initialProducts: OnboardingProductRow[] = [];

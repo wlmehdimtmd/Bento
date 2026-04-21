@@ -1,10 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useForm, type FieldErrors, type UseFormRegister } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { TranslatableTabs } from "@/components/catalog/TranslatableTabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +18,14 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import {
   Table,
   TableBody,
@@ -29,7 +40,17 @@ import {
   normalizeLabelValue,
   type ShopLabelOption,
 } from "@/lib/shop-labels";
+import {
+  shopLabelCompletion,
+  shopLabelDefaultFormValues,
+  shopLabelFormSchema,
+  shopLabelFormToSavePayload,
+  type ShopLabelFormValues,
+} from "@/lib/catalogFormAdapters";
+import { getDefaultCatalogLanguageCode, type TabCompletionStatus } from "@/lib/catalogLanguages";
+import { pickLocalized } from "@/lib/i18n";
 import { useLocale } from "@/components/i18n/LocaleProvider";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface ShopLabelsClientProps {
   shopId: string;
@@ -37,12 +58,83 @@ interface ShopLabelsClientProps {
   existingProductTags: string[];
 }
 
-interface LabelDraft {
-  id?: string;
-  label: string;
-}
-
 const DEFAULT_COLOR = "#1d4ed8";
+
+function ShopLabelFormFields({
+  register,
+  errors,
+  isSaving,
+  catalogTab,
+  setCatalogTab,
+  completionByLang,
+  completeCount,
+  onCopyFromFr,
+  tr,
+}: {
+  register: UseFormRegister<ShopLabelFormValues>;
+  errors: FieldErrors<ShopLabelFormValues>;
+  isSaving: boolean;
+  catalogTab: string;
+  setCatalogTab: (v: string) => void;
+  completionByLang: Record<string, TabCompletionStatus>;
+  completeCount: number;
+  onCopyFromFr: () => void;
+  tr: (fr: string, en: string) => string;
+}) {
+  return (
+    <div className="space-y-3">
+      <TranslatableTabs
+        value={catalogTab}
+        onValueChange={setCatalogTab}
+        completionByLang={completionByLang}
+        completeCount={completeCount}
+        sectionTitle={tr("Contenu multilingue", "Multilingual content")}
+        footerSlot={
+          catalogTab !== "fr" ? (
+            <Button type="button" variant="outline" size="sm" onClick={onCopyFromFr} disabled={isSaving}>
+              {tr("Copier depuis FR (champs vides uniquement)", "Copy from FR (empty fields only)")}
+            </Button>
+          ) : null
+        }
+      >
+        {(langCode) =>
+          langCode === "fr" ? (
+            <div className="space-y-1.5">
+              <label htmlFor="shop-label-fr" className="text-sm font-medium">
+                {tr("Nom", "Name")} *
+              </label>
+              <Input
+                id="shop-label-fr"
+                {...register("translations.fr.label")}
+                placeholder={tr("Ex: Nouveauté", "Ex: New")}
+                disabled={isSaving}
+                autoFocus
+              />
+              {errors.translations?.fr?.label && (
+                <p className="text-xs text-destructive">{errors.translations.fr.label.message}</p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <label htmlFor="shop-label-en" className="text-sm font-medium">
+                {tr("Nom (anglais)", "Name (English)")}
+              </label>
+              <Input
+                id="shop-label-en"
+                {...register("translations.en.label")}
+                placeholder={tr("Optionnel", "Optional")}
+                disabled={isSaving}
+              />
+              {errors.translations?.en?.label && (
+                <p className="text-xs text-destructive">{errors.translations.en.label.message}</p>
+              )}
+            </div>
+          )
+        }
+      </TranslatableTabs>
+    </div>
+  );
+}
 
 export function ShopLabelsClient({
   shopId,
@@ -53,16 +145,49 @@ export function ShopLabelsClient({
   const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
   const router = useRouter();
   const supabase = createClient();
+  const isMobile = useIsMobile(768);
 
   const [labels, setLabels] = useState<ShopLabelOption[]>(initialLabels);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [draft, setDraft] = useState<LabelDraft>({
-    label: "",
-  });
+  const [labelEditorOpen, setLabelEditorOpen] = useState(false);
+  const [editing, setEditing] = useState<ShopLabelOption | null>(null);
+  const [catalogTab, setCatalogTab] = useState(getDefaultCatalogLanguageCode());
   const [isSaving, setIsSaving] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState<ShopLabelOption | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    getValues,
+    setValue,
+    formState: { errors },
+  } = useForm<ShopLabelFormValues>({
+    resolver: zodResolver(shopLabelFormSchema),
+    defaultValues: shopLabelDefaultFormValues(),
+  });
+
+  const watched = watch();
+  const completionByLang = shopLabelCompletion(watched);
+  const completeCount = Object.values(completionByLang).filter((s) => s === "complete").length;
+
+  useEffect(() => {
+    if (!labelEditorOpen) return;
+    reset(
+      shopLabelDefaultFormValues(
+        editing
+          ? {
+              label: editing.label,
+              label_fr: editing.label_fr,
+              label_en: editing.label_en,
+            }
+          : undefined
+      )
+    );
+    setCatalogTab(getDefaultCatalogLanguageCode());
+  }, [labelEditorOpen, editing, reset]);
 
   const count = labels.length;
   const isAtLimit = count >= MAX_SHOP_LABELS;
@@ -86,16 +211,13 @@ export function ShopLabelsClient({
       toast.error(tr("Limite atteinte: 50 labels maximum.", "Limit reached: 50 labels maximum."));
       return;
     }
-    setDraft({ label: "" });
-    setDialogOpen(true);
+    setEditing(null);
+    setLabelEditorOpen(true);
   }
 
   function openEdit(item: ShopLabelOption) {
-    setDraft({
-      id: item.id,
-      label: item.label,
-    });
-    setDialogOpen(true);
+    setEditing(item);
+    setLabelEditorOpen(true);
   }
 
   function openDelete(item: ShopLabelOption) {
@@ -103,20 +225,27 @@ export function ShopLabelsClient({
     setDeleteOpen(true);
   }
 
-  async function saveLabel() {
-    const labelText = draft.label.trim();
-    if (!labelText) {
-      toast.error(tr("Le nom du label est requis.", "Label name is required."));
-      return;
+  function copyFromFr() {
+    if (catalogTab === "fr") return;
+    const fr = (getValues("translations.fr.label") ?? "").trim();
+    if (catalogTab === "en") {
+      const en = (getValues("translations.en.label") ?? "").trim();
+      if (!en && fr) {
+        setValue("translations.en.label", fr, { shouldValidate: true, shouldDirty: true });
+      }
     }
-    const value = normalizeLabelValue(labelText);
+  }
+
+  const onSubmit = handleSubmit(async (values) => {
+    const payload = shopLabelFormToSavePayload(values);
+    const value = normalizeLabelValue(payload.label_fr);
     if (!value) {
       toast.error(tr("Nom invalide pour générer une clé de label.", "Invalid name to generate label key."));
       return;
     }
 
     const duplicate = sorted.find(
-      (item) => item.value === value && item.id !== draft.id
+      (item) => item.value === value && item.id !== editing?.id
     );
     if (duplicate) {
       toast.error(tr("Un label avec ce nom existe déjà.", "A label with this name already exists."));
@@ -125,16 +254,18 @@ export function ShopLabelsClient({
 
     setIsSaving(true);
 
-    if (draft.id) {
+    if (editing?.id) {
       const { data, error } = await supabase
         .from("shop_labels")
         .update({
-          label: labelText,
+          label: payload.label,
+          label_fr: payload.label_fr,
+          label_en: payload.label_en,
           value,
           color: DEFAULT_COLOR,
         })
-        .eq("id", draft.id)
-        .select("id, shop_id, value, label, color, display_order, created_at, updated_at")
+        .eq("id", editing.id)
+        .select("id, shop_id, value, label, label_fr, label_en, color, display_order, created_at, updated_at")
         .single();
 
       setIsSaving(false);
@@ -143,10 +274,10 @@ export function ShopLabelsClient({
         return;
       }
       setLabels((prev) =>
-        prev.map((item) => (item.id === draft.id ? (data as ShopLabelOption) : item))
+        prev.map((item) => (item.id === editing.id ? (data as ShopLabelOption) : item))
       );
-      setDialogOpen(false);
-      toast.success(tr("Label mis a jour.", "Label updated."));
+      setLabelEditorOpen(false);
+      toast.success(tr("Label mis à jour.", "Label updated."));
       router.refresh();
       return;
     }
@@ -155,12 +286,14 @@ export function ShopLabelsClient({
       .from("shop_labels")
       .insert({
         shop_id: shopId,
-        label: labelText,
+        label: payload.label,
+        label_fr: payload.label_fr,
+        label_en: payload.label_en,
         value,
         color: DEFAULT_COLOR,
         display_order: sorted.length,
       })
-      .select("id, shop_id, value, label, color, display_order, created_at, updated_at")
+      .select("id, shop_id, value, label, label_fr, label_en, color, display_order, created_at, updated_at")
       .single();
 
     setIsSaving(false);
@@ -175,10 +308,10 @@ export function ShopLabelsClient({
     }
 
     setLabels((prev) => [...prev, data as ShopLabelOption]);
-    setDialogOpen(false);
-    toast.success(tr("Label ajoute.", "Label added."));
+    setLabelEditorOpen(false);
+    toast.success(tr("Label ajouté.", "Label added."));
     router.refresh();
-  }
+  });
 
   async function confirmDelete() {
     if (!deleting) return;
@@ -194,9 +327,46 @@ export function ShopLabelsClient({
 
     setLabels((prev) => prev.filter((item) => item.id !== deleting.id));
     setDeleting(null);
-    toast.success(tr("Label supprime.", "Label deleted."));
+    toast.success(tr("Label supprimé.", "Label deleted."));
     router.refresh();
   }
+
+  const editorTitle = editing?.id ? tr("Modifier le label", "Edit label") : tr("Nouveau label", "New label");
+  const editorDescription = tr(
+    "Ce label pourra être appliqué sur vos produits.",
+    "This label can be applied to your products."
+  );
+
+  const formFields = (
+    <ShopLabelFormFields
+      register={register}
+      errors={errors}
+      isSaving={isSaving}
+      catalogTab={catalogTab}
+      setCatalogTab={setCatalogTab}
+      completionByLang={completionByLang}
+      completeCount={completeCount}
+      onCopyFromFr={copyFromFr}
+      tr={tr}
+    />
+  );
+
+  const editorFooter = (
+    <div className="flex w-full gap-2">
+      <Button variant="outline" onClick={() => setLabelEditorOpen(false)} disabled={isSaving} className="flex-1">
+        {tr("Annuler", "Cancel")}
+      </Button>
+      <Button
+        type="button"
+        onClick={() => void onSubmit()}
+        disabled={isSaving}
+        style={{ backgroundColor: "var(--primary)" }}
+        className="flex-1 text-primary-foreground hover:opacity-90"
+      >
+        {isSaving ? tr("Enregistrement...", "Saving...") : tr("Enregistrer", "Save")}
+      </Button>
+    </div>
+  );
 
   return (
     <>
@@ -218,7 +388,7 @@ export function ShopLabelsClient({
 
         {sorted.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border py-12 text-center text-sm text-muted-foreground">
-            {tr("Aucun label personnalise pour le moment.", "No custom labels yet.")}
+            {tr("Aucun label personnalisé pour le moment.", "No custom labels yet.")}
           </div>
         ) : (
           <div className="rounded-lg border border-border overflow-hidden">
@@ -226,7 +396,7 @@ export function ShopLabelsClient({
               <TableHeader>
                 <TableRow>
                   <TableHead>{tr("Label", "Label")}</TableHead>
-                  <TableHead className="hidden sm:table-cell">{tr("Cle", "Key")}</TableHead>
+                  <TableHead className="hidden sm:table-cell">{tr("Clé", "Key")}</TableHead>
                   <TableHead className="w-24 text-right">{tr("Actions", "Actions")}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -234,7 +404,13 @@ export function ShopLabelsClient({
                 {sorted.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell>
-                      <Badge variant="secondary">{item.label}</Badge>
+                      <Badge variant="secondary">
+                        {pickLocalized(locale, {
+                          fr: item.label_fr,
+                          en: item.label_en,
+                          legacy: item.label,
+                        }) ?? item.label}
+                      </Badge>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
                       <code className="text-xs text-muted-foreground">{item.value}</code>
@@ -269,22 +445,23 @@ export function ShopLabelsClient({
 
         <div className="rounded-lg border border-border p-4 space-y-3">
           <div className="space-y-1">
-            <p className="text-sm font-medium">{tr("Tags detectes dans les produits", "Detected tags in products")}</p>
+            <p className="text-sm font-medium">{tr("Tags détectés dans les produits", "Detected tags in products")}</p>
             <p className="text-xs text-muted-foreground">
-              {existingProductTags.length} {tr("tag(s) trouve(s) dans la base pour cette boutique.", "tag(s) found in this shop database.")}
+              {existingProductTags.length}{" "}
+              {tr("tag(s) trouvé(s) dans la base pour cette boutique.", "tag(s) found in this shop database.")}
             </p>
           </div>
 
           {existingProductTags.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              {tr("Aucun tag present dans les produits.", "No tags found in products.")}
+              {tr("Aucun tag présent dans les produits.", "No tags found in products.")}
             </p>
           ) : (
             <div className="space-y-2">
               {unmappedProductTags.length > 0 && (
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
-                    {tr("Non mappes", "Unmapped")} ({unmappedProductTags.length})
+                    {tr("Non mappés", "Unmapped")} ({unmappedProductTags.length})
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {unmappedProductTags.map((tag) => (
@@ -299,7 +476,7 @@ export function ShopLabelsClient({
               {mappedProductTags.length > 0 && (
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                    {tr("Mappes", "Mapped")} ({mappedProductTags.length})
+                    {tr("Mappés", "Mapped")} ({mappedProductTags.length})
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {mappedProductTags.map((tag) => (
@@ -315,41 +492,27 @@ export function ShopLabelsClient({
         </div>
       </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogTitle>{draft.id ? tr("Modifier le label", "Edit label") : tr("Nouveau label", "New label")}</DialogTitle>
-          <DialogDescription>
-            {tr("Ce label pourra etre applique sur vos produits.", "This label can be applied to your products.")}
-          </DialogDescription>
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <label htmlFor="label-name" className="text-sm font-medium">
-                {tr("Nom", "Name")}
-              </label>
-              <Input
-                id="label-name"
-                value={draft.label}
-                onChange={(e) => setDraft((prev) => ({ ...prev, label: e.target.value }))}
-                placeholder={tr("Ex: Nouveaute", "Ex: New")}
-                disabled={isSaving}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSaving}>
-              {tr("Annuler", "Cancel")}
-            </Button>
-            <Button
-              onClick={saveLabel}
-              disabled={isSaving}
-              style={{ backgroundColor: "var(--primary)" }}
-              className="text-primary-foreground hover:opacity-90"
-            >
-              {isSaving ? tr("Enregistrement...", "Saving...") : tr("Enregistrer", "Save")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {isMobile ? (
+        <Drawer open={labelEditorOpen} onOpenChange={setLabelEditorOpen}>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>{editorTitle}</DrawerTitle>
+              <DrawerDescription>{editorDescription}</DrawerDescription>
+            </DrawerHeader>
+            <div className="px-4 py-4">{formFields}</div>
+            <DrawerFooter>{editorFooter}</DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={labelEditorOpen} onOpenChange={setLabelEditorOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogTitle>{editorTitle}</DialogTitle>
+            <DialogDescription>{editorDescription}</DialogDescription>
+            {formFields}
+            <DialogFooter className="gap-2 sm:gap-0">{editorFooter}</DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="sm:max-w-sm">

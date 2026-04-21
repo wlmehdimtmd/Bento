@@ -23,3 +23,21 @@ export function resolveLocale(value: string | null | undefined): AppLocale {
   if (isAppLocale(value)) return value;
   return DEFAULT_LOCALE;
 }
+
+/** Champs catalogue alignés sur les colonnes `_fr` / `_en` / legacy en base. */
+export type CatalogLocalizedStrings = {
+  fr?: string | null;
+  en?: string | null;
+  legacy?: string | null;
+};
+
+/**
+ * Résout une chaîne pour la locale vitrine : EN → en puis fr puis legacy ; FR → fr puis en puis legacy.
+ */
+export function pickLocalized(
+  locale: AppLocale,
+  opts: CatalogLocalizedStrings
+): string | null {
+  if (locale === "en") return opts.en ?? opts.fr ?? opts.legacy ?? null;
+  return opts.fr ?? opts.en ?? opts.legacy ?? null;
+}

@@ -11,7 +11,7 @@ export function AdminShopsDesktopTable({ rows }: AdminShopsDesktopTableProps) {
   if (rows.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-14 text-center text-sm text-muted-foreground">
-        Aucune boutique dans le tableau (hors modèle démo réservé).
+        Aucune boutique enregistrée.
       </div>
     );
   }
