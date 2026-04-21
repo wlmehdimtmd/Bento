@@ -55,21 +55,25 @@ export default async function DashboardPage() {
       productCount = count ?? 0;
     }
 
-    const { data: orders, count } = await supabase
-      .from("orders")
-      .select("id, order_number, customer_name, total_amount, status, created_at", {
-        count: "exact",
-      })
-      .eq("shop_id", primaryShop.id)
-      .order("created_at", { ascending: false })
-      .limit(5);
+    const [{ data: orders, count }, { data: revenueRows }] = await Promise.all([
+      supabase
+        .from("orders")
+        .select("id, order_number, customer_name, total_amount, status, created_at", {
+          count: "exact",
+        })
+        .eq("shop_id", primaryShop.id)
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabase
+        .from("orders")
+        .select("total_amount")
+        .eq("shop_id", primaryShop.id)
+        .neq("status", "cancelled"),
+    ]);
 
     orderCount = count ?? 0;
     recentOrders = orders ?? [];
-    revenue = (orders ?? []).reduce(
-      (sum, o) => (o.status !== "cancelled" ? sum + Number(o.total_amount) : sum),
-      0
-    );
+    revenue = (revenueRows ?? []).reduce((sum, o) => sum + Number(o.total_amount), 0);
   }
 
   if (!hasShops) {
