@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { BentoCard, type BentoSize } from "./BentoCard";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface BentoCardCategoryProps {
   name: string;
@@ -26,6 +27,7 @@ export function BentoCardCategory({
   className,
   onClick,
 }: BentoCardCategoryProps) {
+  const { locale } = useLocale();
   const hasSingleRowHeight = size === "1x1" || size === "2x1";
   const showCoverImage = Boolean(coverImageUrl) && !hasSingleRowHeight;
 
@@ -64,7 +66,7 @@ export function BentoCardCategory({
             {name}
           </p>
           <p className="text-xs text-muted-foreground dark:text-white/80">
-            {productCount} produit{productCount !== 1 ? "s" : ""}
+            {productCount} {locale === "en" ? `product${productCount !== 1 ? "s" : ""}` : `produit${productCount !== 1 ? "s" : ""}`}
           </p>
         </div>
       ) : (
@@ -79,7 +81,7 @@ export function BentoCardCategory({
             {name}
           </p>
           <p className="text-xs text-muted-foreground">
-            {productCount} produit{productCount !== 1 ? "s" : ""}
+            {productCount} {locale === "en" ? `product${productCount !== 1 ? "s" : ""}` : `produit${productCount !== 1 ? "s" : ""}`}
           </p>
         </div>
       )}

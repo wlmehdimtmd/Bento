@@ -10,10 +10,15 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { AppBrandMark } from "@/components/layout/AppBrandMark";
+import { cookies } from "next/headers";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 
-export const metadata = {
-  title: "Créer un compte — Bento Resto",
-};
+export async function generateMetadata() {
+  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
+  return {
+    title: locale === "en" ? "Create account — Bento Resto" : "Créer un compte — Bento Resto",
+  };
+}
 
 export default function RegisterPage() {
   return (

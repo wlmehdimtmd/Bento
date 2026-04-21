@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import type { ShopReviews } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 import { resolveDemoSourceShopId } from "@/lib/platformDemo";
 import { fetchPublicShopPagePayload } from "@/lib/fetchPublicShopPagePayload";
 import { DemoView } from "./DemoView";
 import { DemoLiveStoreView } from "@/components/demo/DemoLiveStoreView";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 
 const DEMO_PLACE_ID = "ChIJEZfXAcVx5kcRHQGcF21SLyw";
 const DEMO_GOOGLE_URL = "https://maps.google.com/?cid=3183854090075242781";
@@ -52,6 +54,7 @@ async function fetchDemoReviews(): Promise<ShopReviews | null> {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
   const supabase = await createClient();
   const demoShopId = await resolveDemoSourceShopId(supabase);
 
@@ -59,28 +62,40 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
       title: "Démo — Maison Kanpai | Bento Resto",
       description:
-        "Découvrez une démo interactive de Bento Resto avec le restaurant franco-japonais Maison Kanpai.",
+        locale === "en"
+          ? "Discover an interactive Bento Resto demo with Maison Kanpai."
+          : "Découvrez une démo interactive de Bento Resto avec le restaurant franco-japonais Maison Kanpai.",
     };
   }
 
   const payload = await fetchPublicShopPagePayload(supabase, { id: demoShopId });
   if (!payload) {
     return {
-      title: "Démo | Bento Resto",
-      description: "Découvrez une démo interactive de Bento Resto.",
+      title: locale === "en" ? "Demo | Bento Resto" : "Démo | Bento Resto",
+      description: locale === "en" ? "Discover an interactive Bento Resto demo." : "Découvrez une démo interactive de Bento Resto.",
     };
   }
 
   const { shop } = payload;
   const imageUrl = shop.cover_image_url ?? shop.logo_url;
   const description =
-    shop.description ?? `Découvrez la carte de ${shop.name} en mode démo sur Bento Resto.`;
+    shop.description ??
+    (locale === "en"
+      ? `Discover ${shop.name}'s menu in demo mode on Bento Resto.`
+      : `Découvrez la carte de ${shop.name} en mode démo sur Bento Resto.`);
 
   return {
-    title: `Démo — ${shop.name} | Bento Resto`,
+    title: `${locale === "en" ? "Demo" : "Démo"} — ${shop.name} | Bento Resto`,
     description,
+    alternates: {
+      canonical: "/demo",
+      languages: {
+        fr: "/demo?lang=fr",
+        en: "/demo?lang=en",
+      },
+    },
     openGraph: {
-      title: `Démo — ${shop.name}`,
+      title: `${locale === "en" ? "Demo" : "Démo"} — ${shop.name}`,
       description,
       type: "website",
       ...(imageUrl && {
@@ -89,7 +104,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: `Démo — ${shop.name}`,
+      title: `${locale === "en" ? "Demo" : "Démo"} — ${shop.name}`,
       description,
       ...(imageUrl && { images: [imageUrl] }),
     },

@@ -1,0 +1,68 @@
+import type { AppLocale } from "@/lib/i18n";
+
+type FlatMessages = Record<string, string>;
+
+const fr: FlatMessages = {
+  "common.login": "Connexion",
+  "common.register": "S'inscrire",
+  "common.backToShop": "Retour à la boutique",
+  "landing.badge": "Pour les restaurateurs & commerçants",
+  "landing.cta.start": "Commencer gratuitement",
+  "landing.cta.demo": "Voir la démo",
+  "landing.footer.rights": "Tous droits réservés.",
+  "cart.title": "Mon panier",
+  "cart.empty.title": "Votre panier est vide",
+  "cart.empty.subtitle": "Parcourez la carte et ajoutez des produits.",
+  "cart.backToMenu": "Retour à la carte",
+  "cart.checkout": "Passer la commande",
+  "cart.perUnit": "/ unité",
+  "cart.total": "Total",
+  "cart.details": "Voir le détail",
+  "cart.remove": "Supprimer",
+  "cart.seeCart": "Voir le panier",
+  "cart.itemsLabel": "article(s)",
+  "checkout.title": "Informations de commande",
+  "checkout.submitRedirect": "Redirection vers Stripe...",
+  "order.confirmed": "Commande confirmée !",
+  "order.items": "Articles commandés",
+  "order.totalPaid": "Total payé",
+  "legal.privacy.title": "Politique de confidentialité",
+  "legal.terms.title": "Conditions d'utilisation",
+  "legal.notice.title": "Mentions légales",
+  "support.title": "Support",
+};
+
+const en: FlatMessages = {
+  "common.login": "Log in",
+  "common.register": "Sign up",
+  "common.backToShop": "Back to shop",
+  "landing.badge": "For restaurants & merchants",
+  "landing.cta.start": "Get started for free",
+  "landing.cta.demo": "See demo",
+  "landing.footer.rights": "All rights reserved.",
+  "cart.title": "My cart",
+  "cart.empty.title": "Your cart is empty",
+  "cart.empty.subtitle": "Browse the menu and add products.",
+  "cart.backToMenu": "Back to menu",
+  "cart.checkout": "Place order",
+  "cart.perUnit": "/ unit",
+  "cart.total": "Total",
+  "cart.details": "View details",
+  "cart.remove": "Remove",
+  "cart.seeCart": "View cart",
+  "cart.itemsLabel": "item(s)",
+  "checkout.title": "Order details",
+  "checkout.submitRedirect": "Redirecting to Stripe...",
+  "order.confirmed": "Order confirmed!",
+  "order.items": "Ordered items",
+  "order.totalPaid": "Total paid",
+  "legal.privacy.title": "Privacy Policy",
+  "legal.terms.title": "Terms of Service",
+  "legal.notice.title": "Legal Notice",
+  "support.title": "Support",
+};
+
+export const MESSAGES: Record<AppLocale, FlatMessages> = {
+  fr,
+  en,
+};

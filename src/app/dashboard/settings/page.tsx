@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ThemePreferenceSection } from "@/components/dashboard/ThemePreferenceSection";
+import { LanguagePreferenceSection } from "@/components/dashboard/LanguagePreferenceSection";
 import { ResetShopButton } from "@/components/shop/ResetShopButton";
 import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
@@ -47,6 +48,12 @@ export default async function SettingsPage() {
           </Link>
         </p>
       ) : null}
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold">Langue</h2>
+        <Separator />
+        <LanguagePreferenceSection />
+      </section>
 
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">Apparence</h2>

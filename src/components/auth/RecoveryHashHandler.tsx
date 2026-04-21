@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { createClient } from "@/lib/supabase/client";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 /**
  * Flux « mot de passe oublié » Supabase :
@@ -12,6 +13,7 @@ import { createClient } from "@/lib/supabase/client";
  * - Ancien flux : `#access_token=…&type=recovery` sur le Site URL.
  */
 export function RecoveryHashHandler() {
+  const { locale } = useLocale();
   const router = useRouter();
   const started = useRef(false);
 
@@ -32,7 +34,11 @@ export function RecoveryHashHandler() {
         window.history.replaceState(null, "", pathname);
         if (error) {
           console.error("[recovery] exchangeCodeForSession:", error.message);
-          toast.error("Lien invalide ou expiré. Demandez un nouveau lien depuis la connexion.");
+          toast.error(
+            locale === "en"
+              ? "Invalid or expired link. Request a new one from the login page."
+              : "Lien invalide ou expiré. Demandez un nouveau lien depuis la connexion."
+          );
           started.current = false;
           return;
         }
@@ -71,7 +77,11 @@ export function RecoveryHashHandler() {
 
       if (error) {
         console.error("[recovery] setSession:", error.message);
-        toast.error("Lien invalide ou expiré. Demandez un nouveau lien depuis la connexion.");
+        toast.error(
+          locale === "en"
+            ? "Invalid or expired link. Request a new one from the login page."
+            : "Lien invalide ou expiré. Demandez un nouveau lien depuis la connexion."
+        );
         started.current = false;
         return;
       }

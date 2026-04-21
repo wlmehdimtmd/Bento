@@ -87,6 +87,10 @@ export interface Database {
           opening_timezone: string;
           open_on_public_holidays: boolean;
           bundles_menu_grouped: boolean;
+          name_fr: string | null;
+          name_en: string | null;
+          description_fr: string | null;
+          description_en: string | null;
           created_at: string;
         };
         Insert: {
@@ -112,6 +116,10 @@ export interface Database {
           opening_timezone?: string;
           open_on_public_holidays?: boolean;
           bundles_menu_grouped?: boolean;
+          name_fr?: string | null;
+          name_en?: string | null;
+          description_fr?: string | null;
+          description_en?: string | null;
           created_at?: string;
         };
         Update: {
@@ -137,6 +145,10 @@ export interface Database {
           opening_timezone?: string;
           open_on_public_holidays?: boolean;
           bundles_menu_grouped?: boolean;
+          name_fr?: string | null;
+          name_en?: string | null;
+          description_fr?: string | null;
+          description_en?: string | null;
           created_at?: string;
         };
         Relationships: [
@@ -197,6 +209,10 @@ export interface Database {
           cover_image_url: string | null;
           display_order: number;
           is_active: boolean;
+          name_fr: string | null;
+          name_en: string | null;
+          description_fr: string | null;
+          description_en: string | null;
           created_at: string;
         };
         Insert: {
@@ -208,6 +224,10 @@ export interface Database {
           cover_image_url?: string | null;
           display_order?: number;
           is_active?: boolean;
+          name_fr?: string | null;
+          name_en?: string | null;
+          description_fr?: string | null;
+          description_en?: string | null;
           created_at?: string;
         };
         Update: {
@@ -219,6 +239,10 @@ export interface Database {
           cover_image_url?: string | null;
           display_order?: number;
           is_active?: boolean;
+          name_fr?: string | null;
+          name_en?: string | null;
+          description_fr?: string | null;
+          description_en?: string | null;
           created_at?: string;
         };
         Relationships: [
@@ -243,6 +267,12 @@ export interface Database {
           option_label: string | null;
           is_available: boolean;
           display_order: number;
+          name_fr: string | null;
+          name_en: string | null;
+          description_fr: string | null;
+          description_en: string | null;
+          option_label_fr: string | null;
+          option_label_en: string | null;
           created_at: string;
         };
         Insert: {
@@ -256,6 +286,12 @@ export interface Database {
           option_label?: string | null;
           is_available?: boolean;
           display_order?: number;
+          name_fr?: string | null;
+          name_en?: string | null;
+          description_fr?: string | null;
+          description_en?: string | null;
+          option_label_fr?: string | null;
+          option_label_en?: string | null;
           created_at?: string;
         };
         Update: {
@@ -269,6 +305,12 @@ export interface Database {
           option_label?: string | null;
           is_available?: boolean;
           display_order?: number;
+          name_fr?: string | null;
+          name_en?: string | null;
+          description_fr?: string | null;
+          description_en?: string | null;
+          option_label_fr?: string | null;
+          option_label_en?: string | null;
           created_at?: string;
         };
         Relationships: [
@@ -291,6 +333,8 @@ export interface Database {
           display_order: number;
           created_at: string;
           updated_at: string;
+          label_fr: string | null;
+          label_en: string | null;
         };
         Insert: {
           id?: string;
@@ -301,6 +345,8 @@ export interface Database {
           display_order?: number;
           created_at?: string;
           updated_at?: string;
+          label_fr?: string | null;
+          label_en?: string | null;
         };
         Update: {
           id?: string;
@@ -311,6 +357,8 @@ export interface Database {
           display_order?: number;
           created_at?: string;
           updated_at?: string;
+          label_fr?: string | null;
+          label_en?: string | null;
         };
         Relationships: [
           {
@@ -331,6 +379,10 @@ export interface Database {
           price: number;
           image_url: string | null;
           is_active: boolean;
+          name_fr: string | null;
+          name_en: string | null;
+          description_fr: string | null;
+          description_en: string | null;
           created_at: string;
         };
         Insert: {
@@ -341,6 +393,10 @@ export interface Database {
           price: number;
           image_url?: string | null;
           is_active?: boolean;
+          name_fr?: string | null;
+          name_en?: string | null;
+          description_fr?: string | null;
+          description_en?: string | null;
           created_at?: string;
         };
         Update: {
@@ -351,6 +407,10 @@ export interface Database {
           price?: number;
           image_url?: string | null;
           is_active?: boolean;
+          name_fr?: string | null;
+          name_en?: string | null;
+          description_fr?: string | null;
+          description_en?: string | null;
           created_at?: string;
         };
         Relationships: [
@@ -371,6 +431,8 @@ export interface Database {
           label: string;
           quantity: number;
           display_order: number;
+          label_fr: string | null;
+          label_en: string | null;
         };
         Insert: {
           id?: string;
@@ -379,6 +441,8 @@ export interface Database {
           label: string;
           quantity?: number;
           display_order?: number;
+          label_fr?: string | null;
+          label_en?: string | null;
         };
         Update: {
           id?: string;
@@ -387,6 +451,8 @@ export interface Database {
           label?: string;
           quantity?: number;
           display_order?: number;
+          label_fr?: string | null;
+          label_en?: string | null;
         };
         Relationships: [
           {

@@ -21,8 +21,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { buildResetPasswordRedirectTo } from "@/lib/authRedirectUrls";
-import { createClient } from "@/lib/supabase/client";
 import { createImplicitEmailAuthClient } from "@/lib/supabase/recoveryEmailClient";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 const loginSchema = z.object({
   email: z.string().email("Adresse email invalide"),
@@ -51,6 +51,7 @@ function forgotPasswordToastMessage(raw: string): string {
 }
 
 export function LoginForm() {
+  const { t, locale } = useLocale();
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [forgotOpen, setForgotOpen] = useState(false);
@@ -86,7 +87,11 @@ export function LoginForm() {
         if (res.status === 500) {
           // Erreur serveur — probablement un hook Supabase qui échoue
           console.error("[login] Server error:", code, msg);
-          setServerError("Erreur serveur lors de la connexion. Vérifiez la configuration du hook Supabase.");
+          setServerError(
+            locale === "en"
+              ? "Server error during login. Check Supabase hook configuration."
+              : "Erreur serveur lors de la connexion. Vérifiez la configuration du hook Supabase."
+          );
           return;
         }
 
@@ -94,14 +99,16 @@ export function LoginForm() {
           code === "invalid_credentials" ||
           msg === "Invalid login credentials"
         ) {
-          setServerError("Email ou mot de passe incorrect.");
+          setServerError(locale === "en" ? "Incorrect email or password." : "Email ou mot de passe incorrect.");
         } else if (
           code === "email_not_confirmed" ||
           msg.includes("Email not confirmed") ||
           msg.includes("email_not_confirmed")
         ) {
           setServerError(
-            "Vérifiez votre boîte mail pour confirmer votre compte avant de vous connecter."
+            locale === "en"
+              ? "Check your inbox and confirm your account before logging in."
+              : "Vérifiez votre boîte mail pour confirmer votre compte avant de vous connecter."
           );
         } else {
           setServerError(`Une erreur est survenue (${code || res.status}).`);
@@ -115,7 +122,11 @@ export function LoginForm() {
       const redirectTo = data.redirectTo === "/admin" ? "/admin" : "/dashboard";
       router.push(redirectTo);
     } catch {
-      setServerError("Une erreur inattendue s'est produite. Veuillez réessayer.");
+      setServerError(
+        locale === "en"
+          ? "An unexpected error occurred. Please try again."
+          : "Une erreur inattendue s'est produite. Veuillez réessayer."
+      );
     }
   }
 
@@ -132,12 +143,16 @@ export function LoginForm() {
         );
         return;
       }
-      toast.success("Si cette adresse est valide, un lien vous a été envoyé.");
+      toast.success(
+        locale === "en"
+          ? "If this email is valid, a reset link has been sent."
+          : "Si cette adresse est valide, un lien vous a été envoyé."
+      );
       setForgotOpen(false);
       forgotForm.reset();
     } catch (err) {
       console.error("[login] forgot password:", err);
-      toast.error("Une erreur inattendue s'est produite.");
+      toast.error(locale === "en" ? "An unexpected error occurred." : "Une erreur inattendue s'est produite.");
     }
   }
 
@@ -196,29 +211,31 @@ export function LoginForm() {
         {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Connexion…
+            {locale === "en" ? "Logging in..." : "Connexion…"}
           </>
         ) : (
-          "Se connecter"
+          locale === "en" ? "Log in" : "Se connecter"
         )}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
-        Pas encore de compte ?{" "}
+        {locale === "en" ? "No account yet?" : "Pas encore de compte ?"}{" "}
         <Link
           href="/register"
           className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary)]"
         >
-          S&apos;inscrire
+          {t("common.register")}
         </Link>
       </p>
 
       <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Réinitialiser le mot de passe</DialogTitle>
+            <DialogTitle>{locale === "en" ? "Reset password" : "Réinitialiser le mot de passe"}</DialogTitle>
             <DialogDescription>
-              Nous vous enverrons un lien pour choisir un nouveau mot de passe.
+              {locale === "en"
+                ? "We will send you a link to choose a new password."
+                : "Nous vous enverrons un lien pour choisir un nouveau mot de passe."}
             </DialogDescription>
           </DialogHeader>
           <form
@@ -248,16 +265,16 @@ export function LoginForm() {
                 onClick={() => setForgotOpen(false)}
                 disabled={forgotForm.formState.isSubmitting}
               >
-                Annuler
+                {locale === "en" ? "Cancel" : "Annuler"}
               </Button>
               <Button type="submit" disabled={forgotForm.formState.isSubmitting}>
                 {forgotForm.formState.isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Envoi…
+                    {locale === "en" ? "Sending..." : "Envoi…"}
                   </>
                 ) : (
-                  "Envoyer le lien"
+                  locale === "en" ? "Send link" : "Envoyer le lien"
                 )}
               </Button>
             </DialogFooter>

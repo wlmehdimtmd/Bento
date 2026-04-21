@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { ensureDefaultShopForOwner } from "@/lib/merchant-bootstrap";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 const registerSchema = z.object({
   full_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
@@ -46,6 +47,7 @@ function mapAuthError(message: string): string {
 }
 
 export function RegisterForm() {
+  const { locale } = useLocale();
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
@@ -73,7 +75,7 @@ export function RegisterForm() {
       router.push(`/onboarding/shop?shopId=${data.shopId}`);
       router.refresh();
     } catch {
-      setServerError("Erreur inattendue.");
+      setServerError(locale === "en" ? "Unexpected error." : "Erreur inattendue.");
     } finally {
       setIsQuickLoading(false);
     }
@@ -117,7 +119,11 @@ export function RegisterForm() {
       const { userId, hasSession } = await res.json();
 
       if (!userId) {
-        setServerError("Une erreur inattendue s'est produite.");
+        setServerError(
+          locale === "en"
+            ? "An unexpected error occurred."
+            : "Une erreur inattendue s'est produite."
+        );
         return;
       }
 
@@ -144,7 +150,9 @@ export function RegisterForm() {
         await fetch("/api/auth/rollback", { method: "POST" });
         await supabase.auth.signOut();
         setServerError(
-          "La création de votre compte a échoué. Veuillez réessayer."
+          locale === "en"
+            ? "Account creation failed. Please try again."
+            : "La création de votre compte a échoué. Veuillez réessayer."
         );
         return;
       }
@@ -152,7 +160,11 @@ export function RegisterForm() {
       router.push(`/onboarding/shop?shopId=${shopResult.shopId}`);
       router.refresh();
     } catch {
-      setServerError("Une erreur inattendue s'est produite. Veuillez réessayer.");
+      setServerError(
+        locale === "en"
+          ? "An unexpected error occurred. Please try again."
+          : "Une erreur inattendue s'est produite. Veuillez réessayer."
+      );
     }
   }
 

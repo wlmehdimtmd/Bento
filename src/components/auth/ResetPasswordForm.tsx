@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import type { AuthError, User } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 const resetSchema = z
   .object({
@@ -36,6 +37,7 @@ const resetSchema = z
 type ResetValues = z.infer<typeof resetSchema>;
 
 export function ResetPasswordForm() {
+  const { locale } = useLocale();
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const [blocked, setBlocked] = useState(false);
@@ -89,10 +91,19 @@ export function ResetPasswordForm() {
       const { error } = await supabase.auth.updateUser({ password: values.password });
       if (error) {
         console.error("[reset-password] updateUser:", error.message);
-        toast.error(error.message || "Impossible de mettre à jour le mot de passe.");
+        toast.error(
+          error.message ||
+            (locale === "en"
+              ? "Unable to update password."
+              : "Impossible de mettre à jour le mot de passe.")
+        );
         return;
       }
-      toast.success("Mot de passe mis à jour. Redirection…");
+      toast.success(
+        locale === "en"
+          ? "Password updated. Redirecting..."
+          : "Mot de passe mis à jour. Redirection…"
+      );
       router.push("/dashboard");
       router.refresh();
     } catch (err) {

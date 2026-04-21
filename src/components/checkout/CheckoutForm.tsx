@@ -16,42 +16,15 @@ import { usePublicShop } from "@/components/shop/PublicShopContext";
 import { createClient } from "@/lib/supabase/client";
 import { STOREFRONT_CART_CTA_CLASSNAME } from "@/lib/constants";
 import { cn, formatPrice } from "@/lib/utils";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 // ── Fulfillment labels ─────────────────────────────────────────
 
-const FULFILLMENT_LABELS: Record<string, string> = {
-  dine_in: "Sur place",
-  takeaway: "À emporter",
-  delivery: "Livraison",
+const FULFILLMENT_LABELS: Record<string, Record<"fr" | "en", string>> = {
+  dine_in: { fr: "Sur place", en: "Dine-in" },
+  takeaway: { fr: "À emporter", en: "Takeaway" },
+  delivery: { fr: "Livraison", en: "Delivery" },
 };
-
-// ── Schema ─────────────────────────────────────────────────────
-
-const checkoutSchema = z
-  .object({
-    fulfillment_mode: z.string().min(1, "Mode de retrait requis"),
-    customer_name: z.string().min(2, "Nom requis (minimum 2 caractères)"),
-    customer_phone: z.string().optional(),
-    table_number: z.string().optional(),
-    delivery_address: z.string().optional(),
-    notes: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.fulfillment_mode === "dine_in" && !data.table_number?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["table_number"],
-        message: "N° de table requis pour le service sur place",
-      });
-    }
-    if (data.fulfillment_mode === "delivery" && !data.delivery_address?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["delivery_address"],
-        message: "Adresse requise pour la livraison",
-      });
-    }
-  });
 
 type CheckoutValues = z.infer<typeof checkoutSchema>;
 
@@ -62,6 +35,7 @@ interface CheckoutFormProps {
 }
 
 export function CheckoutForm({ onBack }: CheckoutFormProps) {
+  const { t, locale } = useLocale();
   const shop = usePublicShop();
   const items = useCartStore((s) => s.items);
   const total = useCartStore((s) => s.getTotal());
@@ -78,7 +52,37 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<CheckoutValues>({
-    resolver: zodResolver(checkoutSchema),
+    resolver: zodResolver(
+      z
+        .object({
+          fulfillment_mode: z
+            .string()
+            .min(1, locale === "en" ? "Pickup method is required" : "Mode de retrait requis"),
+          customer_name: z
+            .string()
+            .min(2, locale === "en" ? "Name is required (minimum 2 characters)" : "Nom requis (minimum 2 caractères)"),
+          customer_phone: z.string().optional(),
+          table_number: z.string().optional(),
+          delivery_address: z.string().optional(),
+          notes: z.string().optional(),
+        })
+        .superRefine((data, ctx) => {
+          if (data.fulfillment_mode === "dine_in" && !data.table_number?.trim()) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ["table_number"],
+              message: locale === "en" ? "Table number is required for dine-in" : "N° de table requis pour le service sur place",
+            });
+          }
+          if (data.fulfillment_mode === "delivery" && !data.delivery_address?.trim()) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ["delivery_address"],
+              message: locale === "en" ? "Delivery address is required" : "Adresse requise pour la livraison",
+            });
+          }
+        })
+    ),
     defaultValues: {
       fulfillment_mode: fulfillmentModes[0] ?? "",
     },
@@ -88,7 +92,11 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
 
   async function onSubmit(values: CheckoutValues) {
     if (shop.isDemoMode) {
-      toast.info("Mode démo — Dans la vraie version, votre commande serait transmise ici. Créez votre vitrine pour tester avec de vraies commandes !");
+      toast.info(
+        locale === "en"
+          ? "Demo mode — in the live product, your order would be sent now."
+          : "Mode démo — Dans la vraie version, votre commande serait transmise ici. Créez votre vitrine pour tester avec de vraies commandes !"
+      );
       return;
     }
 
@@ -112,7 +120,7 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
       .single();
 
     if (orderErr || !order) {
-      toast.error("Erreur lors de la création de la commande.");
+      toast.error(locale === "en" ? "Failed to create order." : "Erreur lors de la création de la commande.");
       return;
     }
 
@@ -132,7 +140,11 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
       .insert(orderItems);
 
     if (itemsErr) {
-      toast.error("Erreur lors de l'enregistrement des articles.");
+      toast.error(
+        locale === "en"
+          ? "Failed to save order items."
+          : "Erreur lors de l'enregistrement des articles."
+      );
       // Clean up the order
       await supabase.from("orders").delete().eq("id", order.id);
       return;
@@ -148,7 +160,8 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       toast.error(
-        (body as { error?: string }).error ?? "Erreur lors du paiement."
+        (body as { error?: string }).error ??
+          (locale === "en" ? "Payment failed." : "Erreur lors du paiement.")
       );
       return;
     }
@@ -160,7 +173,7 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col h-full"
+      className="flex h-full min-h-0 flex-col"
     >
       {/* Header back */}
       <div className="flex items-center gap-2 pb-3 border-b border-border mb-4">
@@ -173,13 +186,13 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <span className="text-sm font-medium">Informations de commande</span>
+        <span className="text-sm font-medium">{t("checkout.title")}</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-4 pr-0.5">
+      <div className="flex-1 overflow-y-auto space-y-4 pr-0.5 pb-24">
         {/* Fulfillment mode */}
         <div className="space-y-2">
-          <Label>Mode de retrait *</Label>
+          <Label>{locale === "en" ? "Pickup method *" : "Mode de retrait *"}</Label>
           <div className="grid gap-2">
             {fulfillmentModes.map((mode) => (
               <label
@@ -200,7 +213,7 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
                   className="accent-[var(--primary)]"
                 />
                 <span className="text-sm font-medium">
-                  {FULFILLMENT_LABELS[mode]}
+                  {FULFILLMENT_LABELS[mode][locale === "en" ? "en" : "fr"]}
                 </span>
               </label>
             ))}
@@ -216,11 +229,11 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
 
         {/* Customer name */}
         <div className="space-y-1.5">
-          <Label htmlFor="customer_name">Nom *</Label>
+          <Label htmlFor="customer_name">{locale === "en" ? "Name *" : "Nom *"}</Label>
           <Input
             id="customer_name"
             {...register("customer_name")}
-            placeholder="Votre nom"
+            placeholder={locale === "en" ? "Your name" : "Votre nom"}
             disabled={isSubmitting}
           />
           {errors.customer_name && (
@@ -232,7 +245,7 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
 
         {/* Phone */}
         <div className="space-y-1.5">
-          <Label htmlFor="customer_phone">Téléphone</Label>
+          <Label htmlFor="customer_phone">{locale === "en" ? "Phone" : "Téléphone"}</Label>
           <Input
             id="customer_phone"
             type="tel"
@@ -245,11 +258,11 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
         {/* Table number (dine_in only) */}
         {fulfillmentMode === "dine_in" && (
           <div className="space-y-1.5">
-            <Label htmlFor="table_number">N° de table *</Label>
+          <Label htmlFor="table_number">{locale === "en" ? "Table number *" : "N° de table *"}</Label>
             <Input
               id="table_number"
               {...register("table_number")}
-              placeholder="Ex : 12"
+              placeholder={locale === "en" ? "Ex: 12" : "Ex : 12"}
               disabled={isSubmitting}
             />
             {errors.table_number && (
@@ -263,11 +276,11 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
         {/* Delivery address (delivery only) */}
         {fulfillmentMode === "delivery" && (
           <div className="space-y-1.5">
-            <Label htmlFor="delivery_address">Adresse de livraison *</Label>
+            <Label htmlFor="delivery_address">{locale === "en" ? "Delivery address *" : "Adresse de livraison *"}</Label>
             <Input
               id="delivery_address"
               {...register("delivery_address")}
-              placeholder="12 rue des Lilas, 75001 Paris"
+              placeholder={locale === "en" ? "12 Main St, 75001 Paris" : "12 rue des Lilas, 75001 Paris"}
               disabled={isSubmitting}
             />
             {errors.delivery_address && (
@@ -280,11 +293,11 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
 
         {/* Notes */}
         <div className="space-y-1.5">
-          <Label htmlFor="notes">Notes (optionnel)</Label>
+          <Label htmlFor="notes">{locale === "en" ? "Notes (optional)" : "Notes (optionnel)"}</Label>
           <Textarea
             id="notes"
             {...register("notes")}
-            placeholder="Instructions spéciales pour votre commande…"
+            placeholder={locale === "en" ? "Special instructions for your order..." : "Instructions spéciales pour votre commande…"}
             rows={2}
             disabled={isSubmitting}
           />
@@ -295,7 +308,9 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
         {/* Order recap (read-only) */}
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Récapitulatif ({count} article{count > 1 ? "s" : ""})
+            {locale === "en"
+              ? `Summary (${count} item${count > 1 ? "s" : ""})`
+              : `Récapitulatif (${count} article${count > 1 ? "s" : ""})`}
           </p>
           <div className="space-y-1">
             {items.map((item) => (
@@ -313,7 +328,7 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
             ))}
           </div>
           <div className="flex justify-between font-bold text-base pt-1 border-t border-border">
-            <span>Total</span>
+            <span>{locale === "en" ? "Total" : "Total"}</span>
             <span style={{ color: "var(--primary)" }}>
               {formatPrice(total)}
             </span>
@@ -321,7 +336,7 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
         </div>
       </div>
 
-      <div className="pt-4 mt-2 border-t border-border">
+      <div className="sticky bottom-0 mt-2 border-t border-border bg-popover pt-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
         <button
           type="submit"
           disabled={isSubmitting || items.length === 0}
@@ -330,12 +345,14 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
           {isSubmitting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="font-semibold">Redirection vers Stripe…</span>
+              <span className="font-semibold">{t("checkout.submitRedirect")}</span>
             </>
           ) : (
             <>
               <CreditCard className="h-4 w-4" />
-              <span className="font-semibold">Payer {formatPrice(total)}</span>
+              <span className="font-semibold">
+                {locale === "en" ? "Pay" : "Payer"} {formatPrice(total)}
+              </span>
             </>
           )}
         </button>

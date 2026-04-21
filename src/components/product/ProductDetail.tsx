@@ -29,6 +29,7 @@ import { useCartStore } from "@/lib/stores/cartStore";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { formatPrice } from "@/lib/utils";
 import type { ProductLabelOption } from "@/lib/shop-labels";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -68,6 +69,7 @@ function ProductDetailContent({
   stickyActionBar,
   shopLabels,
 }: ContentProps) {
+  const { locale } = useLocale();
   const addItem = useCartStore((s) => s.addItem);
   const [quantity, setQuantity] = useState(1);
   const [optionValue, setOptionValue] = useState("");
@@ -89,7 +91,9 @@ function ProductDetailContent({
       isBundle: false,
     });
     toast.success(
-      `${quantity}× ${product.name} ajouté${quantity > 1 ? "s" : ""} au panier !`
+      locale === "en"
+        ? `${quantity}× ${product.name} added to cart!`
+        : `${quantity}× ${product.name} ajouté${quantity > 1 ? "s" : ""} au panier !`
     );
     onClose();
   }
@@ -137,8 +141,8 @@ function ProductDetailContent({
           >
             <span className="text-sm font-semibold text-foreground">
               {optionValue.trim()
-                ? "Préférence indiquée"
-                : "Préciser une préférence"}
+                ? locale === "en" ? "Preference added" : "Préférence indiquée"
+                : locale === "en" ? "Add a preference" : "Préciser une préférence"}
             </span>
             <span className="text-xs text-muted-foreground line-clamp-2">
               {optionValue.trim() ? optionValue.trim() : product.option_label}
@@ -151,7 +155,7 @@ function ProductDetailContent({
                 id="pd-option"
                 value={optionValue}
                 onChange={(e) => setOptionValue(e.target.value)}
-                placeholder="Votre réponse…"
+                placeholder={locale === "en" ? "Your answer..." : "Votre réponse…"}
               />
             </div>
           )}
@@ -167,22 +171,26 @@ function ProductDetailContent({
           aria-expanded={noteFieldOpen}
         >
           <span className="text-sm font-semibold text-foreground">
-            {specialNote.trim() ? "Note ajoutée" : "Ajouter une note"}
+            {specialNote.trim()
+              ? locale === "en" ? "Note added" : "Note ajoutée"
+              : locale === "en" ? "Add a note" : "Ajouter une note"}
           </span>
           <span className="text-xs text-muted-foreground line-clamp-2">
             {specialNote.trim()
               ? specialNote.trim()
-              : "Instructions pour le restaurant (facultatif)"}
+              : locale === "en"
+                ? "Instructions for the restaurant (optional)"
+                : "Instructions pour le restaurant (facultatif)"}
           </span>
         </Button>
         {noteFieldOpen && (
           <div className="space-y-1.5">
-            <Label htmlFor="pd-note">Votre note</Label>
+            <Label htmlFor="pd-note">{locale === "en" ? "Your note" : "Votre note"}</Label>
             <Textarea
               id="pd-note"
               value={specialNote}
               onChange={(e) => setSpecialNote(e.target.value)}
-              placeholder="Instructions spéciales…"
+              placeholder={locale === "en" ? "Special instructions..." : "Instructions spéciales…"}
               rows={3}
             />
           </div>
@@ -283,7 +291,7 @@ function ProductDetailContent({
         disabled={!product.is_available}
       >
         <ShoppingCart className="h-4 w-4 shrink-0" />
-        <span>Ajouter au panier</span>
+        <span>{locale === "en" ? "Add to cart" : "Ajouter au panier"}</span>
         <span className="ml-auto tabular-nums">{formatPrice(lineTotal)}</span>
       </Button>
     </div>
@@ -322,6 +330,7 @@ function ProductDetailContent({
 // ── Root component ─────────────────────────────────────────────
 
 export function ProductDetail({ product, open, onClose, shopLabels }: ProductDetailProps) {
+  const { locale } = useLocale();
   const isMobile = useIsMobile();
 
   if (!product) return null;
@@ -352,7 +361,7 @@ export function ProductDetail({ product, open, onClose, shopLabels }: ProductDet
         <button
           onClick={onClose}
           className="absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/60 transition-colors"
-          aria-label="Fermer"
+          aria-label={locale === "en" ? "Close" : "Fermer"}
         >
           <X className="h-4 w-4" />
         </button>

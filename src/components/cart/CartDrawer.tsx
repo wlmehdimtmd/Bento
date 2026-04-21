@@ -30,6 +30,7 @@ import { TagBadge } from "@/components/product/TagBadge";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { ALLERGENS, STOREFRONT_CART_CTA_CLASSNAME } from "@/lib/constants";
 import { cn, formatPrice } from "@/lib/utils";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 // ── Item review panel ──────────────────────────────────────────
 
@@ -42,6 +43,7 @@ function parseBundle(specialNote: string): { label: string; choice: string }[] {
 }
 
 function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }) {
+  const { locale } = useLocale();
   const removeItem = useCartStore((s) => s.removeItem);
   const bundleSteps = item.isBundle && item.specialNote ? parseBundle(item.specialNote) : null;
   const allergenTags = (item.tags ?? []).filter((t) => ALLERGENS.some((a) => a.value === t));
@@ -49,7 +51,7 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
   function handleRemove() {
     removeItem(item.id);
     onBack();
-    toast.success(`${item.name} retiré du panier.`);
+    toast.success(locale === "en" ? `${item.name} removed from cart.` : `${item.name} retiré du panier.`);
   }
 
   return (
@@ -61,7 +63,7 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
-          Retour au panier
+          {locale === "en" ? "Back to cart" : "Retour au panier"}
         </button>
       </div>
 
@@ -81,7 +83,7 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
             <p className="font-bold text-base leading-tight">{item.name}</p>
             {item.isBundle && (
               <span className="inline-block text-xs font-medium px-1.5 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] mt-1">
-                Formule
+                {locale === "en" ? "Bundle" : "Formule"}
               </span>
             )}
           </div>
@@ -95,7 +97,9 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
         {/* Bundle steps with descriptions */}
         {item.isBundle && item.bundleSelections && item.bundleSelections.length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Composition</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              {locale === "en" ? "Composition" : "Composition"}
+            </p>
             <div className="space-y-3">
               {item.bundleSelections.map((s, i) => (
                 <div key={i} className="flex items-start gap-2">
@@ -128,7 +132,9 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
         {/* Fallback: bundle without bundleSelections (legacy) */}
         {item.isBundle && !item.bundleSelections && bundleSteps && bundleSteps.length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Composition</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              {locale === "en" ? "Composition" : "Composition"}
+            </p>
             <div className="space-y-2">
               {bundleSteps.map((s, i) => (
                 <div key={i} className="flex items-start gap-2">
@@ -156,13 +162,17 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
           <>
             {item.description && (
               <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Description</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                  {locale === "en" ? "Description" : "Description"}
+                </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
               </div>
             )}
             {allergenTags.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Allergènes</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+                  {locale === "en" ? "Allergens" : "Allergènes"}
+                </p>
                 <div className="flex flex-wrap gap-1.5">
                   {allergenTags.map((t) => (
                     <TagBadge key={t} value={t} size="md" />
@@ -172,13 +182,17 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
             )}
             {item.optionValue && (
               <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Option</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                  {locale === "en" ? "Option" : "Option"}
+                </p>
                 <p className="text-sm">{item.optionValue}</p>
               </div>
             )}
             {item.specialNote && (
               <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Note</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                  {locale === "en" ? "Note" : "Note"}
+                </p>
                 <p className="text-sm italic text-muted-foreground">{item.specialNote}</p>
               </div>
             )}
@@ -187,7 +201,7 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
 
         {/* Quantity */}
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Quantité</span>
+          <span className="text-muted-foreground">{locale === "en" ? "Quantity" : "Quantité"}</span>
           <span className="font-semibold">{item.quantity} × {formatPrice(item.price)}</span>
         </div>
       </div>
@@ -200,7 +214,7 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
           onClick={handleRemove}
         >
           <Trash2 className="h-4 w-4" />
-          Retirer du panier
+          {locale === "en" ? "Remove from cart" : "Retirer du panier"}
         </Button>
       </div>
     </div>
@@ -215,6 +229,7 @@ interface CartViewProps {
 }
 
 function CartView({ onClose, onCheckout }: CartViewProps) {
+  const { t, locale } = useLocale();
   const items = useCartStore((s) => s.items);
   const clearCart = useCartStore((s) => s.clearCart);
   const count = useCartStore((s) => s.getCount());
@@ -225,7 +240,7 @@ function CartView({ onClose, onCheckout }: CartViewProps) {
   function handleClear() {
     clearCart();
     setConfirmClear(false);
-    toast.success("Panier vidé.");
+    toast.success(locale === "en" ? "Cart cleared." : "Panier vidé.");
   }
 
   if (items.length === 0) {
@@ -241,13 +256,13 @@ function CartView({ onClose, onCheckout }: CartViewProps) {
           />
         </div>
         <div>
-          <p className="font-semibold text-base">Votre panier est vide</p>
+          <p className="font-semibold text-base">{t("cart.empty.title")}</p>
           <p className="text-sm text-muted-foreground mt-1">
-            Parcourez la carte et ajoutez des produits.
+            {t("cart.empty.subtitle")}
           </p>
         </div>
         <Button variant="outline" onClick={onClose}>
-          ← Retour à la carte
+          ← {t("cart.backToMenu")}
         </Button>
       </div>
     );
@@ -284,16 +299,16 @@ function CartView({ onClose, onCheckout }: CartViewProps) {
         <div className="flex justify-center">
           {confirmClear ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Confirmer ?</span>
+              <span className="text-sm text-muted-foreground">{locale === "en" ? "Confirm?" : "Confirmer ?"}</span>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setConfirmClear(false)}
               >
-                Annuler
+                {locale === "en" ? "Cancel" : "Annuler"}
               </Button>
               <Button variant="destructive" size="sm" onClick={handleClear}>
-                Vider
+                {locale === "en" ? "Clear" : "Vider"}
               </Button>
             </div>
           ) : (
@@ -304,7 +319,7 @@ function CartView({ onClose, onCheckout }: CartViewProps) {
               onClick={() => setConfirmClear(true)}
             >
               <Trash2 className="h-3.5 w-3.5" />
-              Vider le panier
+              {locale === "en" ? "Clear cart" : "Vider le panier"}
             </Button>
           )}
         </div>
@@ -314,7 +329,7 @@ function CartView({ onClose, onCheckout }: CartViewProps) {
           className={cn(STOREFRONT_CART_CTA_CLASSNAME, "w-full")}
           onClick={onCheckout}
         >
-          <span className="font-semibold">Passer la commande</span>
+          <span className="font-semibold">{t("cart.checkout")}</span>
           <ArrowRight className="h-4 w-4" />
         </button>
       </div>
@@ -359,6 +374,7 @@ function DrawerInner({ onClose }: { onClose: () => void }) {
 // ── Root ───────────────────────────────────────────────────────
 
 export function CartDrawer() {
+  const { t } = useLocale();
   const { open, closeDrawer } = useCartDrawer();
   const isMobile = useIsMobile();
 
@@ -368,7 +384,7 @@ export function CartDrawer() {
         className="h-4 w-4"
         style={{ color: "var(--primary)" }}
       />
-      Mon panier
+      {t("cart.title")}
     </div>
   );
 

@@ -50,6 +50,7 @@ import type { StorefrontPhoto } from "@/lib/types";
 import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
 import { getStorefrontThemePreviewStyle, type StorefrontThemeOverrides } from "@/lib/storefrontTheme";
 import type { ProductLabelOption } from "@/lib/shop-labels";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -194,6 +195,7 @@ export function StoreView({
   storefrontThemeOverrides,
   shopLabels = [],
 }: StoreViewProps) {
+  const { locale } = useLocale();
   const isMobile = useIsMobile();
   const { resolvedTheme } = useTheme();
   const mounted = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
@@ -392,7 +394,7 @@ export function StoreView({
       tags: product.tags,
       isBundle: false,
     });
-    toast.success(`${product.name} ajouté !`);
+    toast.success(locale === "en" ? `${product.name} added!` : `${product.name} ajouté !`);
   }
 
   function renderLevel1Tile(item: StorefrontBentoLayoutItem, sizing: Level1SizingMode) {
@@ -603,14 +605,22 @@ export function StoreView({
                 {l2View === "category" && products.length === 0 && (
                   <div className="col-span-full flex flex-col items-center justify-center gap-2 py-12 text-center text-muted-foreground">
                     <span className="text-4xl">{selectedCat?.icon_emoji}</span>
-                    <p>Aucun produit disponible dans cette catégorie.</p>
+                    <p>
+                      {locale === "en"
+                        ? "No products available in this category."
+                        : "Aucun produit disponible dans cette catégorie."}
+                    </p>
                   </div>
                 )}
 
                 {l2View === "bundles" && bundles.length === 0 && (
                   <div className="col-span-full flex flex-col items-center justify-center gap-2 py-12 text-center text-muted-foreground">
                     <span className="text-4xl">{MENU_CARD_EMOJI}</span>
-                    <p>Aucune formule disponible pour le moment.</p>
+                    <p>
+                      {locale === "en"
+                        ? "No bundles available right now."
+                        : "Aucune formule disponible pour le moment."}
+                    </p>
                   </div>
                 )}
               </BentoGrid>

@@ -34,6 +34,7 @@ import {
 } from "@/lib/openingHours";
 import { slugify, cn } from "@/lib/utils";
 import type { ShopReviews, SocialLinks } from "@/lib/types";
+import { seedEnglishText } from "@/lib/translationSeed";
 
 import { OpeningHoursSection } from "./OpeningHoursSection";
 import { updateShopProfileAdmin } from "@/app/admin/actions";
@@ -78,6 +79,10 @@ interface ShopData {
   slug: string;
   type?: string;
   description?: string | null;
+  name_fr?: string | null;
+  name_en?: string | null;
+  description_fr?: string | null;
+  description_en?: string | null;
   address?: string | null;
   phone?: string | null;
   email_contact?: string | null;
@@ -250,9 +255,13 @@ export function ShopForm({
     const payload = {
       owner_id: userId,
       name: values.name,
+      name_fr: values.name,
+      name_en: initialData?.name_en ?? seedEnglishText(values.name),
       slug: values.slug,
       type: initialData?.type ?? "other",
       description: values.description || null,
+      description_fr: values.description || null,
+      description_en: initialData?.description_en ?? seedEnglishText(values.description),
       address: values.address || null,
       phone: values.phone || null,
       email_contact: values.email_contact || null,

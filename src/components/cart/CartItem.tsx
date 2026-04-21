@@ -7,6 +7,7 @@ import { TagBadge } from "@/components/product/TagBadge";
 import { useCartStore, type CartItem } from "@/lib/stores/cartStore";
 import { ALLERGENS } from "@/lib/constants";
 import { formatPrice } from "@/lib/utils";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface CartItemRowProps {
   item: CartItem;
@@ -14,6 +15,7 @@ interface CartItemRowProps {
 }
 
 export function CartItemRow({ item, onReview }: CartItemRowProps) {
+  const { t } = useLocale();
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
 
@@ -45,7 +47,7 @@ export function CartItemRow({ item, onReview }: CartItemRowProps) {
         <button
           className="text-left w-full group"
           onClick={onReview}
-          aria-label={`Voir les détails de ${item.name}`}
+          aria-label={`${t("cart.details")} ${item.name}`}
         >
           <p className="text-sm font-semibold leading-tight line-clamp-1 group-hover:underline decoration-dotted underline-offset-2">
             {item.name}
@@ -96,7 +98,7 @@ export function CartItemRow({ item, onReview }: CartItemRowProps) {
         )}
 
         <p className="text-xs text-muted-foreground mt-0.5">
-          {formatPrice(item.price)} / unité
+          {formatPrice(item.price)} {t("cart.perUnit")}
         </p>
 
         {/* Quantity stepper */}
@@ -139,7 +141,7 @@ export function CartItemRow({ item, onReview }: CartItemRowProps) {
               size="icon"
               className="h-7 w-7 text-muted-foreground hover:text-foreground"
               onClick={onReview}
-              aria-label="Voir le détail"
+              aria-label={t("cart.details")}
             >
               <Eye className="h-3.5 w-3.5" />
             </Button>
@@ -149,7 +151,7 @@ export function CartItemRow({ item, onReview }: CartItemRowProps) {
             size="icon"
             className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             onClick={() => removeItem(item.id)}
-            aria-label="Supprimer"
+            aria-label={t("cart.remove")}
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>

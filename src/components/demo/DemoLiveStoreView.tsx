@@ -11,6 +11,7 @@ import { PublicShopProvider } from "@/components/shop/PublicShopContext";
 import { DemoUnifiedTopBar } from "@/components/demo/DemoUnifiedTopBar";
 import type { CategoryThemeKey } from "@/lib/categoryThemeTokens";
 import { StorefrontThemeScope } from "@/components/bento/StorefrontThemeScope";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 export interface DemoLiveStoreViewProps {
   shop: ShopInfo;
@@ -33,6 +34,7 @@ export function DemoLiveStoreView({
   storefrontThemeKey,
   stripeAccountId,
 }: DemoLiveStoreViewProps) {
+  const { locale } = useLocale();
   const fulfillmentModes = Array.isArray(shop.fulfillment_modes)
     ? shop.fulfillment_modes
     : [];
@@ -69,8 +71,10 @@ export function DemoLiveStoreView({
 
                 {categories.length === 0 && bundles.length === 0 && (
                   <div className="mt-16 text-center text-muted-foreground">
-                    <p className="text-lg">Ce restaurant n&apos;a pas encore de carte.</p>
-                    <p className="text-sm mt-1">Revenez bientôt !</p>
+                    <p className="text-lg">
+                      {locale === "en" ? "This shop does not have a menu yet." : "Ce restaurant n&apos;a pas encore de carte."}
+                    </p>
+                    <p className="text-sm mt-1">{locale === "en" ? "Please check back soon!" : "Revenez bientôt !"}</p>
                   </div>
                 )}
               </main>

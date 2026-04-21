@@ -10,10 +10,15 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import { AppBrandMark } from "@/components/layout/AppBrandMark";
+import { cookies } from "next/headers";
+import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 
-export const metadata = {
-  title: "Nouveau mot de passe — Bento Resto",
-};
+export async function generateMetadata() {
+  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
+  return {
+    title: locale === "en" ? "New password — Bento Resto" : "Nouveau mot de passe — Bento Resto",
+  };
+}
 
 export default function ResetPasswordPage() {
   return (

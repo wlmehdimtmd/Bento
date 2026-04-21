@@ -17,6 +17,8 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { AppBrandMark } from "@/components/layout/AppBrandMark";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 import type { LandingDemoHeroData } from "@/lib/fetchLandingDemoHero";
 
 // ── Animation helpers ──────────────────────────────────────────
@@ -326,6 +328,8 @@ const PRICING_POINTS = [
 ];
 
 export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
+  const { t } = useLocale();
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
@@ -335,10 +339,10 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <Link href="/login" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-              Connexion
+              {t("common.login")}
             </Link>
             <Link href="/register" className={buttonVariants({ size: "sm" })}>
-              S&apos;inscrire
+              {t("common.register")}
             </Link>
           </div>
         </div>
@@ -351,7 +355,7 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
               <Reveal>
                 <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
                   <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
-                  Pour les restaurateurs &amp; commerçants
+                  {t("landing.badge")}
                 </div>
               </Reveal>
 
@@ -395,11 +399,11 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
               <Reveal delay={0.15}>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link href="/register" className={buttonVariants({ size: "lg" })}>
-                    Commencer gratuitement
+                    {t("landing.cta.start")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                   <Link href="/demo" className={buttonVariants({ variant: "outline", size: "lg" })}>
-                    Voir la démo
+                    {t("landing.cta.demo")}
                   </Link>
                 </div>
               </Reveal>
@@ -544,11 +548,18 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
             </div>
           </div>
           <div className="flex items-center gap-5">
+            <LocaleSwitcher />
             <Link href="/login" className="hover:text-foreground transition-colors">
-              Connexion
+              {t("common.login")}
             </Link>
             <Link href="/register" className="hover:text-foreground transition-colors">
-              S&apos;inscrire
+              {t("common.register")}
+            </Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">
+              Terms
             </Link>
           </div>
         </div>

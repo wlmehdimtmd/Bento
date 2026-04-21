@@ -27,6 +27,7 @@ import { ALLERGENS } from "@/lib/constants";
 import type { BundleInfo } from "@/components/bento/StoreView";
 import type { PublicProduct } from "@/components/product/ProductDetail";
 import type { ProductLabelOption } from "@/lib/shop-labels";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 export interface BundleDetailProps {
   bundle: BundleInfo | null;
@@ -51,6 +52,7 @@ function BundleDetailContent({
   loadCategoryProducts: (categoryId: string) => Promise<PublicProduct[]>;
   showInlineClose?: boolean;
 }) {
+  const { locale } = useLocale();
   const addItem = useCartStore((s) => s.addItem);
   const [step, setStep] = useState(0);
   const [selections, setSelections] = useState<Selections>({});
@@ -122,7 +124,9 @@ function BundleDetailContent({
       specialNote: note,
       bundleSelections,
     });
-    toast.success(`${bundle.name} ajouté au panier !`);
+    toast.success(
+      locale === "en" ? `${bundle.name} added to cart!` : `${bundle.name} ajouté au panier !`
+    );
     onClose();
   }
 
@@ -134,7 +138,7 @@ function BundleDetailContent({
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="min-w-0">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-0.5">
-              Formule
+              {locale === "en" ? "Bundle" : "Formule"}
             </p>
             <h2
               className="text-xl font-bold leading-tight"
@@ -157,7 +161,7 @@ function BundleDetailContent({
                 size="icon-sm"
                 onClick={onClose}
                 className="shrink-0"
-                aria-label="Fermer"
+                aria-label={locale === "en" ? "Close" : "Fermer"}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -208,7 +212,7 @@ function BundleDetailContent({
       <div className="px-5 py-3 shrink-0">
         <p className="text-sm font-semibold">
           <span className="text-muted-foreground">
-            Étape {step + 1}/{totalSteps} —
+            {locale === "en" ? "Step" : "Étape"} {step + 1}/{totalSteps} —
           </span>{" "}
           {currentSlot?.quantity === 1
             ? `Choisissez votre ${(currentSlot.label || currentSlot.categoryName).toLowerCase()} ${currentSlot.categoryEmoji}`
@@ -220,11 +224,11 @@ function BundleDetailContent({
       <div className="flex-1 overflow-y-auto px-5 pb-4">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
-            Chargement des produits…
+            {locale === "en" ? "Loading products..." : "Chargement des produits…"}
           </div>
         ) : products.length === 0 ? (
           <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
-            Aucun produit disponible pour cette étape.
+            {locale === "en" ? "No product available for this step." : "Aucun produit disponible pour cette étape."}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-3">
@@ -327,7 +331,9 @@ function BundleDetailContent({
                         }
                         className="flex items-center gap-1 pt-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        {isExpanded ? "Masquer le détail" : "Voir le détail"}
+                        {isExpanded
+                          ? locale === "en" ? "Hide details" : "Masquer le détail"
+                          : locale === "en" ? "View details" : "Voir le détail"}
                         <ChevronDown
                           className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-180" : ""}`}
                         />
@@ -357,7 +363,7 @@ function BundleDetailContent({
                       {allergenTags.length > 0 && (
                         <div>
                           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
-                            Allergènes
+                            {locale === "en" ? "Allergens" : "Allergènes"}
                           </p>
                           <div className="flex flex-wrap gap-1.5">
                             {allergenTags.map((t) => (
@@ -385,7 +391,7 @@ function BundleDetailContent({
           className="gap-1"
         >
           <ChevronLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Précédent</span>
+          <span className="hidden sm:inline">{locale === "en" ? "Previous" : "Précédent"}</span>
         </Button>
 
         <div className="flex-1" />
@@ -401,7 +407,7 @@ function BundleDetailContent({
               color: "var(--primary-foreground)",
             }}
           >
-            Suivant
+            {locale === "en" ? "Next" : "Suivant"}
             <ChevronRight className="h-4 w-4" />
           </Button>
         ) : (
@@ -416,7 +422,7 @@ function BundleDetailContent({
             }}
           >
             <ShoppingCart className="h-4 w-4" />
-            Ajouter au panier
+            {locale === "en" ? "Add to cart" : "Ajouter au panier"}
           </Button>
         )}
       </div>
@@ -433,6 +439,7 @@ export function BundleDetail({
   loadCategoryProducts,
   shopLabels: _shopLabels,
 }: BundleDetailProps) {
+  const { locale } = useLocale();
   const isMobile = useIsMobile();
 
   if (!bundle) return null;
@@ -443,7 +450,9 @@ export function BundleDetail({
         <DrawerContent className="flex flex-col h-[92vh]">
           <DrawerHeader className="sr-only">
             <DrawerTitle>{bundle.name}</DrawerTitle>
-            <DrawerDescription>Composez votre formule étape par étape</DrawerDescription>
+            <DrawerDescription>
+              {locale === "en" ? "Build your bundle step by step" : "Composez votre formule étape par étape"}
+            </DrawerDescription>
           </DrawerHeader>
           <BundleDetailContent
             key={bundle.id}
@@ -465,7 +474,7 @@ export function BundleDetail({
       >
         <DialogTitle className="sr-only">{bundle.name}</DialogTitle>
         <DialogDescription className="sr-only">
-          Composez votre formule étape par étape
+          {locale === "en" ? "Build your bundle step by step" : "Composez votre formule étape par étape"}
         </DialogDescription>
         <BundleDetailContent
           key={bundle.id}

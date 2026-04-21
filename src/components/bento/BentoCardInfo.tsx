@@ -15,6 +15,7 @@ import { ReviewsDisplay } from "./ReviewsDisplay";
 import { ShopOpenStatus } from "./ShopOpenStatus";
 import type { SocialLinks, ShopReviews } from "@/lib/types";
 import { SHOP_INFO_DESCRIPTION_MOBILE_MAX_CHARS } from "@/lib/constants";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface BentoCardInfoProps {
   cardSize?: BentoSize;
@@ -65,6 +66,7 @@ export function BentoCardInfo({
   openingTimezone = "Europe/Paris",
   openOnPublicHolidays = false,
 }: BentoCardInfoProps) {
+  const { locale } = useLocale();
   const hasSingleRowHeight = cardSize === "1x1" || cardSize === "2x1";
   const contactOnStorefront = _socialLinks.show_contact_on_storefront !== false;
   const hasActions =
@@ -150,7 +152,7 @@ export function BentoCardInfo({
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     className={iconActionClass}
-                    aria-label="Itinéraire, écrire"
+                    aria-label={locale === "en" ? "Directions, email" : "Itinéraire, écrire"}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoreVertical className="size-4" aria-hidden />
@@ -168,7 +170,7 @@ export function BentoCardInfo({
                         }}
                       >
                         <Map aria-hidden />
-                        Itinéraire
+                        {locale === "en" ? "Directions" : "Itinéraire"}
                       </DropdownMenuItem>
                     )}
                     {canMail && (
@@ -179,7 +181,7 @@ export function BentoCardInfo({
                         }}
                       >
                         <Mail aria-hidden />
-                        Écrire
+                        {locale === "en" ? "Email" : "Écrire"}
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>
@@ -191,7 +193,7 @@ export function BentoCardInfo({
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
                   className={iconActionClass}
-                  aria-label="Itinéraire"
+                  aria-label={locale === "en" ? "Directions" : "Itinéraire"}
                 >
                   <Map className="size-4" aria-hidden />
                 </a>
@@ -200,7 +202,7 @@ export function BentoCardInfo({
                   href={`mailto:${emailContact}`}
                   onClick={(e) => e.stopPropagation()}
                   className={iconActionClass}
-                  aria-label="Écrire"
+                  aria-label={locale === "en" ? "Email" : "Écrire"}
                 >
                   <Mail className="size-4" aria-hidden />
                 </a>
@@ -215,7 +217,7 @@ export function BentoCardInfo({
                 )}
               >
                 <Phone className="size-4 shrink-0" aria-hidden />
-                Appeler
+                {locale === "en" ? "Call" : "Appeler"}
               </a>
             )}
           </div>

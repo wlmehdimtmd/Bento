@@ -9,11 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCartStore, type CartItem } from "@/lib/stores/cartStore";
 import { formatPrice } from "@/lib/utils";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
-const FULFILLMENT_LABELS: Record<string, string> = {
-  dine_in: "Sur place",
-  takeaway: "À emporter",
-  delivery: "Livraison",
+const FULFILLMENT_LABELS: Record<string, Record<"fr" | "en", string>> = {
+  dine_in: { fr: "Sur place", en: "Dine-in" },
+  takeaway: { fr: "À emporter", en: "Takeaway" },
+  delivery: { fr: "Livraison", en: "Delivery" },
 };
 
 interface OrderData {
@@ -32,6 +33,7 @@ interface OrderConfirmationProps {
 }
 
 export function OrderConfirmation({ order, shopSlug }: OrderConfirmationProps) {
+  const { t, locale } = useLocale();
   const clearCart = useCartStore((s) => s.clearCart);
   const storeItems = useCartStore((s) => s.items);
 
@@ -69,10 +71,10 @@ export function OrderConfirmation({ order, shopSlug }: OrderConfirmationProps) {
               className="text-2xl font-bold"
               style={{ fontFamily: "var(--font-onest)" }}
             >
-              Commande confirmée !
+              {t("order.confirmed")}
             </h2>
             <p className="text-muted-foreground mt-1">
-              N°{" "}
+              {locale === "en" ? "No." : "N°"}{" "}
               <span className="font-bold text-foreground">
                 #{String(order.order_number).padStart(4, "0")}
               </span>
@@ -84,20 +86,21 @@ export function OrderConfirmation({ order, shopSlug }: OrderConfirmationProps) {
           {/* Mode + table/address */}
           <div className="rounded-lg bg-muted/50 px-4 py-3 space-y-1 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Mode</span>
+                <span className="text-muted-foreground">{locale === "en" ? "Mode" : "Mode"}</span>
               <span className="font-medium">
-                {FULFILLMENT_LABELS[order.fulfillment_mode] ?? order.fulfillment_mode}
+                {FULFILLMENT_LABELS[order.fulfillment_mode]?.[locale === "en" ? "en" : "fr"] ??
+                  order.fulfillment_mode}
               </span>
             </div>
             {order.table_number && (
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Table</span>
+                <span className="text-muted-foreground">{locale === "en" ? "Table" : "Table"}</span>
                 <span className="font-medium">#{order.table_number}</span>
               </div>
             )}
             {order.delivery_address && (
               <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground shrink-0">Livraison</span>
+                <span className="text-muted-foreground shrink-0">{locale === "en" ? "Delivery" : "Livraison"}</span>
                 <span className="font-medium text-right">{order.delivery_address}</span>
               </div>
             )}
@@ -109,7 +112,7 @@ export function OrderConfirmation({ order, shopSlug }: OrderConfirmationProps) {
               <Separator />
               <div className="space-y-1.5">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Articles commandés
+                  {t("order.items")}
                 </p>
                 {capturedItems.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm">
@@ -129,7 +132,7 @@ export function OrderConfirmation({ order, shopSlug }: OrderConfirmationProps) {
 
           {/* Total */}
           <div className="flex justify-between font-bold text-base">
-            <span>Total payé</span>
+            <span>{t("order.totalPaid")}</span>
             <span className="text-foreground">
               {formatPrice(order.total_amount)}
             </span>
@@ -141,7 +144,7 @@ export function OrderConfirmation({ order, shopSlug }: OrderConfirmationProps) {
               variant="outline"
               className="w-full"
             >
-              ← Retour à la boutique
+              ← {t("common.backToShop")}
             </Button>
           </Link>
         </div>

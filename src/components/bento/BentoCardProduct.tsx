@@ -6,6 +6,7 @@ import { BentoCard } from "./BentoCard";
 import { PriceTag } from "@/components/product/PriceTag";
 import { TagBadge } from "@/components/product/TagBadge";
 import type { ProductLabelOption } from "@/lib/shop-labels";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 interface BentoCardProductProps {
   name: string;
@@ -30,6 +31,7 @@ export function BentoCardProduct({
   onAddToCart,
   onClick,
 }: BentoCardProductProps) {
+  const { locale } = useLocale();
   return (
     <BentoCard size="1x1" onClick={isAvailable ? onClick : undefined}>
       {/* Background */}
@@ -51,7 +53,7 @@ export function BentoCardProduct({
       {!isAvailable && (
         <div className="absolute inset-0 bg-background/60 flex items-center justify-center z-10">
           <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground border border-border">
-            Indisponible
+            {locale === "en" ? "Unavailable" : "Indisponible"}
           </span>
         </div>
       )}
@@ -70,7 +72,7 @@ export function BentoCardProduct({
         <button
           type="button"
           onClick={onAddToCart}
-          aria-label={`Ajouter ${name} au panier`}
+          aria-label={locale === "en" ? `Add ${name} to cart` : `Ajouter ${name} au panier`}
           className="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full text-primary-foreground shadow-md transition-transform hover:scale-110 active:scale-95"
           style={{ backgroundColor: "var(--primary)" }}
         >

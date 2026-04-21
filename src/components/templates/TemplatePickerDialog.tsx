@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { cn } from "@/lib/utils";
+import { seedEnglishText } from "@/lib/translationSeed";
 import type {
   BusinessType,
   CategoryTemplate,
@@ -664,6 +665,8 @@ export async function importTemplatesIntoShop(
         .insert({
           shop_id: shopId,
           name: selectedCat.name,
+          name_fr: selectedCat.name,
+          name_en: seedEnglishText(selectedCat.name),
           display_order: 999 + categoryCount,
           is_active: true,
         })
@@ -686,10 +689,16 @@ export async function importTemplatesIntoShop(
       const { error: prodError } = await supabase.from("products").insert({
         category_id: catId,
         name: p.name,
+        name_fr: p.name,
+        name_en: seedEnglishText(p.name),
         description: p.description,
+        description_fr: p.description,
+        description_en: seedEnglishText(p.description),
         price: p.price,
         tags: p.tags ?? [],
         option_label: p.option_label,
+        option_label_fr: p.option_label,
+        option_label_en: seedEnglishText(p.option_label),
         display_order: pi,
         is_available: true,
       });
@@ -720,7 +729,11 @@ export async function importTemplatesIntoShop(
       .insert({
         shop_id: shopId,
         name: bundle.name,
+        name_fr: bundle.name,
+        name_en: seedEnglishText(bundle.name),
         description: bundle.description,
+        description_fr: bundle.description,
+        description_en: seedEnglishText(bundle.description),
         price: bundle.price,
         is_active: true,
       })
@@ -745,6 +758,8 @@ export async function importTemplatesIntoShop(
         bundle_id: newBundle.id,
         category_id: shopCatId,
         label: catName || "Choix",
+        label_fr: catName || "Choix",
+        label_en: seedEnglishText(catName || "Choix"),
         quantity: 1,
         display_order: si,
       });

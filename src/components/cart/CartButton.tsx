@@ -7,14 +7,17 @@ import { useCartDrawer } from "./CartDrawerContext";
 import { usePublicShop } from "@/components/shop/PublicShopContext";
 import { STOREFRONT_CART_CTA_CLASSNAME } from "@/lib/constants";
 import { cn, formatPrice } from "@/lib/utils";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 
 export function CartButton() {
+  const { t } = useLocale();
   const { isDemoMode } = usePublicShop();
   const count = useCartStore((s) => s.getCount());
   const total = useCartStore((s) => s.getTotal());
   const { openDrawer } = useCartDrawer();
 
-  const label = `Voir le panier, ${count} article${count > 1 ? "s" : ""}, total ${formatPrice(total)}`;
+  const label = `${t("cart.seeCart")}, ${count} ${t("cart.itemsLabel")}, ${t("cart.total").toLowerCase()} ${formatPrice(total)}`;
 
   const countBadgeClass = isDemoMode
     ? "bg-white text-[10px] font-bold text-neutral-950 ring-1 ring-black/10"
@@ -54,11 +57,14 @@ export function CartButton() {
                     {count > 9 ? "9+" : count}
                   </span>
                 </div>
-                <span className="font-semibold whitespace-nowrap">Voir le panier</span>
+                <span className="font-semibold whitespace-nowrap">{t("cart.seeCart")}</span>
               </button>
               <span className="flex min-h-11 items-center text-sm font-bold tabular-nums text-neutral-900">
                 {formatPrice(total)}
               </span>
+            </div>
+            <div className="mt-2 flex justify-center">
+              <LocaleSwitcher />
             </div>
           </div>
         </motion.div>
