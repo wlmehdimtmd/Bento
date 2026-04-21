@@ -26,14 +26,14 @@ interface RecentOrdersProps {
   orders: OrderRow[];
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, label }: { status: string; label: string }) {
   const found = ORDER_STATUSES.find((s) => s.value === status);
   return (
     <Badge
       variant="outline"
       style={found ? { borderColor: found.color, color: found.color } : undefined}
     >
-      {found?.label ?? status}
+      {label}
     </Badge>
   );
 }
@@ -49,7 +49,7 @@ function relativeTime(iso: string, locale: "fr" | "en") {
 }
 
 export function RecentOrders({ orders }: RecentOrdersProps) {
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
   const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
 
   if (orders.length === 0) {
@@ -80,10 +80,17 @@ export function RecentOrders({ orders }: RecentOrdersProps) {
               </TableCell>
               <TableCell className="font-medium">{order.customer_name}</TableCell>
               <TableCell className="text-right font-medium">
-                {formatPrice(order.total_amount)}
+                {formatPrice(
+                  order.total_amount,
+                  "EUR",
+                  locale === "en" ? "en-US" : "fr-FR"
+                )}
               </TableCell>
               <TableCell>
-                <StatusBadge status={order.status} />
+                <StatusBadge
+                  status={order.status}
+                  label={t(`order.status.${order.status}`, order.status)}
+                />
               </TableCell>
               <TableCell className="text-right text-xs text-muted-foreground">
                 {relativeTime(order.created_at, locale)}
