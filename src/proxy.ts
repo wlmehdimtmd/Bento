@@ -93,7 +93,16 @@ export async function proxy(request: NextRequest) {
       redirect.headers.set("Cache-Control", "no-store");
       return redirect;
     }
-    const { response } = await getSupabaseUserAndResponse(request);
+    const { response, user } = await getSupabaseUserAndResponse(request);
+    // Cookies présents mais JWT invalide / expiré — même traitement que non connecté
+    // (évite un aller-retour edge → layout RSC avant /login).
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      const redirect = NextResponse.redirect(url);
+      redirect.headers.set("Cache-Control", "no-store");
+      return redirect;
+    }
     response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
     return response;
   }

@@ -95,14 +95,14 @@ src/
 │   │   └── cartStore.ts         # Zustand — panier (items, quantités, total)
 │   ├── supabase/
 │   │   ├── client.ts            # createBrowserClient
-│   │   ├── server.ts            # createServerClient
-│   │   └── middleware.ts        # Auth middleware
+│   │   └── server.ts            # createServerClient
 │   ├── stripe/
 │   │   ├── client.ts
 │   │   └── server.ts
 │   ├── types.ts                 # Types globaux (Shop, Category, Product…)
 │   ├── constants.ts             # Constantes (allergènes, modes commande…)
 │   └── utils.ts                 # Helpers (formatPrice, cn, slugify…)
+└── proxy.ts                     # Convention Next.js 16+ (ex-middleware) — edge : auth, rate limit, redirects
 ```
 
 ---
