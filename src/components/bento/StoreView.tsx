@@ -279,10 +279,12 @@ export function StoreView({
   // ── Product loader (shared by category nav and bundle detail) ──
 
   async function loadProductsForCategory(categoryId: string): Promise<PublicProduct[]> {
+    const categoryEmoji = categories.find((c) => c.id === categoryId)?.icon_emoji;
     if (loadCategoryProductsProp) {
       const list = await loadCategoryProductsProp(categoryId);
       return list.map((p) => ({
         ...p,
+        fallback_emoji: p.fallback_emoji ?? categoryEmoji ?? "🍽️",
         tags: Array.isArray(p.tags) ? (p.tags as string[]) : [],
       }));
     }
@@ -319,6 +321,7 @@ export function StoreView({
         }),
         price: row.price,
         image_url: row.image_url,
+        fallback_emoji: categoryEmoji ?? "🍽️",
         tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
         option_label: pickLocalized(locale, {
           fr: row.option_label_fr,
@@ -452,6 +455,7 @@ export function StoreView({
       price: product.price,
       quantity: 1,
       imageUrl: product.image_url,
+      fallbackEmoji: product.fallback_emoji,
       description: product.description,
       tags: product.tags,
       isBundle: false,

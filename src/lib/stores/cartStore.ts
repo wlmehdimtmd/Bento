@@ -15,6 +15,7 @@ export interface CartItem {
   price: number;
   quantity: number;
   imageUrl?: string | null;
+  fallbackEmoji?: string;
   description?: string | null;
   tags?: string[];
   optionValue?: string;

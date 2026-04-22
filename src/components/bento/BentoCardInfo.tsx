@@ -84,23 +84,16 @@ export function BentoCardInfo({
       disableHover
       className={cn("flex flex-col", omitSizeClasses && "h-full min-h-0", cardClassName)}
     >
-      {!hasSingleRowHeight && (
+      {!hasSingleRowHeight && coverUrl && (
         <div className="relative h-52 w-full shrink-0 bg-muted">
-          {coverUrl ? (
-            <Image
-              src={coverUrl}
-              alt={shopName}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-            />
-          ) : (
-            <div
-              className="h-full w-full"
-              style={{ backgroundColor: "var(--primary)" }}
-            />
-          )}
+          <Image
+            src={coverUrl}
+            alt={shopName}
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="object-cover"
+          />
         </div>
       )}
 

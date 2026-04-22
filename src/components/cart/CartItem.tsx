@@ -37,7 +37,7 @@ export function CartItemRow({ item, onReview }: CartItemRowProps) {
           />
         ) : (
           <span className="flex h-full w-full items-center justify-center text-lg">
-            {item.isBundle ? "🎁" : "🍽️"}
+            {item.isBundle ? "🎁" : (item.fallbackEmoji ?? "🍽️")}
           </span>
         )}
       </div>

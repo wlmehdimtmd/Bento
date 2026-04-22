@@ -75,7 +75,7 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
               <Image src={item.imageUrl} alt={item.name} fill className="object-cover" sizes="64px" />
             ) : (
               <span className="flex h-full w-full items-center justify-center text-2xl">
-                {item.isBundle ? "🎁" : "🍽️"}
+                {item.isBundle ? "🎁" : (item.fallbackEmoji ?? "🍽️")}
               </span>
             )}
           </div>

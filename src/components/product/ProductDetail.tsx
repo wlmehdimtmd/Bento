@@ -39,6 +39,7 @@ export interface PublicProduct {
   description: string | null;
   price: number;
   image_url: string | null;
+  fallback_emoji?: string;
   tags: string[];
   option_label: string | null;
   is_available: boolean;
@@ -84,6 +85,7 @@ function ProductDetailContent({
       price: product.price,
       quantity,
       imageUrl: product.image_url,
+      fallbackEmoji: product.fallback_emoji,
       description: product.description,
       tags: product.tags,
       optionValue: optionValue.trim() || undefined,
@@ -213,7 +215,7 @@ function ProductDetailContent({
           sizes="(max-width: 640px) 100vw, 480px"
         />
       ) : (
-        <span className="text-7xl select-none">🍽️</span>
+        <span className="text-7xl select-none">{product.fallback_emoji ?? "🍽️"}</span>
       )}
     </div>
   );

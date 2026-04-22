@@ -9,6 +9,7 @@
     "lint": "eslint",
     "check:shop": "node scripts/check-public-shop.mjs",
     "seed:local:multi-storefronts": "node scripts/seed-local-multi-storefronts.mjs",
+    "generate:local:storefront-assets": "node scripts/generate-local-storefront-assets.mjs",
     "supabase:link": "npx supabase link --project-ref pnvkrxdaviejwjuoxjar --yes",
     "supabase:push": "npx supabase db push --yes"
   },
