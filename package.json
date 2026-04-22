@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "predev": "test ! -f src/middleware.ts && test ! -f middleware.ts || (echo 'middleware.ts interdit: utiliser src/proxy.ts' && exit 1)",
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

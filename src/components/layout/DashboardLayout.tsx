@@ -42,7 +42,7 @@ export function DashboardLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setMobileOpen(false);
   }, [pathname]);
 

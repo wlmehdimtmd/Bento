@@ -578,6 +578,9 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
             <Link href="/terms" className="hover:text-foreground transition-colors">
               {t("landing.footer.terms")}
             </Link>
+            <Link href="/cgv" className="hover:text-foreground transition-colors">
+              {t("landing.footer.cgv")}
+            </Link>
           </div>
         </div>
       </footer>

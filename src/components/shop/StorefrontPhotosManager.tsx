@@ -101,14 +101,18 @@ export function StorefrontPhotosManager({ shopId }: StorefrontPhotosManagerProps
         setLoading(false);
         return;
       }
-      toast.error(tr("Impossible de charger les photos de la vitrine.", "Unable to load storefront photos."));
+      toast.error(
+        locale === "en"
+          ? "Unable to load storefront photos."
+          : "Impossible de charger les photos de la vitrine."
+      );
       setLoading(false);
       return;
     }
 
     setPhotos((data ?? []) as StorefrontPhotoRow[]);
     setLoading(false);
-  }, [shopId, supabase]);
+  }, [shopId, supabase, locale]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {

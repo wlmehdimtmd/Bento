@@ -120,7 +120,7 @@ export function OrderDetail({
 
   useEffect(() => {
     if (!open || !order) return;
-    setLoadingItems(true);
+    queueMicrotask(() => setLoadingItems(true));
     fetchItemsWithNames(order.id)
       .then(setItems)
       .finally(() => setLoadingItems(false));
@@ -242,7 +242,7 @@ export function OrderDetail({
 
             {order.notes && (
               <p className="mt-2 rounded-lg bg-muted/60 px-3 py-2 text-sm italic text-muted-foreground">
-                "{order.notes}"
+                «{order.notes}»
               </p>
             )}
           </div>

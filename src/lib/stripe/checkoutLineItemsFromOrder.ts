@@ -55,7 +55,7 @@ export async function buildStripeLineItemsFromOrder(
     is_available: boolean;
     category_id: string;
   };
-  let productsById: Record<string, ProductRow> = {};
+  const productsById: Record<string, ProductRow> = {};
   const categoryIds = new Set<string>();
 
   if (productIds.length > 0) {
@@ -74,7 +74,7 @@ export async function buildStripeLineItemsFromOrder(
   }
 
   type CatRow = { id: string; shop_id: string };
-  let catsById: Record<string, CatRow> = {};
+  const catsById: Record<string, CatRow> = {};
   if (categoryIds.size > 0) {
     const { data: cats, error: cErr } = await admin
       .from("categories")
@@ -90,7 +90,7 @@ export async function buildStripeLineItemsFromOrder(
   }
 
   type BundleRow = { id: string; name: string; price: number; is_active: boolean; shop_id: string };
-  let bundlesById: Record<string, BundleRow> = {};
+  const bundlesById: Record<string, BundleRow> = {};
   if (bundleIds.length > 0) {
     const { data: bundles, error: bErr } = await admin
       .from("bundles")

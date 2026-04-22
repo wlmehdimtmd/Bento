@@ -32,6 +32,16 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | Deploy | Vercel | — |
 | Node | v18+ | — |
 
+## ⚠️ RÈGLE ABSOLUE - NE JAMAIS VIOLER
+
+Ce projet utilise Next.js 16 → le fichier edge s'appelle `proxy.ts`.
+- ❌ NE JAMAIS créer `middleware.ts`
+- ❌ NE JAMAIS renommer `proxy.ts` en `middleware.ts`
+- ✅ `proxy.ts` est le NOUVEAU nom de l'ancien `middleware.ts` (Next 15.2+)
+- ✅ Si tu vois une doc qui parle de `middleware.ts`, applique le même code dans `proxy.ts`
+
+Si tu trouves les deux fichiers : SUPPRIME `middleware.ts` et garde `proxy.ts`.
+
 ---
 
 ## 3. Design system & règles visuelles
@@ -102,7 +112,7 @@ src/
 │   ├── types.ts                 # Types globaux (Shop, Category, Product…)
 │   ├── constants.ts             # Constantes (allergènes, modes commande…)
 │   └── utils.ts                 # Helpers (formatPrice, cn, slugify…)
-└── proxy.ts                     # Convention Next.js 16+ (ex-middleware) — edge : auth, rate limit, redirects
+└── proxy.ts                     # Edge (Next 16) : auth Supabase, rate limit, redirections — ne pas utiliser middleware.ts
 ```
 
 ---

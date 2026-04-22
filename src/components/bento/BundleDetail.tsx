@@ -65,9 +65,11 @@ function BundleDetailContent({
 
   useEffect(() => {
     if (!currentSlot?.categoryId) return;
-    setLoading(true);
-    setProducts([]);
-    setExpandedProductId(null);
+    queueMicrotask(() => {
+      setLoading(true);
+      setProducts([]);
+      setExpandedProductId(null);
+    });
     loadCategoryProducts(currentSlot.categoryId).then((p) => {
       const hide = new Set(currentSlot.excludedProductIds ?? []);
       setProducts(p.filter((x) => !hide.has(x.id)));

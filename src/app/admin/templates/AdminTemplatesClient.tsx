@@ -453,7 +453,14 @@ export function AdminTemplatesClient({
                 <div key={bt.id} className="rounded-lg border border-border overflow-hidden">
                   <div
                     className="flex items-center justify-between px-4 py-3 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => setExpandedBt((prev) => { const n = new Set(prev); n.has(bt.id) ? n.delete(bt.id) : n.add(bt.id); return n; })}
+                    onClick={() =>
+                      setExpandedBt((prev) => {
+                        const n = new Set(prev);
+                        if (n.has(bt.id)) n.delete(bt.id);
+                        else n.add(bt.id);
+                        return n;
+                      })
+                    }
                   >
                     <div className="flex items-center gap-2 font-semibold">
                       {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -483,7 +490,14 @@ export function AdminTemplatesClient({
                           <div key={cat.id}>
                             <div
                               className="flex items-center gap-2 px-4 py-2.5 bg-background cursor-pointer hover:bg-muted/20 transition-colors"
-                              onClick={() => setExpandedCat((prev) => { const n = new Set(prev); n.has(cat.id) ? n.delete(cat.id) : n.add(cat.id); return n; })}
+                              onClick={() =>
+                                setExpandedCat((prev) => {
+                                  const n = new Set(prev);
+                                  if (n.has(cat.id)) n.delete(cat.id);
+                                  else n.add(cat.id);
+                                  return n;
+                                })
+                              }
                             >
                               {isCatExpanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                               <span className="font-medium text-sm flex-1">{cat.name}</span>

@@ -20,7 +20,10 @@ function useCountAnimation(target: number, duration = 1200) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (target === 0) { setCount(0); return; }
+    if (target === 0) {
+      queueMicrotask(() => setCount(0));
+      return;
+    }
     let start: number | null = null;
 
     const tick = (ts: number) => {

@@ -28,7 +28,7 @@ export default function RootError({ error, reset }: ErrorProps) {
           Une erreur est survenue
         </h1>
         <p className="text-muted-foreground max-w-sm text-sm">
-          {error.message || "Quelque chose s'est mal passé. Veuillez réessayer."}
+          {error.message || "Quelque chose s’est mal passé. Veuillez réessayer."}
         </p>
         {error.digest && (
           <p className="text-xs text-muted-foreground/60 font-mono">
@@ -44,7 +44,7 @@ export default function RootError({ error, reset }: ErrorProps) {
           Réessayer
         </button>
         <Link href="/" className={buttonVariants({ variant: "outline" })}>
-          Retour à l'accueil
+          Retour à l’accueil
         </Link>
       </div>
     </div>

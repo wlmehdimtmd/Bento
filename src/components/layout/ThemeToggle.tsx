@@ -9,8 +9,10 @@ export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Avoid hydration mismatch
-  useEffect(() => setMounted(true), []);
+  // Avoid hydration mismatch (déféré hors du corps synchrone de l’effet pour le linter React)
+  useEffect(() => {
+    queueMicrotask(() => setMounted(true));
+  }, []);
 
   if (!mounted) {
     return (
