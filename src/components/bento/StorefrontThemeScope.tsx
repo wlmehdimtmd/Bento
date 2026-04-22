@@ -56,7 +56,7 @@ export function StorefrontThemeScope({
         className="pointer-events-none absolute top-0 right-0 z-0 h-[320px] w-[320px] rounded-full"
         style={{
           backgroundColor: "var(--storefront-orb-color)",
-          filter: "blur(192px)",
+          filter: "blur(320px)",
         }}
       />
     </div>
