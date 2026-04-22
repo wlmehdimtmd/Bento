@@ -41,6 +41,7 @@ import {
   BUNDLES_MENU_TILE_ID,
   GALLERY_TILE_ID,
   buildDefaultStorefrontLayout,
+  compactStorefrontLayout,
   mergeStorefrontLayout,
   mobileTileOrder,
   parseStorefrontBentoLayout,
@@ -231,7 +232,36 @@ export function StoreView({
     return mergeStorefrontLayout(parsed?.lg, built);
   }, [categories, bundles, bundlesMenuGrouped, savedStorefrontLayout, visibleStorefrontPhotos.length]);
 
-  const level1Map = useMemo(() => new Map(level1Layout.map((l) => [l.i, l])), [level1Layout]);
+  const isLevel1TileRenderable = useCallback(
+    (item: StorefrontBentoLayoutItem) => {
+      if (item.i === "info" || item.i === GALLERY_TILE_ID || item.i === BUNDLES_MENU_TILE_ID) return true;
+      if (item.i.startsWith("category:")) {
+        const id = item.i.slice("category:".length);
+        return categories.some((cat) => cat.id === id);
+      }
+      if (item.i.startsWith("bundle:")) {
+        const id = item.i.slice("bundle:".length);
+        return bundles.some((bundle) => bundle.id === id);
+      }
+      return false;
+    },
+    [categories, bundles]
+  );
+
+  const renderableLevel1Layout = useMemo(
+    () => level1Layout.filter(isLevel1TileRenderable),
+    [level1Layout, isLevel1TileRenderable]
+  );
+
+  const compactedLevel1Layout = useMemo(
+    () => compactStorefrontLayout(renderableLevel1Layout),
+    [renderableLevel1Layout]
+  );
+
+  const level1Map = useMemo(
+    () => new Map(compactedLevel1Layout.map((l) => [l.i, l])),
+    [compactedLevel1Layout]
+  );
 
   const [level, setLevel] = useState<"l1" | "l2">("l1");
   const levelRef = useRef<"l1" | "l2">("l1");
@@ -510,7 +540,6 @@ export function StoreView({
           photos={visibleStorefrontPhotos}
           size={size}
           omitSizeClasses={omitSizeClasses}
-          className={!omitSizeClasses ? "col-span-2 row-span-1" : undefined}
         />
       );
     }
@@ -562,7 +591,7 @@ export function StoreView({
                 animate="show"
                 className={cn("hidden lg:grid grid-cols-4", BENTO_GRID_SURFACE_CLASS)}
               >
-                {level1Layout.map((item) => (
+                {compactedLevel1Layout.map((item) => (
                   <div
                     key={item.i}
                     style={{
@@ -577,7 +606,7 @@ export function StoreView({
               </motion.div>
 
               <BentoGrid className="lg:hidden grid-cols-2">
-                {mobileTileOrder(level1Layout).map((tileId) => {
+                {mobileTileOrder(compactedLevel1Layout).map((tileId) => {
                   const item = level1Map.get(tileId);
                   if (!item) return null;
                   return (

@@ -168,3 +168,78 @@ export function mobileTileOrder(layout: StorefrontBentoLayoutItem[]): string[] {
     .sort((a, b) => (a.y !== b.y ? a.y - b.y : a.x - b.x))
     .map((l) => l.i);
 }
+
+function collides(a: StorefrontBentoLayoutItem, b: StorefrontBentoLayoutItem): boolean {
+  return !(
+    a.x + a.w <= b.x ||
+    b.x + b.w <= a.x ||
+    a.y + a.h <= b.y ||
+    b.y + b.h <= a.y
+  );
+}
+
+function canPlaceAt(
+  item: StorefrontBentoLayoutItem,
+  placed: StorefrontBentoLayoutItem[],
+  nextX: number,
+  nextY: number
+): boolean {
+  if (nextX < 0 || nextX + item.w > STOREFRONT_BENTO_COLS || nextY < 0) return false;
+  const candidate = { ...item, x: nextX, y: nextY };
+  for (const existing of placed) {
+    if (collides(candidate, existing)) return false;
+  }
+  return true;
+}
+
+/**
+ * Compaction verticale stable (sans collision) en conservant au mieux l’ordre visuel.
+ * Le tri se base sur y puis x puis ordre d’origine, puis chaque tuile remonte au plus haut.
+ */
+export function compactStorefrontLayout(
+  layout: StorefrontBentoLayoutItem[]
+): StorefrontBentoLayoutItem[] {
+  const ordered = [...layout]
+    .map((item, idx) => ({ item, idx }))
+    .sort((a, b) => {
+      if (a.item.y !== b.item.y) return a.item.y - b.item.y;
+      if (a.item.x !== b.item.x) return a.item.x - b.item.x;
+      return a.idx - b.idx;
+    });
+
+  const placed: StorefrontBentoLayoutItem[] = [];
+
+  for (const { item } of ordered) {
+    const clampedWidth = Math.min(Math.max(item.w, item.minW ?? 1), item.maxW ?? STOREFRONT_BENTO_COLS);
+    const nextItem: StorefrontBentoLayoutItem = { ...item, w: clampedWidth };
+    const maxStartX = STOREFRONT_BENTO_COLS - nextItem.w;
+    let found = false;
+
+    for (let y = 0; y <= nextItem.y; y++) {
+      for (let x = 0; x <= maxStartX; x++) {
+        if (canPlaceAt(nextItem, placed, x, y)) {
+          placed.push({ ...nextItem, x, y });
+          found = true;
+          break;
+        }
+      }
+      if (found) break;
+    }
+
+    if (!found) {
+      let y = Math.max(0, nextItem.y);
+      while (!found) {
+        for (let x = 0; x <= maxStartX; x++) {
+          if (canPlaceAt(nextItem, placed, x, y)) {
+            placed.push({ ...nextItem, x, y });
+            found = true;
+            break;
+          }
+        }
+        y += 1;
+      }
+    }
+  }
+
+  return placed;
+}
