@@ -40,6 +40,8 @@
 - **Border-radius** : `rounded-2xl` sur les cartes bento
 - **Toasts** : shadcn Sonner — **TOUJOURS `position="top-center"`** — jamais en bas (le pouce navigue en bas sur mobile → clics accidentels sur "Commander")
 - **Responsive** : mobile-first — 1 col mobile, 2 col tablette, 3 col desktop
+- **Thèmes (light / dark)** : toute consigne ou modification **UI** implique une vérification dans **les deux** modes (lisibilité, contrastes, bordures, fonds, overlays, médias). Ne pas valider sur un seul thème.
+- **i18n** : l’interface est **multilingue** — tout libellé utilisateur nouveau doit être traduit pour **chaque** locale supportée (`src/lib/i18nMessages.ts`, `useLocale().t()`, ou schéma équivalent côté serveur). Éviter les chaînes en dur dans les composants pour du texte affiché ; aligner les clés entre locales (contrôle possible via `src/scripts/checkI18nCoverage.ts`).
 
 ---
 
