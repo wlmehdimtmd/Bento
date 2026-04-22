@@ -110,7 +110,7 @@ export function SessionAutoLogoutPreferenceSection({
     if (!ok) setDisableAutoLogout(previous);
   }
 
-  async function handleTimeoutChange(nextValue: string) {
+  async function updateTimeoutPreference(nextValue: string) {
     const parsed = Number(nextValue);
     if (!TIMEOUT_OPTIONS_MINUTES.includes(parsed as (typeof TIMEOUT_OPTIONS_MINUTES)[number])) return;
 
@@ -118,6 +118,11 @@ export function SessionAutoLogoutPreferenceSection({
     setTimeoutMinutes(parsed);
     const ok = await persist(disableAutoLogout, parsed);
     if (!ok) setTimeoutMinutes(previous);
+  }
+
+  function handleTimeoutChange(nextValue: string | null) {
+    if (nextValue === null) return;
+    void updateTimeoutPreference(nextValue);
   }
 
   return (

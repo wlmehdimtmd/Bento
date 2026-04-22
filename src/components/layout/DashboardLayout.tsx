@@ -65,7 +65,7 @@ export function DashboardLayout({
       ? autoLogoutTimeoutMinutes
       : 15;
     const timeoutMs = timeoutMinutes * 60 * 1000;
-    let timeoutId: ReturnType<typeof window.setTimeout> | null = null;
+    let timeoutId: number | null = null;
     let isLoggingOut = false;
 
     const triggerAutoLogout = async () => {
