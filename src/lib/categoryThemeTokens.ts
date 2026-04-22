@@ -97,13 +97,13 @@ export const CATEGORY_THEME_TOKENS: Record<CategoryThemeKey, CategoryThemeScale>
     label: "Neutre",
     light: {
       background: "#f7f7f7",
-      surface: "#f6f6f6",
+      surface: "#ffffffb3",
       card: CATEGORY_THEME_CARD_SEMI,
       text: TEXT_LIGHT,
     },
     dark: {
       background: "#000000",
-      surface: "#141414",
+      surface: "#fbfbfb1a",
       card: CATEGORY_THEME_CARD_DARK_SEMI,
       text: TEXT_DARK,
     },
@@ -112,14 +112,14 @@ export const CATEGORY_THEME_TOKENS: Record<CategoryThemeKey, CategoryThemeScale>
   blue: {
     label: "Bleu",
     light: {
-      background: "#e9f1fb",
-      surface: "#f1f6fd",
+      background: "#F2F6FD",
+      surface: "#ffffffb3",
       card: CATEGORY_THEME_CARD_SEMI,
       text: TEXT_LIGHT,
     },
     dark: {
       background: "#000d19",
-      surface: "#011627",
+      surface: "#fbfbfb1a",
       card: CATEGORY_THEME_CARD_DARK_SEMI,
       text: TEXT_DARK,
     },
@@ -128,14 +128,14 @@ export const CATEGORY_THEME_TOKENS: Record<CategoryThemeKey, CategoryThemeScale>
   turquoise: {
     label: "Turquoise",
     light: {
-      background: "#E4F2F5",
-      surface: "#f1f6fd",
+      background: "#F2FBFD",
+      surface: "#ffffffb3",
       card: CATEGORY_THEME_CARD_SEMI,
       text: TEXT_LIGHT,
     },
     dark: {
       background: "#001114",
-      surface: "#011627",
+      surface: "#fbfbfb1a",
       card: CATEGORY_THEME_CARD_DARK_SEMI,
       text: TEXT_DARK,
     },
@@ -144,14 +144,14 @@ export const CATEGORY_THEME_TOKENS: Record<CategoryThemeKey, CategoryThemeScale>
   emerald: {
     label: "Emerald",
     light: {
-      background: "#eaf6f4",
-      surface: "#f0faf8",
+      background: "#F2FDFB",
+      surface: "#ffffffb3",
       card: CATEGORY_THEME_CARD_SEMI,
       text: TEXT_LIGHT,
     },
     dark: {
       background: "#04100e",
-      surface: "#061c18",
+      surface: "#fbfbfb1a",
       card: CATEGORY_THEME_CARD_DARK_SEMI,
       text: TEXT_DARK,
     },
@@ -160,14 +160,14 @@ export const CATEGORY_THEME_TOKENS: Record<CategoryThemeKey, CategoryThemeScale>
   rose: {
     label: "Rose",
     light: {
-      background: "#f5ebf9",
-      surface: "#f8f0fb",
+      background: "#FAF2FD",
+      surface: "#ffffffb3",
       card: CATEGORY_THEME_CARD_SEMI,
       text: TEXT_LIGHT,
     },
     dark: {
       background: "#110915",
-      surface: "#1a101f",
+      surface: "#fbfbfb1a",
       card: CATEGORY_THEME_CARD_DARK_SEMI,
       text: TEXT_DARK,
     },
@@ -176,14 +176,14 @@ export const CATEGORY_THEME_TOKENS: Record<CategoryThemeKey, CategoryThemeScale>
   amber: {
     label: "Ambre",
     light: {
-      background: "#fbf3ee",
-      surface: "#fdf7f2",
+      background: "#FDF6F2",
+      surface: "#ffffffb3",
       card: CATEGORY_THEME_CARD_SEMI,
       text: TEXT_LIGHT,
     },
     dark: {
       background: "#140700",
-      surface: "#231008",
+      surface: "#fbfbfb1a",
       card: CATEGORY_THEME_CARD_DARK_SEMI,
       text: TEXT_DARK,
     },

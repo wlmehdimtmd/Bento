@@ -16,8 +16,8 @@ const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/;
 
 /** Couleur du halo vitrine (mode clair / mode sombre). */
 const STOREFRONT_ORB_COLORS: Record<CategoryThemeKey, { light: string; dark: string }> = {
-  neutral: { light: "#c9e1f9", dark: "#6fa0ff" },
-  blue: { light: "#cae1f8", dark: "#00315e" },
+  neutral: { light: "#FFFFFF", dark: "#5F5F5F" },
+  blue: { light: "#cae1f8", dark: "#00346D" },
   turquoise: { light: "#accfd6", dark: "#004c5a" },
   emerald: { light: "#abd5ce", dark: "#124941" },
   rose: { light: "#ceb0d8", dark: "#381e45" },
