@@ -14,10 +14,27 @@ interface DashboardLayoutProps {
   shops: { id: string; name: string }[];
   /** Commandes à traiter (hors livrées / annulées), pour le badge « Commandes ». */
   activeOrdersCount?: number;
+  disableAutoLogout?: boolean;
+  autoLogoutTimeoutMinutes?: number;
   children: React.ReactNode;
 }
 
-export function DashboardLayout({ shops, activeOrdersCount = 0, children }: DashboardLayoutProps) {
+const INACTIVITY_EVENTS: Array<keyof WindowEventMap> = [
+  "mousemove",
+  "mousedown",
+  "keydown",
+  "scroll",
+  "touchstart",
+  "pointerdown",
+];
+
+export function DashboardLayout({
+  shops,
+  activeOrdersCount = 0,
+  disableAutoLogout = false,
+  autoLogoutTimeoutMinutes = 15,
+  children,
+}: DashboardLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { locale } = useLocale();
   const tr = (fr: string, en: string) => (locale === "en" ? en : fr);
@@ -40,6 +57,57 @@ export function DashboardLayout({ shops, activeOrdersCount = 0, children }: Dash
     });
     return () => subscription.unsubscribe();
   }, [router]);
+
+  useEffect(() => {
+    if (disableAutoLogout) return;
+
+    const timeoutMinutes = [5, 10, 15, 30, 60].includes(autoLogoutTimeoutMinutes)
+      ? autoLogoutTimeoutMinutes
+      : 15;
+    const timeoutMs = timeoutMinutes * 60 * 1000;
+    let timeoutId: ReturnType<typeof window.setTimeout> | null = null;
+    let isLoggingOut = false;
+
+    const triggerAutoLogout = async () => {
+      if (isLoggingOut) return;
+      isLoggingOut = true;
+      try {
+        await fetch("/api/auth/logout", { method: "POST" });
+      } catch (error) {
+        console.error("[dashboard] auto-logout request failed", error);
+        const supabase = createClient();
+        await supabase.auth.signOut({ scope: "global" });
+      } finally {
+        router.push("/login");
+      }
+    };
+
+    const resetInactivityTimer = () => {
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+      timeoutId = window.setTimeout(() => {
+        void triggerAutoLogout();
+      }, timeoutMs);
+    };
+
+    INACTIVITY_EVENTS.forEach((eventName) => {
+      window.addEventListener(eventName, resetInactivityTimer, { passive: true });
+    });
+
+    document.addEventListener("visibilitychange", resetInactivityTimer);
+    resetInactivityTimer();
+
+    return () => {
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+      INACTIVITY_EVENTS.forEach((eventName) => {
+        window.removeEventListener(eventName, resetInactivityTimer);
+      });
+      document.removeEventListener("visibilitychange", resetInactivityTimer);
+    };
+  }, [autoLogoutTimeoutMinutes, disableAutoLogout, router]);
 
   return (
     <MerchantDashboardShell className="flex min-h-screen">

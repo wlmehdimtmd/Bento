@@ -16,6 +16,8 @@ create table if not exists public.users (
   email       text not null,
   full_name   text,
   avatar_url  text,
+  disable_auto_logout boolean not null default false,
+  auto_logout_timeout_minutes integer not null default 15 check (auto_logout_timeout_minutes in (5, 10, 15, 30, 60)),
   created_at  timestamptz not null default now()
 );
 

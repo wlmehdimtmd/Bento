@@ -136,6 +136,25 @@ const fr: FlatMessages = {
   "dashboard.settings.themeLight": "Clair",
   "dashboard.settings.themeDark": "Sombre",
   "dashboard.settings.themeSystem": "Système",
+  "dashboard.settings.session.title": "Session et sécurité",
+  "dashboard.settings.session.description":
+    "Définissez après combien de temps d'inactivité l'interface se déconnecte automatiquement.",
+  "dashboard.settings.session.disableLabel": "Ne jamais déconnecter automatiquement",
+  "dashboard.settings.session.disableDescription":
+    "Recommandé quand l'interface reste ouverte pour prendre des commandes.",
+  "dashboard.settings.session.disableAriaLabel": "Désactiver la déconnexion automatique",
+  "dashboard.settings.session.timeoutLabel": "Délai d'inactivité avant déconnexion",
+  "dashboard.settings.session.timeoutOptionMinutes": "{minutes} min",
+  "dashboard.settings.session.timeoutMinutesLabel": "{minutes} minutes",
+  "dashboard.settings.session.timeoutDisabledHint":
+    "Le délai est ignoré tant que la déconnexion automatique est désactivée.",
+  "dashboard.settings.session.timeoutEnabledHint":
+    "Déconnexion automatique après {minutes} minutes sans activité.",
+  "dashboard.settings.session.saveSuccess": "Préférences de session enregistrées.",
+  "dashboard.settings.session.saveError":
+    "Impossible d'enregistrer les préférences de session.",
+  "dashboard.settings.session.migrationRequired":
+    "Fonction indisponible tant que la migration base de donnees n'est pas appliquee.",
   "dashboard.settings.dangerTitle": "Zone dangereuse",
   "dashboard.settings.dangerDescriptionPrefix": "Réinitialise entièrement la boutique",
   "dashboard.settings.dangerDescriptionSuffix":
@@ -324,6 +343,24 @@ const en: FlatMessages = {
   "dashboard.settings.themeLight": "Light",
   "dashboard.settings.themeDark": "Dark",
   "dashboard.settings.themeSystem": "System",
+  "dashboard.settings.session.title": "Session and security",
+  "dashboard.settings.session.description":
+    "Choose how long the interface can stay inactive before being signed out automatically.",
+  "dashboard.settings.session.disableLabel": "Never sign out automatically",
+  "dashboard.settings.session.disableDescription":
+    "Recommended when the interface stays open for continuous order taking.",
+  "dashboard.settings.session.disableAriaLabel": "Disable automatic sign out",
+  "dashboard.settings.session.timeoutLabel": "Inactivity timeout before sign out",
+  "dashboard.settings.session.timeoutOptionMinutes": "{minutes} min",
+  "dashboard.settings.session.timeoutMinutesLabel": "{minutes} minutes",
+  "dashboard.settings.session.timeoutDisabledHint":
+    "The timeout is ignored while automatic sign out is disabled.",
+  "dashboard.settings.session.timeoutEnabledHint":
+    "Automatic sign out after {minutes} minutes without activity.",
+  "dashboard.settings.session.saveSuccess": "Session preferences saved.",
+  "dashboard.settings.session.saveError": "Unable to save session preferences.",
+  "dashboard.settings.session.migrationRequired":
+    "Feature unavailable until the database migration is applied.",
   "dashboard.settings.dangerTitle": "Danger zone",
   "dashboard.settings.dangerDescriptionPrefix": "Fully resets the shop",
   "dashboard.settings.dangerDescriptionSuffix":

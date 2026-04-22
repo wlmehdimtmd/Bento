@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ThemePreferenceSection } from "@/components/dashboard/ThemePreferenceSection";
 import { LanguagePreferenceSection } from "@/components/dashboard/LanguagePreferenceSection";
+import { SessionAutoLogoutPreferenceSection } from "@/components/dashboard/SessionAutoLogoutPreferenceSection";
 import { ResetShopButton } from "@/components/shop/ResetShopButton";
 import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
@@ -34,6 +35,15 @@ export default async function SettingsPage() {
     .order("created_at", { ascending: true })
     .limit(1)
     .maybeSingle();
+
+  const { data: userPreferences, error: userPreferencesError } = await supabase
+    .from("users")
+    .select("disable_auto_logout, auto_logout_timeout_minutes")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const initialDisableAutoLogout = userPreferences?.disable_auto_logout ?? false;
+  const initialAutoLogoutTimeoutMinutes = userPreferences?.auto_logout_timeout_minutes ?? 15;
 
   return (
     <div className="p-6 md:p-8 space-y-8 max-w-3xl">
@@ -73,6 +83,25 @@ export default async function SettingsPage() {
           {t("dashboard.settings.appearanceDescription", "Merchant area theme")}
         </p>
         <ThemePreferenceSection />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold">
+          {t("dashboard.settings.session.title", "Session et sécurité")}
+        </h2>
+        <Separator />
+        <p className="text-sm text-muted-foreground">
+          {t(
+            "dashboard.settings.session.description",
+            "Définissez après combien de temps d'inactivité l'interface se déconnecte automatiquement."
+          )}
+        </p>
+        <SessionAutoLogoutPreferenceSection
+          userId={user.id}
+          initialDisableAutoLogout={initialDisableAutoLogout}
+          initialAutoLogoutTimeoutMinutes={initialAutoLogoutTimeoutMinutes}
+          featureAvailable={!userPreferencesError}
+        />
       </section>
 
       {firstShop ? (

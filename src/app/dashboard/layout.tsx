@@ -55,6 +55,12 @@ export default async function Layout({
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
 
+  const { data: userPreferences } = await supabase
+    .from("users")
+    .select("disable_auto_logout, auto_logout_timeout_minutes")
+    .eq("id", user.id)
+    .maybeSingle();
+
   const shopIds = (shopsForNav ?? []).map((s) => s.id as string);
   let activeOrdersCount = 0;
   if (shopIds.length > 0) {
@@ -72,6 +78,8 @@ export default async function Layout({
     <DashboardLayout
       shops={(shopsForNav ?? []).map((s) => ({ id: s.id as string, name: s.name as string }))}
       activeOrdersCount={activeOrdersCount}
+      disableAutoLogout={userPreferences?.disable_auto_logout ?? false}
+      autoLogoutTimeoutMinutes={userPreferences?.auto_logout_timeout_minutes ?? 15}
     >
       {children}
     </DashboardLayout>

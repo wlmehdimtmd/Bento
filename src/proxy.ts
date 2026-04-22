@@ -101,7 +101,14 @@ export async function proxy(request: NextRequest) {
   // Auth routes — redirect already-authenticated users to /dashboard
   if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
     if (hasSupabaseSession(request)) {
-      const { user, supabase } = await getSupabaseUserAndResponse(request);
+      const { response, user, supabase } = await getSupabaseUserAndResponse(request);
+      // Important: do not redirect if session cookies exist but resolve to no user.
+      // This situation can happen with stale/expired cookies and would cause
+      // a login <-> dashboard redirect loop.
+      if (!user) {
+        response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+        return response;
+      }
       const url = request.nextUrl.clone();
       url.pathname = (await resolveIsAdmin(supabase, user)) ? "/admin" : "/dashboard";
       const redirect = NextResponse.redirect(url);

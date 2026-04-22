@@ -807,24 +807,30 @@ export type Database = {
       }
       users: {
         Row: {
+          auto_logout_timeout_minutes: number
           avatar_url: string | null
           created_at: string | null
+          disable_auto_logout: boolean
           email: string
           full_name: string | null
           id: string
           role: string | null
         }
         Insert: {
+          auto_logout_timeout_minutes?: number
           avatar_url?: string | null
           created_at?: string | null
+          disable_auto_logout?: boolean
           email: string
           full_name?: string | null
           id: string
           role?: string | null
         }
         Update: {
+          auto_logout_timeout_minutes?: number
           avatar_url?: string | null
           created_at?: string | null
+          disable_auto_logout?: boolean
           email?: string
           full_name?: string | null
           id?: string
