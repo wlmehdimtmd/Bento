@@ -40,3 +40,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI agents — generated artifacts (don't version session outputs)
+_bmad-output/
+
+# AI agents — keep these versioned :
+# .cursor/        ← skills BMAD + symlinks Impeccable
+# .agents/        ← source skills Impeccable  
+# .claude/        ← symlinks Claude Code (futur usage)
+# _bmad/          ← config BMAD
+# AGENTS.md       ← doc projet (source unique)
+# CLAUDE.md       ← symlink vers AGENTS.md
