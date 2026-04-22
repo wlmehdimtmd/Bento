@@ -123,33 +123,28 @@ const fr: FlatMessages = {
   "dashboard.error.back": "Tableau de bord",
   "dashboard.settings.metadataTitle": "Paramètres",
   "dashboard.settings.title": "Paramètres",
-  "dashboard.settings.subtitle":
-    "Préférences de l'interface marchand. La configuration de votre vitrine (QR code, infos, avis) se fait dans",
-  "dashboard.settings.editStorefront": "Modifier ma vitrine",
-  "dashboard.settings.storefrontSettings": "Configuration vitrine",
-  "dashboard.settings.openSettingsFor": "Ouvrir la configuration de",
   "dashboard.settings.languageTitle": "Langue",
-  "dashboard.settings.languageDescription": "Choisissez la langue de l'interface.",
+  "dashboard.settings.languageDescription": "Choisissez la langue d'affichage du back-office.",
   "dashboard.settings.appearanceTitle": "Apparence",
   "dashboard.settings.appearanceDescription":
-    "Thème de l'espace marchand (clair, sombre ou selon votre appareil).",
+    "Choisissez le thème du back-office : clair, sombre ou système.",
   "dashboard.settings.themeLight": "Clair",
   "dashboard.settings.themeDark": "Sombre",
   "dashboard.settings.themeSystem": "Système",
-  "dashboard.settings.session.title": "Session et sécurité",
+  "dashboard.settings.session.title": "Session",
   "dashboard.settings.session.description":
-    "Définissez après combien de temps d'inactivité l'interface se déconnecte automatiquement.",
+    "Définissez la déconnexion automatique après inactivité.",
   "dashboard.settings.session.disableLabel": "Ne jamais déconnecter automatiquement",
   "dashboard.settings.session.disableDescription":
-    "Recommandé quand l'interface reste ouverte pour prendre des commandes.",
+    "Utile si votre écran de caisse reste ouvert en continu.",
   "dashboard.settings.session.disableAriaLabel": "Désactiver la déconnexion automatique",
-  "dashboard.settings.session.timeoutLabel": "Délai d'inactivité avant déconnexion",
+  "dashboard.settings.session.timeoutLabel": "Déconnexion automatique après",
   "dashboard.settings.session.timeoutOptionMinutes": "{minutes} min",
   "dashboard.settings.session.timeoutMinutesLabel": "{minutes} minutes",
   "dashboard.settings.session.timeoutDisabledHint":
-    "Le délai est ignoré tant que la déconnexion automatique est désactivée.",
+    "Ce délai est ignoré tant que la déconnexion automatique est désactivée.",
   "dashboard.settings.session.timeoutEnabledHint":
-    "Déconnexion automatique après {minutes} minutes sans activité.",
+    "Déconnexion après {minutes} minutes sans activité.",
   "dashboard.settings.session.saveSuccess": "Préférences de session enregistrées.",
   "dashboard.settings.session.saveError":
     "Impossible d'enregistrer les préférences de session.",
@@ -330,33 +325,28 @@ const en: FlatMessages = {
   "dashboard.error.back": "Dashboard",
   "dashboard.settings.metadataTitle": "Settings",
   "dashboard.settings.title": "Settings",
-  "dashboard.settings.subtitle":
-    "Merchant interface preferences. Storefront configuration (QR code, info, reviews) is available in",
-  "dashboard.settings.editStorefront": "Edit storefront",
-  "dashboard.settings.storefrontSettings": "Storefront settings",
-  "dashboard.settings.openSettingsFor": "Open settings for",
   "dashboard.settings.languageTitle": "Language",
-  "dashboard.settings.languageDescription": "Choose the interface language.",
+  "dashboard.settings.languageDescription": "Choose the back-office display language.",
   "dashboard.settings.appearanceTitle": "Appearance",
   "dashboard.settings.appearanceDescription":
-    "Merchant area theme (light, dark, or system default).",
+    "Choose the back-office theme: light, dark, or system.",
   "dashboard.settings.themeLight": "Light",
   "dashboard.settings.themeDark": "Dark",
   "dashboard.settings.themeSystem": "System",
-  "dashboard.settings.session.title": "Session and security",
+  "dashboard.settings.session.title": "Session",
   "dashboard.settings.session.description":
-    "Choose how long the interface can stay inactive before being signed out automatically.",
+    "Set automatic sign-out after inactivity.",
   "dashboard.settings.session.disableLabel": "Never sign out automatically",
   "dashboard.settings.session.disableDescription":
-    "Recommended when the interface stays open for continuous order taking.",
+    "Useful when your cashier screen stays open continuously.",
   "dashboard.settings.session.disableAriaLabel": "Disable automatic sign out",
-  "dashboard.settings.session.timeoutLabel": "Inactivity timeout before sign out",
+  "dashboard.settings.session.timeoutLabel": "Automatic sign out after",
   "dashboard.settings.session.timeoutOptionMinutes": "{minutes} min",
   "dashboard.settings.session.timeoutMinutesLabel": "{minutes} minutes",
   "dashboard.settings.session.timeoutDisabledHint":
     "The timeout is ignored while automatic sign out is disabled.",
   "dashboard.settings.session.timeoutEnabledHint":
-    "Automatic sign out after {minutes} minutes without activity.",
+    "Sign out after {minutes} minutes without activity.",
   "dashboard.settings.session.saveSuccess": "Session preferences saved.",
   "dashboard.settings.session.saveError": "Unable to save session preferences.",
   "dashboard.settings.session.migrationRequired":

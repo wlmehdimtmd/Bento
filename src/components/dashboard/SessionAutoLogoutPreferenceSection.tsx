@@ -5,7 +5,6 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -122,36 +121,38 @@ export function SessionAutoLogoutPreferenceSection({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <Label htmlFor="disable-auto-logout" className="text-base">
-            {t(
-              "dashboard.settings.session.disableLabel",
-              "Ne jamais déconnecter automatiquement"
+    <div className="space-y-5">
+      <div className="rounded-xl border border-border bg-muted/30 p-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <Label htmlFor="disable-auto-logout" className="text-base">
+              {t(
+                "dashboard.settings.session.disableLabel",
+                "Ne jamais déconnecter automatiquement"
+              )}
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              {t(
+                "dashboard.settings.session.disableDescription",
+                "Recommandé quand l'interface reste ouverte pour prendre des commandes."
+              )}
+            </p>
+          </div>
+          <Switch
+            id="disable-auto-logout"
+            checked={disableAutoLogout}
+            onCheckedChange={handleSwitchChange}
+            disabled={isSaving || !featureAvailable}
+            aria-label={t(
+              "dashboard.settings.session.disableAriaLabel",
+              "Désactiver la déconnexion automatique"
             )}
-          </Label>
-          <p className="text-xs text-muted-foreground">
-            {t(
-              "dashboard.settings.session.disableDescription",
-              "Recommandé quand l'interface reste ouverte pour prendre des commandes."
-            )}
-          </p>
+          />
         </div>
-        <Switch
-          id="disable-auto-logout"
-          checked={disableAutoLogout}
-          onCheckedChange={handleSwitchChange}
-          disabled={isSaving || !featureAvailable}
-          aria-label={t(
-            "dashboard.settings.session.disableAriaLabel",
-            "Désactiver la déconnexion automatique"
-          )}
-        />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="auto-logout-timeout-select">
+      <div className="space-y-2 rounded-xl border border-border p-4">
+        <Label htmlFor="auto-logout-timeout-select" className="text-sm font-medium">
           {t("dashboard.settings.session.timeoutLabel", "Délai d'inactivité avant déconnexion")}
         </Label>
         <Select
@@ -192,10 +193,10 @@ export function SessionAutoLogoutPreferenceSection({
       </div>
 
       {isSaving ? (
-        <Button type="button" variant="outline" size="sm" disabled className="w-fit">
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        <p className="inline-flex items-center text-xs text-muted-foreground">
+          <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
           {t("dashboard.common.saving", "Enregistrement…")}
-        </Button>
+        </p>
       ) : null}
     </div>
   );

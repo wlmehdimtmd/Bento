@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -6,8 +5,6 @@ import { ThemePreferenceSection } from "@/components/dashboard/ThemePreferenceSe
 import { LanguagePreferenceSection } from "@/components/dashboard/LanguagePreferenceSection";
 import { SessionAutoLogoutPreferenceSection } from "@/components/dashboard/SessionAutoLogoutPreferenceSection";
 import { ResetShopButton } from "@/components/shop/ResetShopButton";
-import { Separator } from "@/components/ui/separator";
-import { buttonVariants } from "@/components/ui/button";
 import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 import { MESSAGES } from "@/lib/i18nMessages";
 
@@ -53,43 +50,23 @@ export default async function SettingsPage() {
       >
         {t("dashboard.settings.title", "Settings")}
       </h1>
-      <p className="text-muted-foreground">
-        {t("dashboard.settings.subtitle", "Merchant interface preferences.")}{" "}
-        <strong>{t("dashboard.settings.editStorefront", "Edit storefront")}</strong> →{" "}
-        <strong>{t("dashboard.settings.storefrontSettings", "Storefront settings")}</strong>.
-      </p>
-
-      {firstShop ? (
-        <p>
-          <Link
-            href={`/dashboard/shops/${firstShop.id}/settings`}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            {t("dashboard.settings.openSettingsFor", "Open settings for")} {firstShop.name as string}
-          </Link>
-        </p>
-      ) : null}
-
-      <section className="space-y-4">
+      <section className="space-y-4 rounded-2xl border bg-card p-5">
         <h2 className="text-lg font-semibold">{t("dashboard.settings.languageTitle", "Language")}</h2>
-        <Separator />
         <LanguagePreferenceSection />
       </section>
 
-      <section className="space-y-4">
+      <section className="space-y-4 rounded-2xl border bg-card p-5">
         <h2 className="text-lg font-semibold">{t("dashboard.settings.appearanceTitle", "Appearance")}</h2>
-        <Separator />
         <p className="text-sm text-muted-foreground">
           {t("dashboard.settings.appearanceDescription", "Merchant area theme")}
         </p>
         <ThemePreferenceSection />
       </section>
 
-      <section className="space-y-4">
+      <section className="space-y-4 rounded-2xl border bg-card p-5">
         <h2 className="text-lg font-semibold">
           {t("dashboard.settings.session.title", "Session et sécurité")}
         </h2>
-        <Separator />
         <p className="text-sm text-muted-foreground">
           {t(
             "dashboard.settings.session.description",
@@ -105,17 +82,14 @@ export default async function SettingsPage() {
       </section>
 
       {firstShop ? (
-        <section className="space-y-4">
+        <section className="space-y-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-5">
           <h2 className="text-lg font-semibold text-destructive">{t("dashboard.settings.dangerTitle", "Danger zone")}</h2>
-          <Separator className="bg-destructive/20" />
-          <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-6 space-y-3">
-            <p className="text-sm text-muted-foreground">
-              {t("dashboard.settings.dangerDescriptionPrefix", "Fully resets the shop")}{" "}
-              <strong>{firstShop.name as string}</strong>
-              {t("dashboard.settings.dangerDescriptionSuffix", ": all categories will be deleted.")}
-            </p>
-            <ResetShopButton shopName={firstShop.name as string} />
-          </div>
+          <p className="text-sm text-muted-foreground">
+            {t("dashboard.settings.dangerDescriptionPrefix", "Fully resets the shop")}{" "}
+            <strong>{firstShop.name as string}</strong>
+            {t("dashboard.settings.dangerDescriptionSuffix", ": all categories will be deleted.")}
+          </p>
+          <ResetShopButton shopName={firstShop.name as string} />
         </section>
       ) : null}
     </div>
