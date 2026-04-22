@@ -18,8 +18,7 @@ export function joinAppOrigin(origin: string, path: string): string {
 
 /** Origine du navigateur (localhost, preview Vercel, prod). */
 export function authRedirectOriginFromBrowser(): string {
-  if (typeof window === "undefined") return publicAppUrl;
-  return window.location.origin;
+  return publicAppUrl;
 }
 
 /** Valeur de `redirectTo` pour `resetPasswordForEmail` (voir `recoveryEmailClient.ts`). */

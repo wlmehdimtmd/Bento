@@ -23,6 +23,25 @@ export async function POST(request: Request) {
   const meta = getAuthRequestMeta(request);
 
   const emailRedirectTo = buildAuthEmailConfirmationRedirectUrl(request);
+  if (
+    process.env.NODE_ENV === "production" &&
+    (() => {
+      try {
+        const host = new URL(emailRedirectTo).hostname.toLowerCase();
+        return host === "localhost" || host === "127.0.0.1" || host === "::1";
+      } catch {
+        return true;
+      }
+    })()
+  ) {
+    console.error("[register] Refusing signup email redirect URL in production", {
+      emailRedirectTo,
+    });
+    return NextResponse.json(
+      { error: "Auth redirect misconfiguration. Please contact support." },
+      { status: 500 }
+    );
+  }
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({

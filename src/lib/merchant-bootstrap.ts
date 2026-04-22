@@ -4,13 +4,39 @@ import { AUTH_CALLBACK_RELATIVE, joinAppOrigin } from "@/lib/authRedirectUrls";
 import type { Database } from "@/lib/supabase/database.types";
 import { slugify } from "@/lib/utils";
 
+function isLocalhostLikeOrigin(origin: string): boolean {
+  try {
+    const host = new URL(origin).hostname.toLowerCase();
+    return host === "localhost" || host === "127.0.0.1" || host === "::1";
+  } catch {
+    return false;
+  }
+}
+
 /** Origine publique de l’app : URL canonique pour les liens email (évite localhost en prod). */
 export function resolvePublicAppOrigin(request: Request): string {
   const fromEnv = process.env.NEXT_PUBLIC_BASE_URL?.trim();
+  const requestOrigin = new URL(request.url).origin.replace(/\/$/, "");
+
   if (fromEnv) {
-    return fromEnv.replace(/\/$/, "");
+    const normalizedEnvOrigin = fromEnv.replace(/\/$/, "");
+
+    // Safety: never send localhost email links from a production runtime.
+    if (
+      process.env.NODE_ENV === "production" &&
+      isLocalhostLikeOrigin(normalizedEnvOrigin)
+    ) {
+      console.error(
+        "[auth] NEXT_PUBLIC_BASE_URL points to localhost in production. Falling back to request origin.",
+        { envOrigin: normalizedEnvOrigin, requestOrigin }
+      );
+      return requestOrigin;
+    }
+
+    return normalizedEnvOrigin;
   }
-  return new URL(request.url).origin;
+
+  return requestOrigin;
 }
 
 /** URL absolue utilisée comme `emailRedirectTo` après inscription (PKCE → callback). */
