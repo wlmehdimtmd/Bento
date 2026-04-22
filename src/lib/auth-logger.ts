@@ -1,6 +1,11 @@
 import { createServiceClient } from "@/lib/supabase/server";
 
-export type AuthEventType = "login" | "login_failed" | "register" | "logout";
+export type AuthEventType =
+  | "login"
+  | "login_failed"
+  | "register"
+  | "logout"
+  | "account_deleted";
 
 interface AuthEventMeta {
   ip?: string;

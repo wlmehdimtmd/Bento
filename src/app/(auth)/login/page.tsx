@@ -12,10 +12,13 @@ import { buttonVariants } from "@/components/ui/button";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { AppBrandMark } from "@/components/layout/AppBrandMark";
 import { LOCALE_COOKIE_NAME, resolveLocale, type AppLocale } from "@/lib/i18n";
+import { MESSAGES } from "@/lib/i18nMessages";
 
 export async function generateMetadata() {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
   return {
-    title: "Log in — Bento Resto",
+    title: MESSAGES[locale]["auth.login.metaTitle"],
   };
 }
 
@@ -44,12 +47,13 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
   const { error: errorCode } = await searchParams;
   const authError = callbackErrorMessage(errorCode, locale);
+  const m = MESSAGES[locale];
 
   return (
     <div className="w-full max-w-md space-y-2">
       <Link
         href="/"
-        aria-label="Back to home"
+        aria-label={m["auth.login.backHomeAria"]}
         className={buttonVariants({ variant: "ghost", size: "icon" })}
       >
         <ChevronLeft className="h-5 w-5" />
@@ -59,10 +63,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
           <div className="flex justify-center mb-4">
             <AppBrandMark variant="auth" />
           </div>
-          <CardTitle className="text-2xl">Welcome back!</CardTitle>
-          <CardDescription>
-            Log in to manage your business.
-          </CardDescription>
+          <CardTitle className="text-2xl">{m["auth.login.pageTitle"]}</CardTitle>
+          <CardDescription>{m["auth.login.pageSubtitle"]}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-4">
           {authError ? (

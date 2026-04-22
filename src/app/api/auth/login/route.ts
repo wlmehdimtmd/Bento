@@ -1,20 +1,82 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { logAuthEvent } from "@/lib/auth-logger";
 import { resolveIsAdmin } from "@/lib/auth-utils";
 import { getAuthRequestMeta } from "@/lib/auth/requestMeta";
+import { normalizeUsername } from "@/lib/auth/usernameSchema";
+
+function looksLikeEmail(raw: string): boolean {
+  return raw.includes("@");
+}
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const body = (await request.json()) as {
+      email?: unknown;
+      identifier?: unknown;
+      password?: unknown;
+    };
     const meta = getAuthRequestMeta(request);
 
-    if (!email || !password) {
-      return NextResponse.json({ error: "Email et mot de passe requis." }, { status: 400 });
+    const rawIdentifier =
+      typeof body.identifier === "string" && body.identifier.trim().length > 0
+        ? body.identifier
+        : typeof body.email === "string"
+          ? body.email
+          : "";
+    const password = typeof body.password === "string" ? body.password : "";
+
+    if (!rawIdentifier.trim() || !password) {
+      return NextResponse.json(
+        { error: "Identifiant et mot de passe requis.", code: "validation_error" },
+        { status: 400 }
+      );
+    }
+
+    let emailForSignIn = rawIdentifier.trim();
+    if (!looksLikeEmail(emailForSignIn)) {
+      const username = normalizeUsername(emailForSignIn);
+      try {
+        const service = createServiceClient();
+        const { data: row, error: lookupError } = await service
+          .from("users")
+          .select("email")
+          .eq("username", username)
+          .maybeSingle();
+
+        if (lookupError) {
+          console.error("[api/auth/login] username lookup failed:", lookupError.message);
+          return NextResponse.json(
+            { error: "Erreur serveur de configuration/authentification.", code: "auth_server_misconfigured" },
+            { status: 503 }
+          );
+        }
+
+        if (!row?.email) {
+          await logAuthEvent("login_failed", null, meta);
+          return NextResponse.json(
+            { error: "Invalid login credentials", code: "invalid_credentials" },
+            { status: 401 }
+          );
+        }
+
+        emailForSignIn = row.email as string;
+      } catch (e) {
+        console.error("[api/auth/login] service client unavailable:", e);
+        return NextResponse.json(
+          { error: "Erreur serveur de configuration/authentification.", code: "auth_server_misconfigured" },
+          { status: 503 }
+        );
+      }
+    } else {
+      emailForSignIn = emailForSignIn.trim().toLowerCase();
     }
 
     const supabase = await createClient();
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: emailForSignIn,
+      password,
+    });
 
     if (error) {
       console.error("[api/auth/login] signInWithPassword failed:", error.message, error.code);

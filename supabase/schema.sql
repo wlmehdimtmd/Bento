@@ -14,12 +14,16 @@ create extension if not exists "uuid-ossp";
 create table if not exists public.users (
   id          uuid primary key references auth.users on delete cascade,
   email       text not null,
+  username    text not null,
   full_name   text,
   avatar_url  text,
   disable_auto_logout boolean not null default false,
   auto_logout_timeout_minutes integer not null default 15 check (auto_logout_timeout_minutes in (5, 10, 15, 30, 60)),
-  created_at  timestamptz not null default now()
+  created_at  timestamptz not null default now(),
+  constraint users_username_format_check check (username ~ '^[a-z0-9][a-z0-9_]{2,31}$')
 );
+
+create unique index if not exists users_username_lower_key on public.users (lower(username));
 
 alter table public.users enable row level security;
 
@@ -187,15 +191,55 @@ returns trigger
 language plpgsql
 security definer set search_path = public
 as $$
+declare
+  v_username text;
+  meta_username text;
+  v_base text;
+  suffix int := 0;
+  attempts int := 0;
 begin
-  insert into public.users (id, email, full_name, avatar_url)
+  meta_username := nullif(trim(new.raw_user_meta_data->>'username'), '');
+  if meta_username is not null then
+    v_username := lower(meta_username);
+  else
+    v_base := regexp_replace(lower(split_part(coalesce(new.email, 'x@example.invalid'), '@', 1)), '[^a-z0-9_]', '', 'g');
+    if v_base is null or length(v_base) < 3 then
+      v_base := 'user';
+    end if;
+    v_username := left(v_base, 32);
+  end if;
+
+  if v_username !~ '^[a-z0-9][a-z0-9_]{2,31}$' or length(v_username) > 32 then
+    v_username := 'user' || substring(replace(new.id::text, '-', ''), 1, 8);
+  end if;
+
+  v_username := left(v_username, 32);
+
+  while exists (select 1 from public.users u where lower(u.username) = lower(v_username)) loop
+    suffix := suffix + 1;
+    v_base := regexp_replace(lower(split_part(coalesce(new.email, 'x@example.invalid'), '@', 1)), '[^a-z0-9_]', '', 'g');
+    if v_base is null or length(v_base) < 2 then
+      v_base := 'u';
+    end if;
+    v_username := left(v_base, 20) || '_' || suffix::text;
+    v_username := left(v_username, 32);
+    attempts := attempts + 1;
+    if attempts > 200 then
+      v_username := 'u' || substring(replace(gen_random_uuid()::text, '-', ''), 1, 12);
+      exit;
+    end if;
+  end loop;
+
+  insert into public.users (id, email, full_name, avatar_url, username)
   values (
     new.id,
-    new.email,
+    coalesce(new.email, ''),
     new.raw_user_meta_data->>'full_name',
-    new.raw_user_meta_data->>'avatar_url'
+    new.raw_user_meta_data->>'avatar_url',
+    v_username
   )
   on conflict (id) do nothing;
+
   return new;
 end;
 $$;

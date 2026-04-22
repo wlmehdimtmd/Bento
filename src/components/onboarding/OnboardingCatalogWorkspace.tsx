@@ -318,7 +318,7 @@ export function OnboardingCatalogWorkspace({
               </div>
             </OnboardingShell>
 
-            <CartButton />
+            <CartButton showLocaleSwitcher={false} />
             <CartDrawer />
           </CartDrawerProvider>
         </PublicShopProvider>

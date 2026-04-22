@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { logAuthEvent } from "@/lib/auth-logger";
 import { buildAuthEmailConfirmationRedirectUrl } from "@/lib/merchant-bootstrap";
 import { registerBodySchema } from "@/lib/auth/registerBodySchema";
 import { getAuthRequestMeta } from "@/lib/auth/requestMeta";
 
 export async function POST(request: Request) {
-  let body: { email: string; password: string; full_name: string };
+  let body: { email: string; password: string; full_name: string; username: string };
   try {
     const raw: unknown = await request.json();
     body = registerBodySchema.parse(raw);
@@ -19,8 +19,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { email, password, full_name } = body;
+  const { email, password, full_name, username } = body;
   const meta = getAuthRequestMeta(request);
+
+  try {
+    const service = createServiceClient();
+    const { data: taken, error: takenError } = await service
+      .from("users")
+      .select("id")
+      .eq("username", username)
+      .maybeSingle();
+    if (takenError) {
+      console.error("[register] username availability check:", takenError.message);
+    } else if (taken?.id) {
+      return NextResponse.json(
+        { error: "Username is already taken", code: "username_taken" },
+        { status: 400 }
+      );
+    }
+  } catch (e) {
+    console.error("[register] service client / username check:", e);
+    // Continue: unique constraint on DB still protects if service role is missing locally.
+  }
 
   const emailRedirectTo = buildAuthEmailConfirmationRedirectUrl(request);
   if (
@@ -48,7 +68,7 @@ export async function POST(request: Request) {
     email,
     password,
     options: {
-      data: { full_name },
+      data: { full_name, username },
       emailRedirectTo,
     },
   });

@@ -126,37 +126,35 @@ export function SessionAutoLogoutPreferenceSection({
   }
 
   return (
-    <div className="space-y-5">
-      <div className="rounded-xl border border-border bg-muted/30 p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <Label htmlFor="disable-auto-logout" className="text-base">
-              {t(
-                "dashboard.settings.session.disableLabel",
-                "Ne jamais déconnecter automatiquement"
-              )}
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              {t(
-                "dashboard.settings.session.disableDescription",
-                "Recommandé quand l'interface reste ouverte pour prendre des commandes."
-              )}
-            </p>
-          </div>
-          <Switch
-            id="disable-auto-logout"
-            checked={disableAutoLogout}
-            onCheckedChange={handleSwitchChange}
-            disabled={isSaving || !featureAvailable}
-            aria-label={t(
-              "dashboard.settings.session.disableAriaLabel",
-              "Désactiver la déconnexion automatique"
+    <div className="space-y-8">
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <Label htmlFor="disable-auto-logout" className="text-base">
+            {t(
+              "dashboard.settings.session.disableLabel",
+              "Ne jamais déconnecter automatiquement"
             )}
-          />
+          </Label>
+          <p className="text-xs text-muted-foreground">
+            {t(
+              "dashboard.settings.session.disableDescription",
+              "Recommandé quand l'interface reste ouverte pour prendre des commandes."
+            )}
+          </p>
         </div>
+        <Switch
+          id="disable-auto-logout"
+          checked={disableAutoLogout}
+          onCheckedChange={handleSwitchChange}
+          disabled={isSaving || !featureAvailable}
+          aria-label={t(
+            "dashboard.settings.session.disableAriaLabel",
+            "Désactiver la déconnexion automatique"
+          )}
+        />
       </div>
 
-      <div className="space-y-2 rounded-xl border border-border p-4">
+      <div className="space-y-2">
         <Label htmlFor="auto-logout-timeout-select" className="text-sm font-medium">
           {t("dashboard.settings.session.timeoutLabel", "Délai d'inactivité avant déconnexion")}
         </Label>

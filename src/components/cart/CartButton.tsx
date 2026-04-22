@@ -10,7 +10,11 @@ import { cn, formatPrice } from "@/lib/utils";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 
-export function CartButton() {
+interface CartButtonProps {
+  showLocaleSwitcher?: boolean;
+}
+
+export function CartButton({ showLocaleSwitcher = true }: CartButtonProps) {
   const { t } = useLocale();
   const { isDemoMode } = usePublicShop();
   const count = useCartStore((s) => s.getCount());
@@ -66,9 +70,11 @@ export function CartButton() {
           </motion.div>
         )}
       </AnimatePresence>
-      <div className="pointer-events-auto flex justify-center">
-        <LocaleSwitcher />
-      </div>
+      {showLocaleSwitcher ? (
+        <div className="pointer-events-auto flex justify-center">
+          <LocaleSwitcher />
+        </div>
+      ) : null}
     </div>
   );
 }

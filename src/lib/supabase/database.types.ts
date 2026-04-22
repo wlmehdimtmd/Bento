@@ -815,6 +815,7 @@ export type Database = {
           full_name: string | null
           id: string
           role: string | null
+          username: string
         }
         Insert: {
           auto_logout_timeout_minutes?: number
@@ -825,6 +826,7 @@ export type Database = {
           full_name?: string | null
           id: string
           role?: string | null
+          username?: string
         }
         Update: {
           auto_logout_timeout_minutes?: number
@@ -835,6 +837,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           role?: string | null
+          username?: string
         }
         Relationships: []
       }

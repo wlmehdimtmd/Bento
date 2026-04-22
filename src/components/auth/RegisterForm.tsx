@@ -14,22 +14,42 @@ import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { ensureDefaultShopForOwner } from "@/lib/merchant-bootstrap";
 import { merchantPasswordSchema } from "@/lib/auth/merchantPasswordSchema";
+import { usernameSchema } from "@/lib/auth/usernameSchema";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
 const registerSchema = z.object({
-  full_name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
+  full_name: z.string().trim().min(2, "dashboard.account.validation.fullNameMin"),
+  username: usernameSchema,
+  email: z.string().trim().email("dashboard.account.validation.emailInvalid"),
   password: merchantPasswordSchema,
 });
 
 type RegisterValues = z.infer<typeof registerSchema>;
+
+function translateUsernameZodCode(
+  code: string | undefined,
+  t: (key: string, fallback?: string) => string
+): string {
+  switch (code) {
+    case "ERR_USERNAME_MIN":
+      return t("dashboard.account.validation.usernameMin", "Le nom d’utilisateur doit contenir au moins 3 caractères.");
+    case "ERR_USERNAME_MAX":
+      return t("dashboard.account.validation.usernameMax", "Le nom d’utilisateur ne peut pas dépasser 32 caractères.");
+    case "ERR_USERNAME_FORMAT":
+      return t(
+        "dashboard.account.validation.usernameFormat",
+        "Lettres minuscules, chiffres et tirets bas uniquement (3 à 32 caractères, commence par une lettre ou un chiffre)."
+      );
+    default:
+      return code ?? "";
+  }
+}
 
 function mapAuthError(message: string): string {
   if (
     message.includes("already registered") ||
     message.includes("already been registered")
   ) {
-    // Do not reveal whether the email is already taken.
     return "If this address is valid, you will receive a confirmation email.";
   }
   if (message.includes("Password should be at least")) {
@@ -42,7 +62,7 @@ function mapAuthError(message: string): string {
 }
 
 export function RegisterForm() {
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
@@ -90,7 +110,6 @@ export function RegisterForm() {
     const supabase = createClient();
 
     try {
-      // 1. Create account through server route (IP + user-agent logging)
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -98,15 +117,34 @@ export function RegisterForm() {
           email: values.email,
           password: values.password,
           full_name: values.full_name,
+          username: values.username,
         }),
       });
 
       if (!res.ok) {
-        const data = await res.json();
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          code?: string;
+        };
         console.error("[register] signUp failed", {
           error: data.error,
+          code: data.code,
           timestamp: new Date().toISOString(),
         });
+        if (data.code === "username_taken") {
+          setServerError(t("dashboard.register.usernameTaken"));
+          return;
+        }
+        if (data.code === "validation_error" && typeof data.error === "string") {
+          setServerError(
+            data.error.startsWith("ERR_USERNAME_")
+              ? translateUsernameZodCode(data.error, t)
+              : data.error.startsWith("dashboard.")
+                ? t(data.error, data.error)
+                : data.error
+          );
+          return;
+        }
         setServerError(mapAuthError(data.error ?? ""));
         return;
       }
@@ -122,14 +160,11 @@ export function RegisterForm() {
         return;
       }
 
-      // If Supabase requires email confirmation, session is null.
-      // Password is persisted; user must confirm first.
       if (!hasSession) {
         setAwaitingConfirmation(true);
         return;
       }
 
-      // 2. Create shop (requires session cookie set by register route)
       const shopResult = await ensureDefaultShopForOwner(
         supabase,
         userId,
@@ -199,9 +234,28 @@ export function RegisterForm() {
           {...register("full_name")}
           aria-invalid={!!errors.full_name}
         />
-        {errors.full_name && (
-          <p className="text-sm text-destructive">{errors.full_name.message}</p>
-        )}
+        {errors.full_name?.message ? (
+          <p className="text-sm text-destructive">{t(errors.full_name.message, errors.full_name.message)}</p>
+        ) : null}
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="username">{t("dashboard.register.usernameLabel")}</Label>
+        <Input
+          id="username"
+          type="text"
+          placeholder={t("dashboard.register.usernamePlaceholder")}
+          autoComplete="username"
+          disabled={isSubmitting}
+          {...register("username")}
+          aria-invalid={!!errors.username}
+        />
+        <p className="text-xs text-muted-foreground">{t("dashboard.register.usernameHint")}</p>
+        {errors.username?.message ? (
+          <p className="text-sm text-destructive">
+            {translateUsernameZodCode(String(errors.username.message), t)}
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-1.5">
@@ -215,9 +269,9 @@ export function RegisterForm() {
           {...register("email")}
           aria-invalid={!!errors.email}
         />
-        {errors.email && (
-          <p className="text-sm text-destructive">{errors.email.message}</p>
-        )}
+        {errors.email?.message ? (
+          <p className="text-sm text-destructive">{t(errors.email.message, errors.email.message)}</p>
+        ) : null}
       </div>
 
       <div className="space-y-1.5">
@@ -231,9 +285,9 @@ export function RegisterForm() {
           {...register("password")}
           aria-invalid={!!errors.password}
         />
-        {errors.password && (
+        {errors.password?.message ? (
           <p className="text-sm text-destructive">{errors.password.message}</p>
-        )}
+        ) : null}
       </div>
 
       {serverError && (

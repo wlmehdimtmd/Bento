@@ -25,12 +25,12 @@ import { createImplicitEmailAuthClient } from "@/lib/supabase/recoveryEmailClien
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
+  identifier: z.string().min(1, "auth.login.identifierRequired"),
+  password: z.string().min(1, "auth.login.passwordRequired"),
 });
 
 const forgotSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("dashboard.account.validation.emailInvalid"),
 });
 
 type LoginValues = z.infer<typeof loginSchema>;
@@ -42,16 +42,19 @@ type LoginResponse = {
   code?: string;
 };
 
-function forgotPasswordToastMessage(raw: string): string {
+function forgotPasswordToastMessage(
+  raw: string,
+  t: (key: string, fallback?: string) => string
+): string {
   const lower = raw.toLowerCase();
   if (lower.includes("rate limit") || lower.includes("email rate limit")) {
-    return "Too many email requests recently (Supabase limit). Wait one hour or check Auth -> Logs in the Supabase dashboard.";
+    return t("auth.login.forgot.toastRateLimit");
   }
   return raw;
 }
 
 export function LoginForm() {
-  const { t, locale } = useLocale();
+  const { t } = useLocale();
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [forgotOpen, setForgotOpen] = useState(false);
@@ -76,7 +79,10 @@ export function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: values.email, password: values.password }),
+        body: JSON.stringify({
+          identifier: values.identifier.trim(),
+          password: values.password,
+        }),
       });
 
       if (!res.ok) {
@@ -84,14 +90,9 @@ export function LoginForm() {
         const msg: string = data.error ?? "";
         const code: string = data.code ?? "";
 
-        if (res.status === 500) {
-          // Server error - likely a failing Supabase hook
+        if (res.status === 500 || res.status === 503) {
           console.error("[login] Server error:", code, msg);
-          setServerError(
-            locale === "en"
-              ? "Server error during login. Check Supabase hook configuration."
-              : "Server error during login. Check Supabase hook configuration."
-          );
+          setServerError(t("auth.login.serverError503"));
           return;
         }
 
@@ -99,15 +100,20 @@ export function LoginForm() {
           code === "invalid_credentials" ||
           msg === "Invalid login credentials"
         ) {
-          setServerError("Incorrect email or password.");
+          setServerError(t("auth.login.invalidCredentials"));
         } else if (
           code === "email_not_confirmed" ||
           msg.includes("Email not confirmed") ||
           msg.includes("email_not_confirmed")
         ) {
-          setServerError("Check your inbox and confirm your account before logging in.");
+          setServerError(t("auth.login.emailNotConfirmed"));
         } else {
-          setServerError(`An error occurred (${code || res.status}).`);
+          setServerError(
+            t("auth.login.genericError").replace(
+              "{status}",
+              String(code || res.status)
+            )
+          );
         }
         return;
       }
@@ -118,11 +124,7 @@ export function LoginForm() {
       const redirectTo = data.redirectTo === "/admin" ? "/admin" : "/dashboard";
       router.push(redirectTo);
     } catch {
-      setServerError(
-        locale === "en"
-          ? "An unexpected error occurred. Please try again."
-          : "An unexpected error occurred. Please try again."
-      );
+      setServerError(t("auth.login.unexpectedError"));
     }
   }
 
@@ -135,65 +137,61 @@ export function LoginForm() {
       if (error) {
         console.error("[login] resetPasswordForEmail:", error.message);
         toast.error(
-          forgotPasswordToastMessage(error.message) || "Unable to send the email."
+          forgotPasswordToastMessage(error.message, t) || t("auth.login.forgot.toastSendFailed")
         );
         return;
       }
-      toast.success(
-        locale === "en"
-          ? "If this email is valid, a reset link has been sent."
-          : "If this email is valid, a reset link has been sent."
-      );
+      toast.success(t("auth.login.forgot.toastSuccess"));
       setForgotOpen(false);
       forgotForm.reset();
     } catch (err) {
       console.error("[login] forgot password:", err);
-      toast.error("An unexpected error occurred.");
+      toast.error(t("auth.login.forgot.toastUnexpectedError"));
     }
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div className="space-y-1.5">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="identifier">{t("auth.login.identifierLabel")}</Label>
         <Input
-          id="email"
-          type="email"
-          placeholder="you@example.com"
-          autoComplete="email"
+          id="identifier"
+          type="text"
+          placeholder={t("auth.login.identifierPlaceholder")}
+          autoComplete="username"
           disabled={isSubmitting}
-          {...register("email")}
-          aria-invalid={!!errors.email}
+          {...register("identifier")}
+          aria-invalid={!!errors.identifier}
         />
-        {errors.email && (
-          <p className="text-sm text-destructive">{errors.email.message}</p>
-        )}
+        {errors.identifier?.message ? (
+          <p className="text-sm text-destructive">{t(String(errors.identifier.message))}</p>
+        ) : null}
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t("auth.login.passwordLabel")}</Label>
         <Input
           id="password"
           type="password"
-          placeholder="••••••••"
+          placeholder={t("auth.login.passwordPlaceholder")}
           autoComplete="current-password"
           disabled={isSubmitting}
           {...register("password")}
           aria-invalid={!!errors.password}
         />
-        {errors.password && (
-          <p className="text-sm text-destructive">{errors.password.message}</p>
-        )}
+        {errors.password?.message ? (
+          <p className="text-sm text-destructive">{t(String(errors.password.message))}</p>
+        ) : null}
         <button
           type="button"
           className="text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-[var(--primary)]"
           onClick={() => {
             setForgotOpen(true);
-            const email = getValues("email");
-            if (email) forgotForm.setValue("email", email);
+            const id = getValues("identifier")?.trim() ?? "";
+            if (id.includes("@")) forgotForm.setValue("email", id);
           }}
         >
-          Forgot password?
+          {t("auth.login.forgotPassword")}
         </button>
       </div>
 
@@ -207,15 +205,15 @@ export function LoginForm() {
         {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            {locale === "en" ? "Logging in..." : "Logging in..."}
+            {t("auth.login.submitting")}
           </>
         ) : (
-          locale === "en" ? "Log in" : "Log in"
+          t("auth.login.submit")
         )}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
-        {locale === "en" ? "No account yet?" : "No account yet?"}{" "}
+        {t("auth.login.noAccountPrompt")}{" "}
         <Link
           href="/register"
           className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary)]"
@@ -227,19 +225,15 @@ export function LoginForm() {
       <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{locale === "en" ? "Reset password" : "Reset password"}</DialogTitle>
-            <DialogDescription>
-              {locale === "en"
-                ? "We will send you a link to choose a new password."
-                : "We will send you a link to choose a new password."}
-            </DialogDescription>
+            <DialogTitle>{t("auth.login.dialog.resetTitle")}</DialogTitle>
+            <DialogDescription>{t("auth.login.dialog.resetDescription")}</DialogDescription>
           </DialogHeader>
           <form
             onSubmit={forgotForm.handleSubmit(onForgotSubmit)}
             className="space-y-4"
           >
             <div className="space-y-1.5">
-              <Label htmlFor="forgot-email">Email</Label>
+              <Label htmlFor="forgot-email">{t("auth.login.dialog.emailLabel")}</Label>
               <Input
                 id="forgot-email"
                 type="email"
@@ -250,7 +244,7 @@ export function LoginForm() {
               />
               {forgotForm.formState.errors.email && (
                 <p className="text-sm text-destructive">
-                  {forgotForm.formState.errors.email.message}
+                  {t(String(forgotForm.formState.errors.email.message))}
                 </p>
               )}
             </div>
@@ -261,16 +255,16 @@ export function LoginForm() {
                 onClick={() => setForgotOpen(false)}
                 disabled={forgotForm.formState.isSubmitting}
               >
-                {locale === "en" ? "Cancel" : "Cancel"}
+                {t("auth.login.dialog.cancel")}
               </Button>
               <Button type="submit" disabled={forgotForm.formState.isSubmitting}>
                 {forgotForm.formState.isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {locale === "en" ? "Sending..." : "Sending..."}
+                    {t("auth.login.dialog.sending")}
                   </>
                 ) : (
-                  locale === "en" ? "Send link" : "Send link"
+                  t("auth.login.dialog.sendLink")
                 )}
               </Button>
             </DialogFooter>
