@@ -24,6 +24,93 @@ const STOREFRONT_ORB_COLORS: Record<CategoryThemeKey, { light: string; dark: str
   amber: { light: "#dfc4b5", dark: "#51250f" },
 };
 
+type Rgb = { r: number; g: number; b: number };
+type Hsl = { h: number; s: number; l: number };
+
+function clampUnit(value: number): number {
+  return Math.min(1, Math.max(0, value));
+}
+
+function hexToRgb(hex: string): Rgb {
+  const src = hex.startsWith("#") ? hex.slice(1) : hex;
+  const normalized = src.length === 3 ? src.split("").map((c) => `${c}${c}`).join("") : src;
+  if (normalized.length !== 6) {
+    throw new Error(`Invalid hex color: ${hex}`);
+  }
+  return {
+    r: Number.parseInt(normalized.slice(0, 2), 16),
+    g: Number.parseInt(normalized.slice(2, 4), 16),
+    b: Number.parseInt(normalized.slice(4, 6), 16),
+  };
+}
+
+function rgbToHex({ r, g, b }: Rgb): string {
+  const toHex = (channel: number) => Math.round(channel).toString(16).padStart(2, "0");
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function rgbToHsl({ r, g, b }: Rgb): Hsl {
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const delta = max - min;
+  const l = (max + min) / 2;
+
+  if (delta === 0) {
+    return { h: 0, s: 0, l };
+  }
+
+  const s = delta / (1 - Math.abs(2 * l - 1));
+  let h = 0;
+  if (max === rn) h = ((gn - bn) / delta) % 6;
+  else if (max === gn) h = (bn - rn) / delta + 2;
+  else h = (rn - gn) / delta + 4;
+
+  return { h: h * 60, s: clampUnit(s), l: clampUnit(l) };
+}
+
+function hslToRgb({ h, s, l }: Hsl): Rgb {
+  const hn = ((h % 360) + 360) % 360;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((hn / 60) % 2) - 1));
+  const m = l - c / 2;
+  let rp = 0;
+  let gp = 0;
+  let bp = 0;
+
+  if (hn < 60) [rp, gp, bp] = [c, x, 0];
+  else if (hn < 120) [rp, gp, bp] = [x, c, 0];
+  else if (hn < 180) [rp, gp, bp] = [0, c, x];
+  else if (hn < 240) [rp, gp, bp] = [0, x, c];
+  else if (hn < 300) [rp, gp, bp] = [x, 0, c];
+  else [rp, gp, bp] = [c, 0, x];
+
+  return {
+    r: (rp + m) * 255,
+    g: (gp + m) * 255,
+    b: (bp + m) * 255,
+  };
+}
+
+function adjustOrbColorForMode(themeKey: CategoryThemeKey, color: string, isDark: boolean): string {
+  if (!isDark) {
+    if (themeKey === "neutral") return "#ffffff";
+    const hsl = rgbToHsl(hexToRgb(color));
+    return rgbToHex(hslToRgb({ ...hsl, s: 1, l: clampUnit(hsl.l - 0.1) }));
+  }
+  if (themeKey === "neutral") return "#cccccc";
+
+  const hsl = rgbToHsl(hexToRgb(color));
+  return rgbToHex(hslToRgb({ ...hsl, l: clampUnit(hsl.l + 0.1) }));
+}
+
+function getStorefrontOrbColor(themeKey: CategoryThemeKey, isDark: boolean): string {
+  const base = STOREFRONT_ORB_COLORS[themeKey][isDark ? "dark" : "light"];
+  return adjustOrbColorForMode(themeKey, base, isDark);
+}
+
 type StorefrontThemeButtons = {
   primaryBg: string;
   primaryText: string;
@@ -102,7 +189,7 @@ export function getStorefrontThemePreviewStyle(
     "--color-bento-accent": globalAccent,
     "--color-bento-accent-foreground": globalAccentFg,
     "--color-bento-card-bg": lightestLevelColor,
-    "--storefront-orb-color": STOREFRONT_ORB_COLORS[themeKey][isDark ? "dark" : "light"],
+    "--storefront-orb-color": getStorefrontOrbColor(themeKey, isDark),
   } as CSSProperties;
 }
 

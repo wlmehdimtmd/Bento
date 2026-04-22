@@ -104,7 +104,10 @@ function HeroDemoPreview({
                       </span>
                     </div>
                   )}
-                  <div className="absolute bottom-2 left-2 z-10 flex w-fit max-w-[calc(100%-1rem)] flex-col gap-0.5 rounded-lg bg-white/85 px-2 py-1.5 shadow-sm dark:bg-black/65 dark:shadow-none">
+                  <div
+                    className="absolute bottom-2 left-2 z-10 flex w-fit max-w-[calc(100%-1rem)] flex-col gap-0.5 rounded-lg px-2 py-1.5 shadow-sm dark:shadow-none"
+                    style={{ backgroundColor: "var(--bento-floating-surface-bg)" }}
+                  >
                     <p className="text-[11px] font-semibold text-foreground leading-snug line-clamp-2 dark:text-white">
                       {tile.label}
                     </p>

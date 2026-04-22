@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/components/i18n/LocaleProvider";
+import { Badge } from "@/components/ui/badge";
 
 interface DashboardSidebarProps {
   shops: { id: string; name: string }[];
@@ -295,13 +296,13 @@ function SidebarColumn({
           <ShoppingCart className={iconClass} />
           <span className="flex-1 text-left">{tr("Commandes", "Orders")}</span>
           {activeOrdersCount > 0 ? (
-            <span
+            <Badge
               className={cn(
-                "flex min-w-5 items-center justify-center rounded-full font-bold tabular-nums leading-none",
-                forSheet ? "px-2 py-1 text-xs" : "px-1.5 py-0.5 text-[10px]",
+                "min-w-5 justify-center rounded-full border-0 font-bold tabular-nums leading-none",
+                forSheet ? "h-auto px-2 py-1 text-xs" : "h-auto px-1.5 py-0.5 text-[10px]",
                 isActive(ordersHref)
-                  ? "bg-white/20 text-white"
-                  : "bg-[var(--primary)] text-white"
+                  ? "bg-white/20 text-white dark:bg-primary-foreground/20 dark:text-primary-foreground"
+                  : "bg-primary text-white dark:text-primary-foreground"
               )}
               aria-label={
                 locale === "en"
@@ -310,7 +311,7 @@ function SidebarColumn({
               }
             >
               {activeOrdersCount > 99 ? "99+" : activeOrdersCount}
-            </span>
+            </Badge>
           ) : null}
         </Link>
       </nav>

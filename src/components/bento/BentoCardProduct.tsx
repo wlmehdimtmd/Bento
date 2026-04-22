@@ -81,7 +81,10 @@ export function BentoCardProduct({
       )}
 
       {/* Bottom info — fond blanc 85 %, hauteur au contenu (max. largeur carte) */}
-      <div className="absolute bottom-2 left-2 z-10 flex w-fit max-w-[calc(100%-1rem)] flex-col gap-0.5 rounded-lg bg-white/85 px-2.5 py-1.5 shadow-sm dark:bg-black/65 dark:shadow-none">
+      <div
+        className="absolute bottom-2 left-2 z-10 flex w-fit max-w-[calc(100%-1rem)] flex-col gap-0.5 rounded-lg px-2.5 py-1.5 shadow-sm dark:shadow-none"
+        style={{ backgroundColor: "var(--bento-floating-surface-bg)" }}
+      >
         <p className="text-sm font-semibold leading-snug text-foreground line-clamp-2 dark:text-white">{name}</p>
         <PriceTag price={price} size="sm" className="text-foreground dark:text-white" />
       </div>

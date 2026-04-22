@@ -29,10 +29,11 @@ export function BackNavFace({
   return (
     <div
       className={cn(
-        "relative flex min-h-0 items-center",
+        "relative flex min-h-0 items-center rounded-xl",
         compact ? "gap-2.5 px-3 py-2" : "h-full gap-4 px-5",
         className
       )}
+      style={{ backgroundColor: "var(--bento-floating-surface-bg)" }}
     >
       <div
         className={cn(
