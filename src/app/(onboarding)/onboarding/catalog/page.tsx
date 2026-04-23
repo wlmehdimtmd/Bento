@@ -19,7 +19,12 @@ import {
 } from "@/lib/onboarding-load-shop";
 import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
 
-export const metadata = { title: "Your catalog — Bento Resto" };
+export async function generateMetadata() {
+  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
+  return {
+    title: locale === "en" ? "Your catalog — Bento Resto" : "Votre catalogue — Bento Resto",
+  };
+}
 
 function normalizeTags(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];

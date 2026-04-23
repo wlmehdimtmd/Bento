@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/lib/stores/cartStore";
@@ -20,8 +21,16 @@ export function CartButton({ showLocaleSwitcher = true }: CartButtonProps) {
   const count = useCartStore((s) => s.getCount());
   const total = useCartStore((s) => s.getTotal());
   const { openDrawer } = useCartDrawer();
+  const [isMounted, setIsMounted] = useState(false);
 
-  const label = `${t("cart.seeCart")}, ${count} ${t("cart.itemsLabel")}, ${t("cart.total").toLowerCase()} ${formatPrice(total)}`;
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const hydratedCount = isMounted ? count : 0;
+  const hydratedTotal = isMounted ? total : 0;
+
+  const label = `${t("cart.seeCart")}, ${hydratedCount} ${t("cart.itemsLabel")}, ${t("cart.total").toLowerCase()} ${formatPrice(hydratedTotal)}`;
 
   const countBadgeClass = isDemoMode
     ? "bg-white text-[10px] font-bold text-neutral-950 ring-1 ring-black/10"
@@ -30,7 +39,7 @@ export function CartButton({ showLocaleSwitcher = true }: CartButtonProps) {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex flex-col items-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <AnimatePresence>
-        {count > 0 && (
+        {hydratedCount > 0 && (
           <motion.div
             className="pointer-events-auto mb-2 w-max max-w-[min(100%,416px)]"
             initial={{ y: 80, opacity: 0 }}
@@ -58,13 +67,13 @@ export function CartButton({ showLocaleSwitcher = true }: CartButtonProps) {
                       countBadgeClass
                     )}
                   >
-                    {count > 9 ? "9+" : count}
+                    {hydratedCount > 9 ? "9+" : hydratedCount}
                   </span>
                 </div>
                 <span className="font-semibold whitespace-nowrap">{t("cart.seeCart")}</span>
               </button>
               <span className="flex min-h-11 items-center text-sm font-bold tabular-nums text-neutral-900">
-                {formatPrice(total)}
+                {formatPrice(hydratedTotal)}
               </span>
             </div>
           </motion.div>

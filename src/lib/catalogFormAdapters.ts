@@ -91,6 +91,8 @@ export function categoryCompletion(values: CategoryFormValues): Record<string, T
 
 export const productFormSchema = z.object({
   category_id: z.string().min(1, "Catégorie requise"),
+  option_mode: z.enum(["none", "free", "paid"]),
+  option_choices: z.array(z.string().trim().min(1).max(120)).max(20),
   translations: z.object({
     fr: z.object({
       name: z.string().min(1, "Nom requis"),
@@ -104,8 +106,37 @@ export const productFormSchema = z.object({
     }),
   }),
   price: z.number().positive("Le prix doit être supérieur à 0"),
+  option_price_delta: z.number().min(0, "Le supplément doit être positif ou nul"),
   is_available: z.boolean(),
   display_order: z.number().int().min(0),
+}).superRefine((data, ctx) => {
+  if (data.option_mode === "none") return;
+
+  const hasFrLabel = (data.translations.fr.option_label ?? "").trim().length > 0;
+  if (!hasFrLabel) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["translations", "fr", "option_label"],
+      message: "Libellé d'option requis",
+    });
+  }
+
+  if (data.option_mode !== "paid") return;
+  if (data.option_price_delta <= 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["option_price_delta"],
+      message: "Le supplément doit être supérieur à 0",
+    });
+  }
+
+  if (data.option_choices.length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["option_choices"],
+      message: "Ajoutez au moins une réponse proposée",
+    });
+  }
 });
 
 export type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -122,9 +153,16 @@ export type ProductRowInput = {
   option_label: string | null;
   option_label_fr?: string | null;
   option_label_en?: string | null;
+  option_mode?: "none" | "free" | "paid" | null;
+  option_price_delta?: number | null;
+  option_choices?: string[] | null;
   is_available: boolean;
   display_order: number;
 };
+
+function normalizeOptionMode(value: unknown): "none" | "free" | "paid" {
+  return value === "free" || value === "paid" ? value : "none";
+}
 
 export function productDefaultFormValues(
   initial?: ProductRowInput,
@@ -136,6 +174,10 @@ export function productDefaultFormValues(
       : 0.01;
   return {
     category_id: initial?.category_id ?? opts?.defaultCategoryId ?? "",
+    option_mode: normalizeOptionMode(initial?.option_mode),
+    option_choices: Array.isArray(initial?.option_choices)
+      ? initial.option_choices.filter((choice): choice is string => typeof choice === "string" && choice.trim().length > 0)
+      : [],
     translations: {
       fr: {
         name: (initial?.name_fr ?? initial?.name ?? "").trim(),
@@ -149,6 +191,10 @@ export function productDefaultFormValues(
       },
     },
     price,
+    option_price_delta: (() => {
+      const raw = Number(initial?.option_price_delta ?? 0);
+      return Number.isFinite(raw) && raw >= 0 ? raw : 0;
+    })(),
     is_available: initial?.is_available ?? true,
     display_order: initial?.display_order ?? opts?.nextDisplayOrder ?? 0,
   };
@@ -165,6 +211,10 @@ export function productFormToSavePayload(
   const descEn = (values.translations.en.description ?? "").trim() || null;
   const optFr = values.translations.fr.option_label?.trim() || null;
   const optEn = (values.translations.en.option_label ?? "").trim() || null;
+  const optionMode = values.option_mode;
+  const optionLabelFr = optionMode === "none" ? null : optFr;
+  const optionLabelEn = optionMode === "none" ? null : optEn;
+  const optionPriceDelta = optionMode === "paid" ? values.option_price_delta : 0;
   return {
     category_id: values.category_id,
     name: nameFr,
@@ -176,9 +226,12 @@ export function productFormToSavePayload(
     price: values.price,
     image_url: imageUrl,
     tags,
-    option_label: optFr,
-    option_label_fr: optFr,
-    option_label_en: optEn,
+    option_label: optionLabelFr,
+    option_label_fr: optionLabelFr,
+    option_label_en: optionLabelEn,
+    option_mode: optionMode,
+    option_price_delta: optionPriceDelta,
+    option_choices: optionMode === "none" ? [] : values.option_choices.map((choice) => choice.trim()).filter((choice) => choice.length > 0),
     is_available: values.is_available,
     display_order: values.display_order,
   };

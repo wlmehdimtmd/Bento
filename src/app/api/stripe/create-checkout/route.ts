@@ -8,6 +8,7 @@ interface RequestBody {
   /** @deprecated ignoré — les montants sont recalculés côté serveur depuis la commande */
   items?: unknown;
 }
+const STRIPE_MAX_UNIT_PRICE_EUR = 999_999.99;
 
 export async function POST(req: Request) {
   try {
@@ -42,6 +43,15 @@ export async function POST(req: Request) {
 
     if (!resolved.ok) {
       return NextResponse.json({ error: resolved.message }, { status: resolved.status });
+    }
+    const hasTooLargeUnitAmount = resolved.items.some(
+      (item) => !Number.isFinite(item.unitPrice) || item.unitPrice > STRIPE_MAX_UNIT_PRICE_EUR
+    );
+    if (hasTooLargeUnitAmount) {
+      return NextResponse.json(
+        { error: "Le montant unitaire dépasse la limite Stripe. Réduisez le prix puis réessayez." },
+        { status: 400 }
+      );
     }
 
     const { data: shop, error: shopErr } = await admin
@@ -87,6 +97,28 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: session.url });
   } catch (err) {
     console.error("[create-checkout]", err);
+    if (
+      err instanceof Error &&
+      (err.message.includes("unit_amount") ||
+        err.message.includes("amount") ||
+        err.message.includes("Invalid integer"))
+    ) {
+      return NextResponse.json(
+        { error: "Le montant est invalide pour Stripe. Réduisez le prix puis réessayez." },
+        { status: 400 }
+      );
+    }
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "type" in err &&
+      (err as { type?: string }).type === "StripeInvalidRequestError"
+    ) {
+      return NextResponse.json(
+        { error: "Le montant est invalide pour Stripe. Réduisez le prix puis réessayez." },
+        { status: 400 }
+      );
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

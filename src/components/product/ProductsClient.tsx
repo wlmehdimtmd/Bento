@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   Search,
   Package,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -110,7 +111,7 @@ export function ProductsClient({
   const [formOpen, setFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] =
     useState<ProductWithCategory | null>(null);
-  const [formSubView, setFormSubView] = useState<"main" | "photo" | "tags">("main");
+  const [formSubView, setFormSubView] = useState<"main" | "photo" | "tags" | "option">("main");
   const [defaultCatId, setDefaultCatId] = useState<string | undefined>();
 
   // Delete state
@@ -122,6 +123,7 @@ export function ProductsClient({
   const [templateOpen, setTemplateOpen] = useState(false);
   const [jsonImportOpen, setJsonImportOpen] = useState(false);
   const isMobile = useIsMobile(768);
+  const isCompactTable = useIsMobile(1120);
 
   async function handleTemplateImport(data: ImportData) {
     const supabase = createClient();
@@ -415,16 +417,20 @@ export function ProductsClient({
               <TableRow>
                 <TableHead className="w-12"></TableHead>
                 <TableHead>{tr("Produit", "Product")}</TableHead>
-                <TableHead className="hidden sm:table-cell">{tr("Catégorie", "Category")}</TableHead>
+                <TableHead className={isCompactTable ? "hidden" : "hidden sm:table-cell"}>{tr("Catégorie", "Category")}</TableHead>
                 <TableHead className="text-right">{tr("Prix", "Price")}</TableHead>
-                <TableHead className="hidden md:table-cell">{tr("Tags", "Tags")}</TableHead>
-                {!adminActions && <TableHead className="text-center w-20">{tr("Dispo", "Avail.")}</TableHead>}
-                <TableHead className="text-right w-20">{tr("Actions", "Actions")}</TableHead>
+                <TableHead className={isCompactTable ? "hidden" : "hidden md:table-cell"}>{tr("Tags", "Tags")}</TableHead>
+                {!adminActions && !isCompactTable && <TableHead className="text-center w-20">{tr("Dispo", "Avail.")}</TableHead>}
+                {!isCompactTable && <TableHead className="text-right w-20">{tr("Actions", "Actions")}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((p) => (
-                <TableRow key={p.id} className={!p.is_available ? "opacity-50" : undefined}>
+                <TableRow
+                  key={p.id}
+                  className={`${!p.is_available ? "opacity-50" : ""} cursor-pointer`}
+                  onClick={() => openEdit(p)}
+                >
                   {/* Thumbnail */}
                   <TableCell className="py-2">
                     <div className="relative h-10 w-10 rounded-lg overflow-hidden bg-muted border border-border shrink-0">
@@ -449,6 +455,9 @@ export function ProductsClient({
                     {p.option_label && (
                       <p className="text-xs text-muted-foreground truncate">
                         {tr("Option", "Option")} : {p.option_label}
+                        {p.option_mode === "paid" && Number(p.option_price_delta ?? 0) > 0
+                          ? ` (+${formatPrice(Number(p.option_price_delta))})`
+                          : ""}
                       </p>
                     )}
                     {p.description && (
@@ -459,7 +468,7 @@ export function ProductsClient({
                   </TableCell>
 
                   {/* Category */}
-                  <TableCell className="hidden sm:table-cell py-2">
+                  <TableCell className={`${isCompactTable ? "hidden" : "hidden sm:table-cell"} py-2`}>
                     <Badge variant="secondary" className="text-xs whitespace-nowrap">
                       {p.categoryName}
                     </Badge>
@@ -471,7 +480,7 @@ export function ProductsClient({
                   </TableCell>
 
                   {/* Tags */}
-                  <TableCell className="hidden md:table-cell py-2">
+                  <TableCell className={`${isCompactTable ? "hidden" : "hidden md:table-cell"} py-2`}>
                     <div className="flex flex-wrap gap-1 max-w-[160px]">
                       {(p.tags ?? []).slice(0, 4).map((t) => (
                         <TagBadge key={t} value={t} size="sm" labels={shopLabels} />
@@ -485,11 +494,12 @@ export function ProductsClient({
                   </TableCell>
 
                   {/* Toggle */}
-                  {!adminActions && (
+                  {!adminActions && !isCompactTable && (
                     <TableCell className="text-center py-2">
                       <Switch
                         checked={p.is_available}
                         onCheckedChange={() => handleToggleAvailable(p)}
+                        onClick={(e) => e.stopPropagation()}
                         size="sm"
                         aria-label={p.is_available ? tr("Désactiver", "Disable") : tr("Activer", "Enable")}
                       />
@@ -497,12 +507,16 @@ export function ProductsClient({
                   )}
 
                   {/* Actions */}
+                  {!isCompactTable && (
                   <TableCell className="text-right py-2">
                     <div className="flex justify-end gap-1">
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        onClick={() => openEdit(p)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEdit(p);
+                        }}
                         aria-label={tr("Modifier", "Edit")}
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -510,7 +524,10 @@ export function ProductsClient({
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        onClick={() => openDelete(p.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDelete(p.id);
+                        }}
                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         aria-label={tr("Supprimer", "Delete")}
                       >
@@ -518,6 +535,7 @@ export function ProductsClient({
                       </Button>
                     </div>
                   </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
@@ -552,14 +570,24 @@ export function ProductsClient({
             if (!open) setFormSubView("main");
           }}
         >
-          <DrawerContent className="flex h-auto max-h-[92vh] min-h-0 flex-col overflow-hidden p-0">
+          <DrawerContent className="mt-0 flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden rounded-none border-0 p-0 data-[vaul-drawer-direction=bottom]:max-h-[100dvh] [&>div:first-child]:hidden">
             <DrawerHeader
               className={
                 formSubView !== "main"
-                  ? "shrink-0 flex-row items-center gap-2 border-b border-border px-4 pb-3 pt-2 text-left"
-                  : "shrink-0 border-b border-border px-4 pb-3 pt-2"
+                  ? "relative shrink-0 flex-row items-center gap-2 border-b border-border px-4 pb-3 pt-2 text-left"
+                  : "relative shrink-0 border-b border-border px-4 pb-3 pt-2"
               }
             >
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="absolute right-3 top-2"
+                onClick={() => setFormOpen(false)}
+                aria-label={tr("Fermer", "Close")}
+              >
+                <X className="h-4 w-4" />
+              </Button>
               {formSubView !== "main" ? (
                 <Button type="button" variant="ghost" size="icon-sm" onClick={() => setFormSubView("main")} aria-label={tr("Retour", "Back")}>
                   <ChevronLeft className="h-4 w-4" />
@@ -570,6 +598,8 @@ export function ProductsClient({
                   ? tr("Photo du produit", "Product photo")
                   : formSubView === "tags"
                     ? tr("Allergènes et labels", "Allergens and labels")
+                    : formSubView === "option"
+                      ? tr("Options client", "Customer options")
                     : editingProduct
                       ? tr("Modifier le produit", "Edit product")
                       : tr("Nouveau produit", "New product")}
@@ -627,6 +657,8 @@ export function ProductsClient({
                   ? tr("Photo du produit", "Product photo")
                   : formSubView === "tags"
                     ? tr("Allergènes et labels", "Allergens and labels")
+                    : formSubView === "option"
+                      ? tr("Options client", "Customer options")
                     : editingProduct
                       ? tr("Modifier le produit", "Edit product")
                       : tr("Nouveau produit", "New product")}

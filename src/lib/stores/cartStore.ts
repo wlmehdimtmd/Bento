@@ -34,6 +34,7 @@ interface CartState {
   addItem: (item: Omit<CartItem, "id">) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
+  updateItemSpecialNote: (id: string, specialNote?: string) => void;
   clearCart: () => void;
 
   // Selectors (stable references — call as functions)
@@ -93,6 +94,19 @@ export const useCartStore = create<CartState>()(
         }
         set((state) => ({
           items: state.items.map((i) => (i.id === id ? { ...i, quantity } : i)),
+        }));
+      },
+
+      updateItemSpecialNote(id, specialNote) {
+        set((state) => ({
+          items: state.items.map((i) =>
+            i.id === id
+              ? {
+                  ...i,
+                  specialNote: specialNote && specialNote.trim().length > 0 ? specialNote.trim() : undefined,
+                }
+              : i
+          ),
         }));
       },
 

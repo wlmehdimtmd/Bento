@@ -41,10 +41,14 @@ function SheetContent({
   children,
   side = "right",
   showCloseButton = true,
+  closeButtonClassName,
+  closeButtonSize = "icon-sm",
   ...props
 }: SheetPrimitive.Popup.Props & {
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
+  closeButtonClassName?: string
+  closeButtonSize?: React.ComponentProps<typeof Button>["size"]
 }) {
   return (
     <SheetPortal>
@@ -65,8 +69,8 @@ function SheetContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute top-3 right-3"
-                size="icon-sm"
+                className={cn("absolute top-3 right-3", closeButtonClassName)}
+                size={closeButtonSize}
               />
             }
           >

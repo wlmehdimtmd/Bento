@@ -6,6 +6,7 @@ import type { Database } from "@/lib/supabase/database.types";
 import type { FulfillmentMode } from "@/lib/types";
 
 const LOG_PREFIX = "[orders/create]";
+const STRIPE_MAX_UNIT_PRICE_EUR = 999_999.99;
 
 const fulfillmentValues = FULFILLMENT_MODES.map((m) => m.value) as [
   FulfillmentMode,
@@ -67,6 +68,8 @@ type ProductRow = {
   price: number;
   is_available: boolean | null;
   category_id: string;
+  option_mode: string | null;
+  option_price_delta: number | null;
 };
 type CategoryRow = { id: string; shop_id: string };
 type BundleRow = {
@@ -136,7 +139,7 @@ export async function createStorefrontOrder(
   if (productIds.length > 0) {
     const { data: prods, error: pErr } = await admin
       .from("products")
-      .select("id, price, is_available, category_id")
+      .select("id, price, is_available, category_id, option_mode, option_price_delta")
       .in("id", productIds);
     if (pErr || !prods) {
       console.error(LOG_PREFIX, "products read failed", pErr?.message);
@@ -193,6 +196,9 @@ export async function createStorefrontOrder(
         console.error(LOG_PREFIX, "invalid bundle price", { bundleId: bid });
         return fail(500, "Erreur serveur.");
       }
+      if (unit > STRIPE_MAX_UNIT_PRICE_EUR) {
+        return fail(400, "Le prix unitaire dépasse la limite autorisée.");
+      }
       if (item.unitPrice !== undefined) {
         if (Math.abs(toCents(item.unitPrice) - toCents(unit)) > 1) {
           return fail(
@@ -229,20 +235,44 @@ export async function createStorefrontOrder(
       console.error(LOG_PREFIX, "invalid product price", { productId: item.productId });
       return fail(500, "Erreur serveur.");
     }
+    const optionMode = p.option_mode === "free" || p.option_mode === "paid" ? p.option_mode : "none";
+    const hasSelectedOption = Boolean(item.optionValue && item.optionValue.trim().length > 0);
+    if (optionMode !== "none" && !hasSelectedOption) {
+      return fail(400, "Une option obligatoire n'a pas été renseignée.");
+    }
+    if (optionMode === "none" && hasSelectedOption) {
+      return fail(400, "Option invalide pour ce produit.");
+    }
+    const optionSurcharge =
+      optionMode === "paid" && hasSelectedOption
+        ? Math.max(0, Number(p.option_price_delta ?? 0))
+        : 0;
+    const expectedUnit = unit + optionSurcharge;
+    if (!Number.isFinite(expectedUnit) || expectedUnit < 0) {
+      console.error(LOG_PREFIX, "invalid product price with option surcharge", {
+        productId: item.productId,
+        unit,
+        optionSurcharge,
+      });
+      return fail(500, "Erreur serveur.");
+    }
+    if (expectedUnit > STRIPE_MAX_UNIT_PRICE_EUR) {
+      return fail(400, "Le prix unitaire dépasse la limite autorisée.");
+    }
     if (item.unitPrice !== undefined) {
-      if (Math.abs(toCents(item.unitPrice) - toCents(unit)) > 1) {
+      if (Math.abs(toCents(item.unitPrice) - toCents(expectedUnit)) > 1) {
         return fail(
           400,
           "Le prix affiché ne correspond plus au catalogue. Rafraîchissez la page."
         );
       }
     }
-    sumCents += toCents(unit) * item.quantity;
+    sumCents += toCents(expectedUnit) * item.quantity;
     resolvedLines.push({
       product_id: item.productId,
       bundle_id: null,
       quantity: item.quantity,
-      unit_price: unit,
+      unit_price: expectedUnit,
       option_value: item.optionValue ?? null,
       special_note: item.specialNote ?? null,
     });

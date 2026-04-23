@@ -153,6 +153,11 @@ export async function importJsonIntoShop(
           price: product.price,
           tags: normalizeTagsForDb(product.tags ?? []),
           option_label: product.option_label?.trim() || null,
+          option_mode: product.option_mode ?? "none",
+          option_price_delta: product.option_mode === "paid" ? (product.option_price_delta ?? 0) : 0,
+          option_choices: Array.isArray(product.option_choices)
+            ? product.option_choices.map((choice) => choice.trim()).filter((choice) => choice.length > 0)
+            : [],
           is_available: product.is_available ?? true,
           display_order: nextDisplayOrder,
         })

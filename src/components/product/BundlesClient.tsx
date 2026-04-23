@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, Gift, Search, ChevronLeft } from "lucide-react";
+import { Plus, Pencil, Trash2, Gift, Search, ChevronLeft, X } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 
@@ -111,6 +111,7 @@ export function BundlesClient({
   const [jsonImportOpen, setJsonImportOpen] = useState(false);
   const [search, setSearch] = useState("");
   const isMobile = useIsMobile(768);
+  const isCompactTable = useIsMobile(1120);
 
   const displayedBundles = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -399,21 +400,22 @@ export function BundlesClient({
               <TableRow>
                 <TableHead className="w-12"></TableHead>
                 <TableHead>{tr("Formule", "Bundle")}</TableHead>
-                <TableHead className="hidden lg:table-cell max-w-[280px]">
+                <TableHead className={isCompactTable ? "hidden" : "hidden lg:table-cell max-w-[280px]"}>
                   {tr("Composition", "Composition")}
                 </TableHead>
                 <TableHead className="text-right w-28">{tr("Prix", "Price")}</TableHead>
-                {!adminActions && (
+                {!adminActions && !isCompactTable && (
                   <TableHead className="text-center w-24">{tr("Actif", "Active")}</TableHead>
                 )}
-                <TableHead className="text-right w-24">{tr("Actions", "Actions")}</TableHead>
+                {!isCompactTable && <TableHead className="text-right w-24">{tr("Actions", "Actions")}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {displayedBundles.map((bundle) => (
                 <TableRow
                   key={bundle.id}
-                  className={!bundle.is_active ? "opacity-50" : undefined}
+                  className={`${!bundle.is_active ? "opacity-50" : ""} cursor-pointer`}
+                  onClick={() => openEdit(bundle)}
                 >
                   <TableCell className="py-2">
                     <div className="relative h-10 w-10 rounded-lg overflow-hidden bg-muted border border-border shrink-0">
@@ -444,7 +446,7 @@ export function BundlesClient({
                       </p>
                     )}
                   </TableCell>
-                  <TableCell className="py-2 hidden lg:table-cell">
+                  <TableCell className={isCompactTable ? "hidden" : "py-2 hidden lg:table-cell"}>
                     <p className="text-xs text-muted-foreground truncate max-w-[280px]">
                       {bundleSlotsSummary(bundle, catMap)}
                     </p>
@@ -452,22 +454,27 @@ export function BundlesClient({
                   <TableCell className="text-right py-2 font-medium tabular-nums text-[var(--primary)]">
                     {formatPrice(bundle.price)}
                   </TableCell>
-                  {!adminActions && (
+                  {!adminActions && !isCompactTable && (
                     <TableCell className="text-center py-2">
                       <Switch
                         checked={bundle.is_active}
                         onCheckedChange={() => handleToggleActive(bundle)}
+                        onClick={(e) => e.stopPropagation()}
                         size="sm"
                         aria-label={bundle.is_active ? tr("Désactiver", "Disable") : tr("Activer", "Enable")}
                       />
                     </TableCell>
                   )}
+                  {!isCompactTable && (
                   <TableCell className="text-right py-2">
                     <div className="flex justify-end gap-1">
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        onClick={() => openEdit(bundle)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEdit(bundle);
+                        }}
                         aria-label={tr("Modifier", "Edit")}
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -475,7 +482,10 @@ export function BundlesClient({
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        onClick={() => openDelete(bundle.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDelete(bundle.id);
+                        }}
                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         aria-label={tr("Supprimer", "Delete")}
                       >
@@ -483,6 +493,7 @@ export function BundlesClient({
                       </Button>
                     </div>
                   </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
@@ -517,14 +528,24 @@ export function BundlesClient({
             if (!open) setFormSubView("main");
           }}
         >
-          <DrawerContent className="flex h-auto max-h-[92vh] min-h-0 flex-col overflow-hidden p-0">
+          <DrawerContent className="mt-0 flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden rounded-none border-0 p-0 data-[vaul-drawer-direction=bottom]:max-h-[100dvh] [&>div:first-child]:hidden">
             <DrawerHeader
               className={
                 formSubView !== "main"
-                  ? "shrink-0 flex-row items-center gap-2 border-b border-border px-4 pb-3 pt-2 text-left"
-                  : "shrink-0 border-b border-border px-4 pb-3 pt-2"
+                  ? "relative shrink-0 flex-row items-center gap-2 border-b border-border px-4 pb-3 pt-2 text-left"
+                  : "relative shrink-0 border-b border-border px-4 pb-3 pt-2"
               }
             >
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="absolute right-3 top-2"
+                onClick={() => setFormOpen(false)}
+                aria-label={tr("Fermer", "Close")}
+              >
+                <X className="h-4 w-4" />
+              </Button>
               {formSubView !== "main" ? (
                 <Button
                   type="button"

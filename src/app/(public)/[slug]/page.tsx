@@ -9,12 +9,25 @@ import { InactivePublicStorefront } from "@/components/storefront/InactivePublic
 import { LOCALE_COOKIE_NAME, resolveLocale, type AppLocale } from "@/lib/i18n";
 import { MESSAGES } from "@/lib/i18nMessages";
 import { resolvePublicShopSlug } from "@/lib/resolvePublicShopSlug";
+import { LocaleRouteSync } from "@/components/i18n/LocaleRouteSync";
 
 type Params = Promise<{ slug: string }>;
-type SearchParams = Promise<{ order?: string; session_id?: string | string[] }>;
+type SearchParams = Promise<{ order?: string; session_id?: string | string[]; lang?: string | string[] }>;
 
-export async function generateMetadata({ params }: { params: Params }) {
-  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
+function resolvePageLocale(input: string | string[] | undefined, cookieLocale: string | undefined): AppLocale {
+  const fromQuery = typeof input === "string" ? input : Array.isArray(input) ? input[0] : undefined;
+  return resolveLocale(fromQuery ?? cookieLocale);
+}
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams: SearchParams;
+}) {
+  const cookieLocale = (await cookies()).get(LOCALE_COOKIE_NAME)?.value;
+  const locale = resolvePageLocale((await searchParams).lang, cookieLocale);
   const { slug } = await params;
   const resolved = await resolvePublicShopSlug(slug);
 
@@ -84,9 +97,10 @@ export default async function ShopPage({
   params: Params;
   searchParams: SearchParams;
 }) {
-  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value) as AppLocale;
+  const cookieLocale = (await cookies()).get(LOCALE_COOKIE_NAME)?.value;
   const { slug } = await params;
-  const { order: orderStatus, session_id: sessionIdRaw } = await searchParams;
+  const { order: orderStatus, session_id: sessionIdRaw, lang } = await searchParams;
+  const locale = resolvePageLocale(lang, cookieLocale);
   const supabase = await createClient();
 
   const sessionId =
@@ -146,6 +160,7 @@ export default async function ShopPage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
+      <LocaleRouteSync locale={locale} />
       <StoreView
         shop={shop}
         categories={categories}

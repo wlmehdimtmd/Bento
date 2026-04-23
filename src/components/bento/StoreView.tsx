@@ -292,7 +292,7 @@ export function StoreView({
     const { data } = await supabase
       .from("products")
       .select(
-        "id, name, name_fr, name_en, description, description_fr, description_en, price, image_url, tags, option_label, option_label_fr, option_label_en, is_available, display_order"
+        "id, name, name_fr, name_en, description, description_fr, description_en, price, image_url, tags, option_label, option_label_fr, option_label_en, option_mode, option_choices, option_price_delta, is_available, display_order"
       )
       .eq("category_id", categoryId)
       .eq("is_available", true)
@@ -305,6 +305,9 @@ export function StoreView({
         description_en?: string | null;
         option_label_fr?: string | null;
         option_label_en?: string | null;
+        option_mode?: string | null;
+        option_choices?: string[] | null;
+        option_price_delta?: number | null;
       };
       return {
         id: row.id,
@@ -328,6 +331,10 @@ export function StoreView({
           en: row.option_label_en,
           legacy: row.option_label,
         }),
+        option_mode:
+          row.option_mode === "free" || row.option_mode === "paid" ? row.option_mode : "none",
+        option_choices: Array.isArray(row.option_choices) ? row.option_choices : [],
+        option_price_delta: Number(row.option_price_delta ?? 0),
         is_available: row.is_available ?? false,
       };
     });
@@ -443,8 +450,14 @@ export function StoreView({
     e.stopPropagation();
     if (!product.is_available) return;
 
+    const hasConfigurableOption =
+      product.option_mode === "free" ||
+      product.option_mode === "paid" ||
+      Boolean(product.option_label) ||
+      (Array.isArray(product.option_choices) && product.option_choices.length > 0);
+
     // If product has an option, open detail instead
-    if (product.option_label) {
+    if (hasConfigurableOption) {
       setDetailProduct(product);
       return;
     }

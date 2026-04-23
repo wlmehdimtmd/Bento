@@ -15,6 +15,9 @@ const productSchema = z.object({
   category_name: z.string().trim().min(1, "Le champ category_name est requis."),
   tags: z.array(z.string().trim().min(1)).max(20).optional(),
   option_label: z.string().trim().max(120).optional(),
+  option_mode: z.enum(["none", "free", "paid"]).optional(),
+  option_price_delta: z.number().min(0).optional(),
+  option_choices: z.array(z.string().trim().min(1).max(120)).max(20).optional(),
   is_available: z.boolean().optional(),
   display_order: z.number().int().min(0).optional(),
 });

@@ -11,6 +11,7 @@ import {
   ChevronDown,
   Package,
   Search,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -99,6 +100,7 @@ export function CategoriesClient({
   const [jsonImportOpen, setJsonImportOpen] = useState(false);
   const [search, setSearch] = useState("");
   const isMobile = useIsMobile(768);
+  const isCompactTable = useIsMobile(1120);
 
   async function handleTemplateImport(data: ImportData) {
     const supabase = createClient();
@@ -411,19 +413,19 @@ export function CategoriesClient({
               <TableRow>
                 <TableHead className="w-12"></TableHead>
                 <TableHead>{tr("Catégorie", "Category")}</TableHead>
-                <TableHead className="hidden md:table-cell max-w-[200px]">
+                <TableHead className={isCompactTable ? "hidden" : "hidden md:table-cell max-w-[200px]"}>
                   {tr("Description", "Description")}
                 </TableHead>
-                <TableHead className="text-right hidden sm:table-cell w-28">
+                <TableHead className={isCompactTable ? "hidden" : "text-right hidden sm:table-cell w-28"}>
                   {tr("Produits", "Products")}
                 </TableHead>
-                {!adminActions && (
+                {!adminActions && !isCompactTable && (
                   <TableHead className="text-center w-24">{tr("Actif", "Active")}</TableHead>
                 )}
-                {!adminActions && (
+                {!adminActions && !isCompactTable && (
                   <TableHead className="text-center w-24">{tr("Ordre", "Order")}</TableHead>
                 )}
-                <TableHead className="text-right w-24">{tr("Actions", "Actions")}</TableHead>
+                {!isCompactTable && <TableHead className="text-right w-24">{tr("Actions", "Actions")}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -432,7 +434,8 @@ export function CategoriesClient({
                 return (
                   <TableRow
                     key={cat.id}
-                    className={!cat.is_active ? "opacity-50" : undefined}
+                    className={`${!cat.is_active ? "opacity-50" : ""} cursor-pointer`}
+                    onClick={() => openEdit(cat)}
                   >
                     <TableCell className="py-2">
                       <span className="text-2xl leading-none" aria-hidden>
@@ -445,31 +448,35 @@ export function CategoriesClient({
                         {cat.description ?? "—"}
                       </p>
                     </TableCell>
-                    <TableCell className="py-2 hidden md:table-cell">
+                    <TableCell className={`${isCompactTable ? "hidden" : "py-2 hidden md:table-cell"}`}>
                       <p className="text-sm text-muted-foreground truncate max-w-[220px]">
                         {cat.description ?? "—"}
                       </p>
                     </TableCell>
-                    <TableCell className="text-right py-2 hidden sm:table-cell tabular-nums">
+                    <TableCell className={`${isCompactTable ? "hidden" : "text-right py-2 hidden sm:table-cell tabular-nums"}`}>
                       {cat.productCount}
                     </TableCell>
-                    {!adminActions && (
+                    {!adminActions && !isCompactTable && (
                       <TableCell className="text-center py-2">
                         <Switch
                           checked={cat.is_active}
                           onCheckedChange={() => handleToggleActive(cat)}
+                          onClick={(e) => e.stopPropagation()}
                           size="sm"
                           aria-label={cat.is_active ? tr("Désactiver", "Disable") : tr("Activer", "Enable")}
                         />
                       </TableCell>
                     )}
-                    {!adminActions && (
+                    {!adminActions && !isCompactTable && (
                       <TableCell className="text-center py-2">
                         <div className="flex justify-center gap-1">
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => handleReorder(cat, "up")}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReorder(cat, "up");
+                            }}
                             disabled={gi <= 0}
                             aria-label={tr("Monter", "Move up")}
                           >
@@ -478,7 +485,10 @@ export function CategoriesClient({
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => handleReorder(cat, "down")}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReorder(cat, "down");
+                            }}
                             disabled={gi >= sorted.length - 1}
                             aria-label={tr("Descendre", "Move down")}
                           >
@@ -487,12 +497,16 @@ export function CategoriesClient({
                         </div>
                       </TableCell>
                     )}
+                    {!isCompactTable && (
                     <TableCell className="text-right py-2">
                       <div className="flex justify-end gap-1">
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          onClick={() => openEdit(cat)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEdit(cat);
+                          }}
                           aria-label={tr("Modifier", "Edit")}
                         >
                           <Pencil className="h-3.5 w-3.5" />
@@ -500,7 +514,10 @@ export function CategoriesClient({
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          onClick={() => openDelete(cat.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDelete(cat.id);
+                          }}
                           className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           aria-label={tr("Supprimer", "Delete")}
                         >
@@ -508,6 +525,7 @@ export function CategoriesClient({
                         </Button>
                       </div>
                     </TableCell>
+                    )}
                   </TableRow>
                 );
               })}
@@ -542,14 +560,24 @@ export function CategoriesClient({
             if (!open) setFormSubView("main");
           }}
         >
-          <DrawerContent className="flex h-auto max-h-[92vh] min-h-0 flex-col overflow-hidden p-0">
+          <DrawerContent className="mt-0 flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden rounded-none border-0 p-0 data-[vaul-drawer-direction=bottom]:max-h-[100dvh] [&>div:first-child]:hidden">
             <DrawerHeader
               className={
                 formSubView !== "main"
-                  ? "shrink-0 flex-row items-center gap-2 border-b border-border px-4 pb-3 pt-2 text-left"
-                  : "shrink-0 border-b border-border px-4 pb-3 pt-2"
+                  ? "relative shrink-0 flex-row items-center gap-2 border-b border-border px-4 pb-3 pt-2 text-left"
+                  : "relative shrink-0 border-b border-border px-4 pb-3 pt-2"
               }
             >
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="absolute right-3 top-2"
+                onClick={() => setFormOpen(false)}
+                aria-label={tr("Fermer", "Close")}
+              >
+                <X className="h-4 w-4" />
+              </Button>
               {formSubView !== "main" ? (
                 <Button type="button" variant="ghost" size="icon-sm" onClick={() => setFormSubView("main")} aria-label={tr("Retour", "Back")}>
                   <ChevronLeft className="h-4 w-4" />

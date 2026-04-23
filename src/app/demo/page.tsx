@@ -5,10 +5,23 @@ import { resolveDemoSourceShopId } from "@/lib/platformDemo";
 import { fetchPublicShopPagePayload } from "@/lib/fetchPublicShopPagePayload";
 import { DemoView } from "./DemoView";
 import { DemoLiveStoreView } from "@/components/demo/DemoLiveStoreView";
-import { LOCALE_COOKIE_NAME, resolveLocale } from "@/lib/i18n";
+import { LOCALE_COOKIE_NAME, resolveLocale, type AppLocale } from "@/lib/i18n";
+import { LocaleRouteSync } from "@/components/i18n/LocaleRouteSync";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
+type SearchParams = Promise<{ lang?: string | string[] }>;
+
+function resolvePageLocale(input: string | string[] | undefined, cookieLocale: string | undefined): AppLocale {
+  const fromQuery = typeof input === "string" ? input : Array.isArray(input) ? input[0] : undefined;
+  return resolveLocale(fromQuery ?? cookieLocale);
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}): Promise<Metadata> {
+  const cookieLocale = (await cookies()).get(LOCALE_COOKIE_NAME)?.value;
+  const locale = resolvePageLocale((await searchParams).lang, cookieLocale);
   const supabase = await createClient();
   const demoShopId = await resolveDemoSourceShopId(supabase);
 
@@ -65,27 +78,31 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function DemoPage() {
+export default async function DemoPage({ searchParams }: { searchParams: SearchParams }) {
   const supabase = await createClient();
-  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
+  const cookieLocale = (await cookies()).get(LOCALE_COOKIE_NAME)?.value;
+  const locale = resolvePageLocale((await searchParams).lang, cookieLocale);
   const demoShopId = await resolveDemoSourceShopId(supabase);
 
   if (demoShopId) {
     const payload = await fetchPublicShopPagePayload(supabase, { id: demoShopId }, locale);
     if (payload) {
       return (
-        <DemoLiveStoreView
-          shop={payload.shop}
-          categories={payload.categories}
-          bundles={payload.bundles}
-          bundlesMenuGrouped={payload.bundlesMenuGrouped}
-          storefrontPhotos={payload.storefrontPhotos}
-          savedStorefrontLayout={payload.savedStorefrontLayout}
-          storefrontThemeKey={payload.storefrontThemeKey}
-          storefrontThemeOverrides={payload.storefrontThemeOverrides}
-          shopLabels={payload.shopLabels}
-          stripeAccountId={payload.stripeAccountId}
-        />
+        <>
+          <LocaleRouteSync locale={locale} />
+          <DemoLiveStoreView
+            shop={payload.shop}
+            categories={payload.categories}
+            bundles={payload.bundles}
+            bundlesMenuGrouped={payload.bundlesMenuGrouped}
+            storefrontPhotos={payload.storefrontPhotos}
+            savedStorefrontLayout={payload.savedStorefrontLayout}
+            storefrontThemeKey={payload.storefrontThemeKey}
+            storefrontThemeOverrides={payload.storefrontThemeOverrides}
+            shopLabels={payload.shopLabels}
+            stripeAccountId={payload.stripeAccountId}
+          />
+        </>
       );
     }
   }

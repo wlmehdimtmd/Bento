@@ -31,6 +31,7 @@ import {
   useOnboardingRuntime,
   useOnboardingStepNav,
 } from "@/components/onboarding/OnboardingRuntimeContext";
+import { useLocale } from "@/components/i18n/LocaleProvider";
 
 export type OnboardingProductRow = {
   id: string;
@@ -52,23 +53,27 @@ interface OnboardingCatalogWorkspaceProps {
   initialProducts: OnboardingProductRow[];
 }
 
-const SECTIONS: { id: EditingSection; label: string }[] = [
-  { id: "categories", label: "Categories" },
-  { id: "products", label: "Products" },
-  { id: "bundles", label: "Bundles" },
-];
-
 export function OnboardingCatalogWorkspace({
   shopId,
   payload,
   initialProducts,
 }: OnboardingCatalogWorkspaceProps) {
   const router = useRouter();
+  const { locale } = useLocale();
+  const tr = useCallback((fr: string, en: string) => (locale === "en" ? en : fr), [locale]);
   const { mode } = useOnboardingRuntime();
   const isPreview = mode === "preview";
   const goStep = useOnboardingStepNav(shopId);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [editingSection, setEditingSection] = useState<EditingSection>("categories");
+  const sections: { id: EditingSection; label: string }[] = useMemo(
+    () => [
+      { id: "categories", label: tr("Catégories", "Categories") },
+      { id: "products", label: tr("Produits", "Products") },
+      { id: "bundles", label: tr("Formules", "Bundles") },
+    ],
+    [tr]
+  );
 
   const refresh = useCallback(() => {
     if (!isPreview) router.refresh();
@@ -115,7 +120,7 @@ export function OnboardingCatalogWorkspace({
 
   async function handleTemplateImport(data: ImportData) {
     if (isPreview) {
-      toast.success("Simulated import (no data written).");
+      toast.success(tr("Import simulé (aucune donnée écrite).", "Simulated import (no data written)."));
       setPickerOpen(false);
       return;
     }
@@ -127,11 +132,34 @@ export function OnboardingCatalogWorkspace({
       templateCategoryNames
     );
     const parts: string[] = [];
-    if (categoryCount > 0) parts.push(`${categoryCount} categor${categoryCount > 1 ? "ies" : "y"}`);
-    if (productCount > 0) parts.push(`${productCount} product${productCount > 1 ? "s" : ""}`);
-    if (bundleCount > 0) parts.push(`${bundleCount} bundle${bundleCount > 1 ? "s" : ""}`);
+    if (categoryCount > 0) {
+      parts.push(
+        tr(
+          `${categoryCount} catégorie${categoryCount > 1 ? "s" : ""}`,
+          `${categoryCount} categor${categoryCount > 1 ? "ies" : "y"}`
+        )
+      );
+    }
+    if (productCount > 0) {
+      parts.push(
+        tr(
+          `${productCount} produit${productCount > 1 ? "s" : ""}`,
+          `${productCount} product${productCount > 1 ? "s" : ""}`
+        )
+      );
+    }
+    if (bundleCount > 0) {
+      parts.push(
+        tr(
+          `${bundleCount} formule${bundleCount > 1 ? "s" : ""}`,
+          `${bundleCount} bundle${bundleCount > 1 ? "s" : ""}`
+        )
+      );
+    }
     toast.success(
-      parts.length > 0 ? `Imported: ${parts.join(", ")}.` : "Import complete."
+      parts.length > 0
+        ? tr(`Importé : ${parts.join(", ")}.`, `Imported: ${parts.join(", ")}.`)
+        : tr("Import terminé.", "Import complete.")
     );
     setPickerOpen(false);
     refresh();
@@ -155,7 +183,7 @@ export function OnboardingCatalogWorkspace({
       )}
     >
       <div className="flex items-center justify-between gap-2 border-b border-border/60 bg-muted/20 px-3 py-2">
-        <span className="text-xs font-medium text-muted-foreground">Storefront preview</span>
+        <span className="text-xs font-medium text-muted-foreground">{tr("Aperçu vitrine", "Storefront preview")}</span>
       </div>
       <div className="p-2 sm:p-4">
         <div className="mx-auto max-w-5xl">
@@ -181,7 +209,7 @@ export function OnboardingCatalogWorkspace({
       role="tablist"
       aria-label="Catalog editing step"
     >
-      {SECTIONS.map(({ id, label }) => (
+      {sections.map(({ id, label }) => (
         <button
           key={id}
           id={`tab-${id}`}
@@ -244,7 +272,7 @@ export function OnboardingCatalogWorkspace({
         className="flex-1 sm:flex-initial gap-1.5"
       >
         <ChevronLeft className="h-4 w-4" />
-        Previous
+        {tr("Précédent", "Previous")}
       </Button>
       <Button
         type="button"
@@ -252,7 +280,7 @@ export function OnboardingCatalogWorkspace({
         style={{ backgroundColor: "var(--primary)" }}
         className="flex-1 sm:flex-initial text-primary-foreground hover:opacity-90 gap-1.5"
       >
-        Next
+        {tr("Suivant", "Next")}
         <ChevronRight className="h-4 w-4" />
       </Button>
     </div>
@@ -283,8 +311,11 @@ export function OnboardingCatalogWorkspace({
               <div className="space-y-5 pt-2 pb-4">
                 <div className="mx-auto w-full max-w-[416px]">
                   <OnboardingStepTitle
-                    title="Your catalog"
-                    subtitle="One continuous flow: live preview as you add items. Start from a template or enter manually."
+                    title={tr("Votre catalogue", "Your catalog")}
+                    subtitle={tr(
+                      "Un flux continu : aperçu en direct pendant que vous ajoutez vos éléments. Démarrez depuis un modèle ou saisissez manuellement.",
+                      "One continuous flow: live preview as you add items. Start from a template or enter manually."
+                    )}
                   />
                 </div>
 
@@ -296,14 +327,19 @@ export function OnboardingCatalogWorkspace({
                     className="gap-1.5"
                     onClick={() => {
                       if (isPreview) {
-                        toast.message("Simulation: template import disabled.");
+                        toast.message(
+                          tr(
+                            "Simulation : import de modèle désactivé.",
+                            "Simulation: template import disabled."
+                          )
+                        );
                         return;
                       }
                       setPickerOpen(true);
                     }}
                   >
                     <Sparkles className="h-4 w-4" />
-                    Start from a template
+                    {tr("Démarrer depuis un modèle", "Start from a template")}
                   </Button>
                 </div>
 

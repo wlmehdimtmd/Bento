@@ -176,7 +176,7 @@ export function PasteJsonImportDialog({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="flex max-h-[92vh] flex-col overflow-hidden p-0">
+        <DrawerContent className="mt-0 flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden rounded-none border-0 p-0 data-[vaul-drawer-direction=bottom]:max-h-[100dvh] [&>div:first-child]:hidden">
           <DrawerHeader className="sr-only">
             <DrawerTitle>Importer depuis JSON (strict)</DrawerTitle>
           </DrawerHeader>

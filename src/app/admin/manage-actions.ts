@@ -110,6 +110,9 @@ export async function adminSaveProduct(
     option_label: string | null;
     option_label_fr: string | null;
     option_label_en: string | null;
+    option_mode: "none" | "free" | "paid";
+    option_price_delta: number;
+    option_choices: string[];
     is_available: boolean;
     display_order: number;
   },
@@ -132,6 +135,9 @@ export async function adminSaveProduct(
     option_label: payload.option_label,
     option_label_fr: payload.option_label_fr,
     option_label_en: payload.option_label_en,
+    option_mode: payload.option_mode,
+    option_price_delta: payload.option_price_delta,
+    option_choices: payload.option_choices,
     is_available: payload.is_available,
   };
 

@@ -19,7 +19,6 @@ import {
   DrawerDescription,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
@@ -42,6 +41,9 @@ export interface PublicProduct {
   fallback_emoji?: string;
   tags: string[];
   option_label: string | null;
+  option_mode?: "none" | "free" | "paid";
+  option_choices?: string[];
+  option_price_delta?: number;
   is_available: boolean;
 }
 
@@ -75,20 +77,48 @@ function ProductDetailContent({
   const [quantity, setQuantity] = useState(1);
   const [optionValue, setOptionValue] = useState("");
   const [specialNote, setSpecialNote] = useState("");
-  const [optionFieldOpen, setOptionFieldOpen] = useState(false);
-  const [noteFieldOpen, setNoteFieldOpen] = useState(false);
+  const [detailDrawer, setDetailDrawer] = useState<"option" | "note" | null>(null);
+  const hasProductOption =
+    product.option_mode === "free" ||
+    product.option_mode === "paid" ||
+    Boolean(product.option_label) ||
+    (Array.isArray(product.option_choices) && product.option_choices.length > 0);
+  const optionChoices = Array.isArray(product.option_choices)
+    ? product.option_choices.filter((choice) => choice.trim().length > 0)
+    : [];
+  const optionSurcharge =
+    product.option_mode === "paid" ? Math.max(0, Number(product.option_price_delta ?? 0)) : 0;
+
+  const selectedOptionValue = optionValue.trim();
+  const appliedOptionSurcharge =
+    hasProductOption && selectedOptionValue && optionSurcharge > 0 ? optionSurcharge : 0;
+  const unitPriceWithOption = product.price + appliedOptionSurcharge;
 
   function handleAdd() {
+    if (hasProductOption && !optionValue.trim()) {
+      toast.error(
+        locale === "en"
+          ? "Please select an option before adding this item."
+          : "Veuillez sélectionner une option avant d'ajouter cet article."
+      );
+      return;
+    }
+
     addItem({
       productId: product.id,
       name: product.name,
-      price: product.price,
+      price: unitPriceWithOption,
       quantity,
       imageUrl: product.image_url,
       fallbackEmoji: product.fallback_emoji,
       description: product.description,
       tags: product.tags,
-      optionValue: optionValue.trim() || undefined,
+      optionValue:
+        selectedOptionValue.length > 0
+          ? appliedOptionSurcharge > 0
+            ? `${selectedOptionValue} (+${formatPrice(appliedOptionSurcharge)})`
+            : selectedOptionValue
+          : undefined,
       specialNote: specialNote.trim() || undefined,
       isBundle: false,
     });
@@ -100,7 +130,7 @@ function ProductDetailContent({
     onClose();
   }
 
-  const lineTotal = product.price * quantity;
+  const lineTotal = unitPriceWithOption * quantity;
 
   const titleEl = isMobile ? (
     <DrawerTitle
@@ -132,14 +162,13 @@ function ProductDetailContent({
 
   const optionNoteBlock = (
     <div className="space-y-3">
-      {product.option_label && (
+      {hasProductOption && (
         <div className="space-y-2">
           <Button
             type="button"
             variant="outline"
             className="h-auto min-h-11 w-full flex-col items-stretch gap-0.5 py-3 px-4 text-left font-normal"
-            onClick={() => setOptionFieldOpen((o) => !o)}
-            aria-expanded={optionFieldOpen}
+            onClick={() => setDetailDrawer("option")}
           >
             <span className="text-sm font-semibold text-foreground">
               {optionValue.trim()
@@ -147,20 +176,13 @@ function ProductDetailContent({
                 : locale === "en" ? "Add a preference" : "Préciser une préférence"}
             </span>
             <span className="text-xs text-muted-foreground line-clamp-2">
-              {optionValue.trim() ? optionValue.trim() : product.option_label}
+              {optionValue.trim()
+                ? optionValue.trim()
+                : product.option_label ||
+                  (locale === "en" ? "Select an option" : "Sélectionnez une option")}
+              {optionSurcharge > 0 ? ` • +${formatPrice(optionSurcharge)}` : ""}
             </span>
           </Button>
-          {optionFieldOpen && (
-            <div className="space-y-1.5">
-              <Label htmlFor="pd-option">{product.option_label}</Label>
-              <Input
-                id="pd-option"
-                value={optionValue}
-                onChange={(e) => setOptionValue(e.target.value)}
-                placeholder={locale === "en" ? "Your answer..." : "Votre réponse…"}
-              />
-            </div>
-          )}
         </div>
       )}
 
@@ -169,8 +191,7 @@ function ProductDetailContent({
           type="button"
           variant="outline"
           className="h-auto min-h-11 w-full flex-col items-stretch gap-0.5 py-3 px-4 text-left font-normal"
-          onClick={() => setNoteFieldOpen((o) => !o)}
-          aria-expanded={noteFieldOpen}
+          onClick={() => setDetailDrawer("note")}
         >
           <span className="text-sm font-semibold text-foreground">
             {specialNote.trim()
@@ -185,18 +206,6 @@ function ProductDetailContent({
                 : "Instructions pour le restaurant (facultatif)"}
           </span>
         </Button>
-        {noteFieldOpen && (
-          <div className="space-y-1.5">
-            <Label htmlFor="pd-note">{locale === "en" ? "Your note" : "Votre note"}</Label>
-            <Textarea
-              id="pd-note"
-              value={specialNote}
-              onChange={(e) => setSpecialNote(e.target.value)}
-              placeholder={locale === "en" ? "Special instructions..." : "Instructions spéciales…"}
-              rows={3}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
@@ -312,6 +321,104 @@ function ProductDetailContent({
           {metaBlock}
         </div>
         {actionBar}
+
+        {detailDrawer && (
+          <Drawer open onOpenChange={(open) => { if (!open) setDetailDrawer(null); }}>
+            <DrawerContent className="mt-0 flex h-[100dvh] max-h-[100dvh] flex-col gap-0 rounded-none border-0 p-0 data-[vaul-drawer-direction=bottom]:max-h-[100dvh] [&>div:first-child]:hidden">
+              <div className="sticky top-0 z-20 border-b border-border bg-background px-4 py-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <DrawerTitle className="text-base font-semibold">
+                      {detailDrawer === "option"
+                        ? locale === "en"
+                          ? "Choose an option"
+                          : "Choisir une option"
+                        : locale === "en"
+                          ? "Add a note"
+                          : "Ajouter une note"}
+                    </DrawerTitle>
+                    <DrawerDescription className="text-xs text-muted-foreground">
+                      {detailDrawer === "option"
+                        ? `${product.option_label || (locale === "en" ? "Customer option" : "Option client")}${optionSurcharge > 0 ? ` • +${formatPrice(optionSurcharge)}` : ""}`
+                        : locale === "en"
+                          ? "Instructions for the restaurant (optional)"
+                          : "Instructions pour le restaurant (facultatif)"}
+                    </DrawerDescription>
+                  </div>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => setDetailDrawer(null)} aria-label={locale === "en" ? "Close" : "Fermer"}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="min-h-0 flex-1 overflow-y-auto p-4">
+                {detailDrawer === "option" ? (
+                  <div className="space-y-4">
+                    {optionChoices.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          {locale === "en" ? "Suggested answers" : "Réponses proposées"}
+                        </p>
+                        {optionSurcharge > 0 && (
+                          <p className="text-sm font-medium text-foreground">
+                            {locale === "en"
+                              ? `Option surcharge: +${formatPrice(optionSurcharge)}`
+                              : `Supplément option : +${formatPrice(optionSurcharge)}`}
+                          </p>
+                        )}
+                        <div className="flex flex-wrap gap-2">
+                          {optionChoices.map((choice) => (
+                            <button
+                              key={choice}
+                              type="button"
+                              onClick={() => setOptionValue(choice)}
+                              className={
+                                optionValue.trim().toLowerCase() === choice.trim().toLowerCase()
+                                  ? "inline-flex min-h-10 items-center rounded-full border border-primary bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary"
+                                  : "inline-flex min-h-10 items-center rounded-full border border-border px-3 py-1.5 text-sm text-foreground hover:bg-muted"
+                              }
+                            >
+                              {choice}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {optionChoices.length === 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        {locale === "en"
+                          ? "No predefined choices are available for this option."
+                          : "Aucun choix prédéfini n'est disponible pour cette option."}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="pd-note">{locale === "en" ? "Your note" : "Votre note"}</Label>
+                    <Textarea
+                      id="pd-note"
+                      value={specialNote}
+                      onChange={(e) => setSpecialNote(e.target.value)}
+                      placeholder={locale === "en" ? "Special instructions..." : "Instructions spéciales…"}
+                      rows={5}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-border bg-background px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-3">
+                <Button
+                  type="button"
+                  className="h-11 w-full"
+                  onClick={() => setDetailDrawer(null)}
+                  disabled={detailDrawer === "option" && hasProductOption && !optionValue.trim()}
+                >
+                  {locale === "en" ? "Confirm" : "Valider"}
+                </Button>
+              </div>
+            </DrawerContent>
+          </Drawer>
+        )}
       </motion.div>
     );
   }
@@ -340,7 +447,14 @@ export function ProductDetail({ product, open, onClose, shopLabels }: ProductDet
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-        <DrawerContent className="flex h-[92vh] max-h-[92vh] flex-col gap-0 p-0">
+        <DrawerContent className="mt-0 flex h-[100dvh] max-h-[100dvh] flex-col gap-0 rounded-none border-0 p-0 data-[vaul-drawer-direction=bottom]:max-h-[100dvh] [&>div:first-child]:hidden">
+          <button
+            onClick={onClose}
+            className="absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
+            aria-label={locale === "en" ? "Close" : "Fermer"}
+          >
+            <X className="h-4 w-4" />
+          </button>
           <ProductDetailContent
             key={product.id}
             product={product}

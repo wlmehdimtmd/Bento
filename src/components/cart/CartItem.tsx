@@ -64,12 +64,12 @@ export function CartItemRow({ item, onReview }: CartItemRowProps) {
             )}
             {item.optionValue && (
               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 italic">
-                {item.optionValue}
+                {`${t("cart.option")} : ${item.optionValue}`}
               </p>
             )}
             {item.specialNote && (
               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 italic">
-                {item.specialNote}
+                {`${t("cart.note")} : ${item.specialNote}`}
               </p>
             )}
             {allergenTags.length > 0 && (

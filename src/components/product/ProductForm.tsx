@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
-import { Camera, ChevronRight, Loader2 } from "lucide-react";
+import { Camera, ChevronRight, Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { TranslatableTabs } from "@/components/catalog/TranslatableTabs";
@@ -57,6 +57,9 @@ export interface ProductRow {
   option_label: string | null;
   option_label_fr?: string | null;
   option_label_en?: string | null;
+  option_mode?: "none" | "free" | "paid" | null;
+  option_price_delta?: number | null;
+  option_choices?: string[] | null;
   is_available: boolean;
   display_order: number;
   created_at: string | null;
@@ -82,6 +85,9 @@ export type ProductSavePayload = {
   option_label: string | null;
   option_label_fr: string | null;
   option_label_en: string | null;
+  option_mode: "none" | "free" | "paid";
+  option_price_delta: number;
+  option_choices: string[];
   is_available: boolean;
   display_order: number;
 };
@@ -95,8 +101,8 @@ interface ProductFormProps {
   onCancel: () => void;
   onSave?: (payload: ProductSavePayload, isEdit: boolean, existingId?: string) => Promise<ProductRow>;
   sheetCtasFullWidth?: boolean;
-  subViewOverride?: "main" | "photo" | "tags";
-  onSubViewChange?: (subView: "main" | "photo" | "tags") => void;
+  subViewOverride?: "main" | "photo" | "tags" | "option";
+  onSubViewChange?: (subView: "main" | "photo" | "tags" | "option") => void;
   labels: ProductLabelOption[];
   /** Drawer mobile : zone formulaire scrollable, barre d’actions fixe en bas, contenu bord à bord horizontal. */
   stickyMobileActions?: boolean;
@@ -130,7 +136,8 @@ export function ProductForm({
     initialData?.image_url ?? null
   );
   const [tags, setTags] = useState<string[]>(initialData?.tags ?? []);
-  const [subView, setSubView] = useState<"main" | "photo" | "tags">("main");
+  const [subView, setSubView] = useState<"main" | "photo" | "tags" | "option">("main");
+  const [optionChoiceDraft, setOptionChoiceDraft] = useState("");
   const [catalogTab, setCatalogTab] = useState(getDefaultCatalogLanguageCode());
 
   useEffect(() => {
@@ -139,7 +146,7 @@ export function ProductForm({
     }
   }, [subView, subViewOverride]);
 
-  function changeSubView(next: "main" | "photo" | "tags") {
+  function changeSubView(next: "main" | "photo" | "tags" | "option") {
     if (next === subView) return;
     setSubView(next);
     onSubViewChange?.(next);
@@ -161,11 +168,15 @@ export function ProductForm({
   });
 
   const categoryId = watch("category_id");
+  const watchedOptionMode = watch("option_mode");
+  const optionMode: "none" | "free" | "paid" =
+    watchedOptionMode === "free" || watchedOptionMode === "paid" ? watchedOptionMode : "none";
   const isAvailable = watch("is_available");
   const productNameFr = watch("translations.fr.name")?.trim() ?? "";
   const watched = watch();
   const completionByLang = productCompletion(watched);
   const completeCount = Object.values(completionByLang).filter((s) => s === "complete").length;
+  const optionChoices = watch("option_choices") ?? [];
 
   const categorySelectItems = useMemo(
     () =>
@@ -228,6 +239,9 @@ export function ProductForm({
       option_label: payload.option_label,
       option_label_fr: payload.option_label_fr,
       option_label_en: payload.option_label_en,
+      option_mode: payload.option_mode,
+      option_price_delta: payload.option_price_delta,
+      option_choices: payload.option_choices,
       is_available: payload.is_available,
       display_order: payload.display_order,
     };
@@ -336,6 +350,186 @@ export function ProductForm({
     );
   }
 
+  function setOptionMode(val: "none" | "free" | "paid") {
+    setValue("option_mode", val, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    if (val === "none") {
+      setValue("translations.fr.option_label", "", { shouldDirty: true, shouldValidate: true });
+      setValue("translations.en.option_label", "", { shouldDirty: true, shouldValidate: true });
+      setValue("option_price_delta", 0, { shouldDirty: true, shouldValidate: true });
+      setValue("option_choices", [], { shouldDirty: true, shouldValidate: true });
+      setOptionChoiceDraft("");
+    }
+    if (val === "free") {
+      setValue("option_price_delta", 0, { shouldDirty: true, shouldValidate: true });
+    }
+  }
+
+  function addOptionChoice() {
+    const next = optionChoiceDraft.trim();
+    if (!next) return;
+    const exists = optionChoices.some((choice) => choice.toLowerCase() === next.toLowerCase());
+    if (exists) {
+      setOptionChoiceDraft("");
+      return;
+    }
+    setValue("option_choices", [...optionChoices, next], {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setOptionChoiceDraft("");
+  }
+
+  function removeOptionChoice(choice: string) {
+    setValue(
+      "option_choices",
+      optionChoices.filter((item) => item !== choice),
+      { shouldDirty: true, shouldValidate: true }
+    );
+  }
+
+  if (subView === "option") {
+    return (
+      <div className={shellClass}>
+        <div className={subScrollClass}>
+          <div className="space-y-3">
+            <p className="text-sm font-medium">{tr("Type d'option", "Option type")}</p>
+            <div className="grid grid-cols-1 gap-2">
+              {([
+                { value: "none", labelFr: "Sans option", labelEn: "No option" },
+                { value: "free", labelFr: "Option gratuite", labelEn: "Free option" },
+                { value: "paid", labelFr: "Option payante", labelEn: "Paid option" },
+              ] as const).map((mode) => (
+                <button
+                  key={mode.value}
+                  type="button"
+                  className={cn(
+                    "flex min-h-11 w-full items-center rounded-lg border px-3 text-left text-sm transition-colors",
+                    optionMode === mode.value
+                      ? "border-[var(--primary)] bg-[var(--primary)]/10"
+                      : "border-border hover:border-muted-foreground/40"
+                  )}
+                  onClick={() => setOptionMode(mode.value)}
+                >
+                  <span className="font-medium">
+                    {locale === "en" ? mode.labelEn : mode.labelFr}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {optionMode !== "none" && (
+            <div className="mt-5 space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="prod-fr-opt">{tr("Question (FR) *", "Question (FR) *")}</Label>
+                <Input
+                  id="prod-fr-opt"
+                  {...register("translations.fr.option_label")}
+                  placeholder={tr("Ex : Cuisson ?", "Ex: Doneness?")}
+                  disabled={isSubmitting}
+                />
+                {errors.translations?.fr?.option_label && (
+                  <p className="text-xs text-destructive">{errors.translations.fr.option_label.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="prod-en-opt">{tr("Question (EN)", "Question (EN)")}</Label>
+                <Input
+                  id="prod-en-opt"
+                  {...register("translations.en.option_label")}
+                  placeholder={tr("Optionnel", "Optional")}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>{tr("Réponses proposées", "Suggested answers")}</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={optionChoiceDraft}
+                    onChange={(e) => setOptionChoiceDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addOptionChoice();
+                      }
+                    }}
+                    placeholder={tr("Ex : Bien cuit", "Ex: Well done")}
+                    disabled={isSubmitting}
+                    className="h-11"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addOptionChoice}
+                    disabled={isSubmitting}
+                    className="h-11 w-11 shrink-0 p-0"
+                    aria-label={tr("Ajouter une réponse", "Add answer")}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {errors.option_choices && (
+                  <p className="text-xs text-destructive">{errors.option_choices.message as string}</p>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  {optionChoices.map((choice) => (
+                    <span
+                      key={choice}
+                      className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm"
+                    >
+                      {choice}
+                      <button
+                        type="button"
+                        className="inline-flex h-6 w-6 items-center justify-center rounded-full hover:bg-muted"
+                        onClick={() => removeOptionChoice(choice)}
+                        aria-label={tr("Retirer", "Remove")}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {optionMode === "paid" && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="option_price_delta">{tr("Supplément option (€) *", "Option surcharge (€) *")}</Label>
+                  <Input
+                    id="option_price_delta"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    placeholder="0.00"
+                    disabled={isSubmitting}
+                    {...register("option_price_delta", { valueAsNumber: true })}
+                  />
+                  {errors.option_price_delta && (
+                    <p className="text-xs text-destructive">{errors.option_price_delta.message}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        <div className={subFooterClass}>
+          <Button
+            type="button"
+            onClick={() => changeSubView("main")}
+            style={{ backgroundColor: "var(--primary)" }}
+            className="w-full text-primary-foreground hover:opacity-90"
+          >
+            {tr("Valider", "Confirm")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const mainScrollClass = stickyMobileActions
     ? cn(mobileCatalogDrawerScrollClass, "space-y-5 px-4 py-4")
     : stickySheetActions
@@ -418,18 +612,6 @@ export function ProductForm({
                     disabled={isSubmitting}
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="prod-fr-opt">{tr("Option / variante", "Option / variant")}</Label>
-                  <Input
-                    id="prod-fr-opt"
-                    {...register("translations.fr.option_label")}
-                    placeholder={tr("Ex : Cuisson ? Taille ? (vide = pas d'option)", "Ex: Doneness? Size? (leave empty if none)")}
-                    disabled={isSubmitting}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {tr("Laissez vide si le produit n'a pas d'option. Cette question sera posée au client au moment de la commande.", "Leave empty if the product has no option. This question will be asked at checkout.")}
-                  </p>
-                </div>
               </div>
             ) : (
               <div className="space-y-4">
@@ -458,22 +640,42 @@ export function ProductForm({
                     <p className="text-xs text-destructive">{errors.translations.en.description.message}</p>
                   )}
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="prod-en-opt">{tr("Libellé d’option (anglais)", "Option label (English)")}</Label>
-                  <Input
-                    id="prod-en-opt"
-                    {...register("translations.en.option_label")}
-                    placeholder={tr("Optionnel", "Optional")}
-                    disabled={isSubmitting}
-                  />
-                  {errors.translations?.en?.option_label && (
-                    <p className="text-xs text-destructive">{errors.translations.en.option_label.message}</p>
-                  )}
-                </div>
               </div>
             )
           }
         </TranslatableTabs>
+
+        <div className="space-y-1.5">
+          <Label>{tr("Options client", "Customer options")}</Label>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-14 w-full justify-between rounded-xl px-3"
+            onClick={() => changeSubView("option")}
+          >
+            <span className="flex min-w-0 items-center gap-2">
+              <span className="inline-flex h-10 items-center rounded-md border border-border bg-muted px-2.5 text-xs font-medium">
+                {optionMode === "none"
+                  ? tr("Sans option", "No option")
+                  : optionMode === "free"
+                    ? tr("Option gratuite", "Free option")
+                    : tr("Option payante", "Paid option")}
+              </span>
+              <span className="truncate text-sm text-muted-foreground">
+                {optionMode === "none"
+                  ? tr("Aucune question client", "No customer question")
+                  : tr(
+                      `${optionChoices.length} réponse${optionChoices.length > 1 ? "s" : ""} proposée${optionChoices.length > 1 ? "s" : ""}`,
+                      `${optionChoices.length} suggested answer${optionChoices.length > 1 ? "s" : ""}`
+                    )}
+                {optionMode === "paid" && watched.option_price_delta > 0
+                  ? ` • +${watched.option_price_delta}€`
+                  : ""}
+              </span>
+            </span>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="price">{tr("Prix (€)", "Price (€)")} *</Label>

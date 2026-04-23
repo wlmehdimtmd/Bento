@@ -399,7 +399,7 @@ export function TemplatePickerDialog({
                 className={cn(
                   "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors border",
                   !activeType
-                    ? "bg-[var(--primary)] text-white border-transparent"
+                    ? "bg-[var(--primary)] text-white dark:text-black border-transparent"
                     : "border-border text-muted-foreground hover:bg-muted"
                 )}
               >
@@ -413,7 +413,7 @@ export function TemplatePickerDialog({
                   className={cn(
                     "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors border",
                     bt.id === activeType
-                      ? "bg-[var(--primary)] text-white border-transparent"
+                      ? "bg-[var(--primary)] text-white dark:text-black border-transparent"
                       : "border-border text-muted-foreground hover:bg-muted"
                   )}
                 >
@@ -611,7 +611,7 @@ export function TemplatePickerDialog({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[92vh] p-0">
+        <DrawerContent className="mt-0 h-[100dvh] max-h-[100dvh] rounded-none border-0 p-0 data-[vaul-drawer-direction=bottom]:max-h-[100dvh] [&>div:first-child]:hidden">
           <DrawerHeader className="sr-only">
             <DrawerTitle>
               {mode === "bundles"

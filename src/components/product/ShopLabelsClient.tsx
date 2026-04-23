@@ -152,6 +152,7 @@ export function ShopLabelsClient({
   const router = useRouter();
   const supabase = createClient();
   const isMobile = useIsMobile(768);
+  const isCompactTable = useIsMobile(1120);
 
   const [labels, setLabels] = useState<ShopLabelOption[]>(initialLabels);
   const [labelEditorOpen, setLabelEditorOpen] = useState(false);
@@ -423,13 +424,13 @@ export function ShopLabelsClient({
               <TableHeader>
                 <TableRow>
                   <TableHead>{tr("Label", "Label")}</TableHead>
-                  <TableHead className="hidden sm:table-cell">{tr("Clé", "Key")}</TableHead>
-                  <TableHead className="w-24 text-right">{tr("Actions", "Actions")}</TableHead>
+                  <TableHead className={isCompactTable ? "hidden" : "hidden sm:table-cell"}>{tr("Clé", "Key")}</TableHead>
+                  {!isCompactTable && <TableHead className="w-24 text-right">{tr("Actions", "Actions")}</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sorted.map((item) => (
-                  <TableRow key={item.id}>
+                  <TableRow key={item.id} className="cursor-pointer" onClick={() => openEdit(item)}>
                     <TableCell>
                       <Badge variant="secondary">
                         {pickLocalized(locale, {
@@ -439,15 +440,19 @@ export function ShopLabelsClient({
                         }) ?? item.label}
                       </Badge>
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell">
+                    <TableCell className={isCompactTable ? "hidden" : "hidden sm:table-cell"}>
                       <code className="text-xs text-muted-foreground">{item.value}</code>
                     </TableCell>
+                    {!isCompactTable && (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          onClick={() => openEdit(item)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEdit(item);
+                          }}
                           aria-label={tr("Modifier", "Edit")}
                         >
                           <Pencil className="h-3.5 w-3.5" />
@@ -455,7 +460,10 @@ export function ShopLabelsClient({
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          onClick={() => openDelete(item)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDelete(item);
+                          }}
                           className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           aria-label={tr("Supprimer", "Delete")}
                         >
@@ -463,6 +471,7 @@ export function ShopLabelsClient({
                         </Button>
                       </div>
                     </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
@@ -521,13 +530,13 @@ export function ShopLabelsClient({
 
       {isMobile ? (
         <Drawer open={labelEditorOpen} onOpenChange={setLabelEditorOpen}>
-          <DrawerContent>
-            <DrawerHeader>
+          <DrawerContent className="mt-0 flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden rounded-none border-0 p-0 data-[vaul-drawer-direction=bottom]:max-h-[100dvh] [&>div:first-child]:hidden">
+            <DrawerHeader className="shrink-0 border-b border-border text-left">
               <DrawerTitle>{editorTitle}</DrawerTitle>
               <DrawerDescription>{editorDescription}</DrawerDescription>
             </DrawerHeader>
-            <div className="px-4 py-4">{formFields}</div>
-            <DrawerFooter>{editorFooter}</DrawerFooter>
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">{formFields}</div>
+            <DrawerFooter className="shrink-0 border-t border-border">{editorFooter}</DrawerFooter>
           </DrawerContent>
         </Drawer>
       ) : (

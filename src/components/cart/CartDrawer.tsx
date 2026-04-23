@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ShoppingCart, Trash2, ArrowRight, ShoppingBag } from "lucide-react";
+import { ChevronLeft, ShoppingCart, Trash2, ArrowRight, ShoppingBag, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 
 import { useCartStore, type CartItem } from "@/lib/stores/cartStore";
 import { useCartDrawer } from "./CartDrawerContext";
@@ -45,6 +46,9 @@ function parseBundle(specialNote: string): { label: string; choice: string }[] {
 function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }) {
   const { locale } = useLocale();
   const removeItem = useCartStore((s) => s.removeItem);
+  const updateItemSpecialNote = useCartStore((s) => s.updateItemSpecialNote);
+  const [isEditingNote, setIsEditingNote] = useState(false);
+  const [noteDraft, setNoteDraft] = useState(item.specialNote ?? "");
   const bundleSteps = item.isBundle && item.specialNote ? parseBundle(item.specialNote) : null;
   const allergenTags = (item.tags ?? []).filter((t) => ALLERGENS.some((a) => a.value === t));
 
@@ -52,6 +56,20 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
     removeItem(item.id);
     onBack();
     toast.success(locale === "en" ? `${item.name} removed from cart.` : `${item.name} retiré du panier.`);
+  }
+
+  function handleSaveNote() {
+    updateItemSpecialNote(item.id, noteDraft);
+    setIsEditingNote(false);
+    toast.success(
+      locale === "en"
+        ? noteDraft.trim().length > 0
+          ? "Note updated."
+          : "Note removed."
+        : noteDraft.trim().length > 0
+          ? "Note mise a jour."
+          : "Note supprimee."
+    );
   }
 
   return (
@@ -196,6 +214,56 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
                 <p className="text-sm italic text-muted-foreground">{item.specialNote}</p>
               </div>
             )}
+
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  {locale === "en" ? "Edit note" : "Modifier la note"}
+                </p>
+                {!isEditingNote ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8"
+                    onClick={() => setIsEditingNote(true)}
+                  >
+                    {locale === "en" ? "Edit" : "Modifier"}
+                  </Button>
+                ) : null}
+              </div>
+
+              {isEditingNote ? (
+                <div className="mt-2 space-y-2">
+                  <Textarea
+                    value={noteDraft}
+                    onChange={(e) => setNoteDraft(e.target.value)}
+                    rows={3}
+                    placeholder={
+                      locale === "en"
+                        ? "Special instructions..."
+                        : "Instructions speciales..."
+                    }
+                  />
+                  <div className="flex gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => setIsEditingNote(false)}>
+                      {locale === "en" ? "Cancel" : "Annuler"}
+                    </Button>
+                    <Button type="button" size="sm" onClick={handleSaveNote}>
+                      {locale === "en" ? "Save" : "Enregistrer"}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-1 text-sm text-muted-foreground italic">
+                  {item.specialNote?.trim()
+                    ? item.specialNote
+                    : locale === "en"
+                      ? "No note added."
+                      : "Aucune note ajoutee."}
+                </p>
+              )}
+            </div>
           </>
         )}
 
@@ -374,7 +442,7 @@ function DrawerInner({ onClose }: { onClose: () => void }) {
 // ── Root ───────────────────────────────────────────────────────
 
 export function CartDrawer() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { open, closeDrawer } = useCartDrawer();
   const isMobile = useIsMobile();
 
@@ -391,8 +459,16 @@ export function CartDrawer() {
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={(o) => { if (!o) closeDrawer(); }}>
-        <DrawerContent className="flex flex-col max-h-[92vh]">
-          <DrawerHeader className="text-left border-b border-border pb-3 shrink-0">
+        <DrawerContent className="mt-0 flex h-[100dvh] max-h-[100dvh] flex-col rounded-none border-0 p-0 data-[vaul-drawer-direction=bottom]:max-h-[100dvh] [&>div:first-child]:hidden">
+          <DrawerHeader className="sticky top-0 z-10 border-b border-border bg-background px-4 pb-3 pt-4 text-left shrink-0">
+            <button
+              type="button"
+              onClick={closeDrawer}
+              className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label={locale === "en" ? "Close cart" : "Fermer le panier"}
+            >
+              <X className="h-4 w-4" />
+            </button>
             <DrawerTitle>{headerTitle}</DrawerTitle>
           </DrawerHeader>
           <DrawerInner onClose={closeDrawer} />
@@ -405,7 +481,8 @@ export function CartDrawer() {
     <Sheet open={open} onOpenChange={(o) => { if (!o) closeDrawer(); }}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-sm flex flex-col p-0"
+        className="data-[side=right]:right-0 data-[side=right]:mr-0 data-[side=right]:translate-x-0 w-full sm:max-w-sm flex flex-col p-0"
+        style={{ right: 0, marginRight: 0 }}
         showCloseButton
       >
         <SheetHeader className="px-4 py-4 border-b border-border shrink-0">

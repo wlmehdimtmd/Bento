@@ -568,6 +568,9 @@ export type Database = {
           option_label: string | null
           option_label_en: string | null
           option_label_fr: string | null
+          option_mode: string | null
+          option_price_delta: number | null
+          option_choices: string[] | null
           price: number
           tags: Json | null
         }
@@ -587,6 +590,9 @@ export type Database = {
           option_label?: string | null
           option_label_en?: string | null
           option_label_fr?: string | null
+          option_mode?: string | null
+          option_price_delta?: number | null
+          option_choices?: string[] | null
           price: number
           tags?: Json | null
         }
@@ -606,6 +612,9 @@ export type Database = {
           option_label?: string | null
           option_label_en?: string | null
           option_label_fr?: string | null
+          option_mode?: string | null
+          option_price_delta?: number | null
+          option_choices?: string[] | null
           price?: number
           tags?: Json | null
         }

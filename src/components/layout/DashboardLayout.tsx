@@ -120,7 +120,9 @@ export function DashboardLayout({
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="left"
-          className="p-0 w-[85%] min-w-[280px] max-w-none sm:max-w-none sm:w-[85%]"
+          className="w-screen max-w-full p-0 data-[side=left]:w-screen data-[side=left]:max-w-full data-[side=left]:sm:max-w-full sm:w-screen sm:max-w-full"
+          closeButtonClassName="left-3 right-auto"
+          closeButtonSize="icon"
         >
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <DashboardSidebar

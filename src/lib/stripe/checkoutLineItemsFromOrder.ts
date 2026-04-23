@@ -33,7 +33,7 @@ export async function buildStripeLineItemsFromOrder(
 
   const { data: rows, error: itemsErr } = await admin
     .from("order_items")
-    .select("id, product_id, bundle_id, quantity, unit_price")
+    .select("id, product_id, bundle_id, quantity, unit_price, option_value")
     .eq("order_id", order.id);
 
   if (itemsErr) {
@@ -54,6 +54,8 @@ export async function buildStripeLineItemsFromOrder(
     price: number;
     is_available: boolean;
     category_id: string;
+    option_mode: string | null;
+    option_price_delta: number | null;
   };
   const productsById: Record<string, ProductRow> = {};
   const categoryIds = new Set<string>();
@@ -61,7 +63,7 @@ export async function buildStripeLineItemsFromOrder(
   if (productIds.length > 0) {
     const { data: prods, error: pErr } = await admin
       .from("products")
-      .select("id, name, price, is_available, category_id")
+      .select("id, name, price, is_available, category_id, option_mode, option_price_delta")
       .in("id", productIds);
     if (pErr || !prods) {
       console.error("[checkoutLineItems] products:", pErr?.message);
@@ -126,13 +128,31 @@ export async function buildStripeLineItemsFromOrder(
       if (!p.is_available) {
         return { ok: false, status: 409, message: "Un produit n'est plus disponible." };
       }
-      const unit = Number(p.price);
-      if (!Number.isFinite(unit) || unit < 0) {
+      const baseUnit = Number(p.price);
+      if (!Number.isFinite(baseUnit) || baseUnit < 0) {
         return { ok: false, status: 500, message: "Prix produit invalide." };
       }
-      const lineCents = toCents(unit) * qty;
+      const optionMode = p.option_mode === "free" || p.option_mode === "paid" ? p.option_mode : "none";
+      const hasSelectedOption = Boolean(row.option_value && row.option_value.trim().length > 0);
+      const optionSurcharge =
+        optionMode === "paid" && hasSelectedOption
+          ? Math.max(0, Number(p.option_price_delta ?? 0))
+          : 0;
+      const expectedUnit = baseUnit + optionSurcharge;
+      const savedUnit = Number(row.unit_price);
+      if (!Number.isFinite(savedUnit) || savedUnit < 0) {
+        return { ok: false, status: 500, message: "Prix article invalide." };
+      }
+      if (Math.abs(toCents(savedUnit) - toCents(expectedUnit)) > 1) {
+        return {
+          ok: false,
+          status: 400,
+          message: "Le prix affiché ne correspond plus au catalogue. Rafraîchissez et réessayez.",
+        };
+      }
+      const lineCents = toCents(savedUnit) * qty;
       sumCents += lineCents;
-      stripeItems.push({ name: p.name, quantity: qty, unitPrice: unit });
+      stripeItems.push({ name: p.name, quantity: qty, unitPrice: savedUnit });
       continue;
     }
 
@@ -151,9 +171,20 @@ export async function buildStripeLineItemsFromOrder(
       if (!Number.isFinite(unit) || unit < 0) {
         return { ok: false, status: 500, message: "Prix formule invalide." };
       }
-      const lineCents = toCents(unit) * qty;
+      const savedUnit = Number(row.unit_price);
+      if (!Number.isFinite(savedUnit) || savedUnit < 0) {
+        return { ok: false, status: 500, message: "Prix article invalide." };
+      }
+      if (Math.abs(toCents(savedUnit) - toCents(unit)) > 1) {
+        return {
+          ok: false,
+          status: 400,
+          message: "Le prix affiché ne correspond plus au catalogue. Rafraîchissez et réessayez.",
+        };
+      }
+      const lineCents = toCents(savedUnit) * qty;
       sumCents += lineCents;
-      stripeItems.push({ name: b.name, quantity: qty, unitPrice: unit });
+      stripeItems.push({ name: b.name, quantity: qty, unitPrice: savedUnit });
       continue;
     }
 

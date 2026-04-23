@@ -80,6 +80,10 @@ export default async function ProductsPage({ params }: { params: Params }) {
     initialProducts = (products ?? []).map((p) => ({
       ...(p as ProductRow),
       tags: Array.isArray(p.tags) ? (p.tags as string[]) : [],
+      option_mode:
+        p.option_mode === "free" || p.option_mode === "paid" ? p.option_mode : "none",
+      option_price_delta: Number(p.option_price_delta ?? 0),
+      option_choices: Array.isArray(p.option_choices) ? (p.option_choices as string[]) : [],
       is_available: p.is_available ?? true,
       display_order: p.display_order ?? 0,
       created_at: p.created_at ?? null,

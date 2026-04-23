@@ -133,11 +133,11 @@ function SidebarColumn({
       <div
         className={cn(
           "flex items-center border-b border-sidebar-border shrink-0",
-          forSheet ? "h-[52px] px-6" : "h-16 px-6"
+          forSheet ? "h-16 justify-center px-4" : "h-16 px-6"
         )}
       >
         <span
-          className={cn("font-bold tracking-tight", forSheet ? "text-2xl" : "text-xl")}
+          className={cn("font-bold", forSheet ? "text-lg" : "text-xl tracking-tight")}
           style={{ fontFamily: "var(--font-onest)" }}
         >
           🍱 Bento Resto
@@ -225,7 +225,7 @@ function SidebarColumn({
             )}
           >
             <Package className={iconClass} />
-            <span className="flex-1 text-left">{tr("Ma carte", "My menu")}</span>
+            <span className="flex-1 text-left">{tr("Mon catalogue", "My catalog")}</span>
             <ChevronDown
               className={cn(chevronClass, "transition-transform", carteOpen && "rotate-180")}
             />
