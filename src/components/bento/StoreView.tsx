@@ -167,6 +167,20 @@ function whToBentoSize(w: number, h: number): BentoSize {
   return "1x1";
 }
 
+function bentoSizeToMobileSpanClass(size: BentoSize): string {
+  switch (size) {
+    case "2x2":
+      return "col-span-2 row-span-2";
+    case "2x1":
+      return "col-span-2 row-span-1";
+    case "1x2":
+      return "col-span-1 row-span-2";
+    case "1x1":
+    default:
+      return "col-span-1 row-span-1";
+  }
+}
+
 // ── Animation variants ─────────────────────────────────────────
 
 function makeSlideVariants(dir: number) {
@@ -488,14 +502,15 @@ export function StoreView({
 
   function renderLevel1Tile(item: StorefrontBentoLayoutItem, sizing: Level1SizingMode) {
     const size = whToBentoSize(item.w, item.h);
-    const omitSizeClasses = sizing === "explicitGrid";
+    const omitSizeClasses = true;
+    const mobileSpanClass = sizing === "bentoCardSpans" ? bentoSizeToMobileSpanClass(size) : undefined;
 
     if (item.i === "info") {
       return (
         <BentoCardInfo
           cardSize={size}
           omitSizeClasses={omitSizeClasses}
-          cardClassName={!omitSizeClasses ? "col-span-2 row-span-2" : undefined}
+          cardClassName={mobileSpanClass}
           shopName={shop.name}
           shopSlug={shop.slug}
           description={shop.description}
@@ -524,6 +539,7 @@ export function StoreView({
           productCount={cat.productCount}
           size={size}
           omitSizeClasses={omitSizeClasses}
+          className={mobileSpanClass}
           onClick={() => goToCategory(cat)}
         />
       );
@@ -537,6 +553,7 @@ export function StoreView({
           productCount={bundles.length}
           size={size}
           omitSizeClasses={omitSizeClasses}
+          className={mobileSpanClass}
           onClick={goToBundlesMenu}
         />
       );
@@ -555,7 +572,7 @@ export function StoreView({
           slots={bundle.slots}
           size={size}
           omitSizeClasses={omitSizeClasses}
-          className={!omitSizeClasses ? "col-span-2 row-span-1" : undefined}
+          className={mobileSpanClass}
           onClick={() => setSelectedBundle(bundle)}
         />
       );
@@ -567,6 +584,7 @@ export function StoreView({
           photos={visibleStorefrontPhotos}
           size={size}
           omitSizeClasses={omitSizeClasses}
+          className={mobileSpanClass}
         />
       );
     }
