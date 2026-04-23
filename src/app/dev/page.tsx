@@ -13,6 +13,7 @@ const LINKS = [
   { href: "/dev/da", label: "Charte / DA" },
   { href: "/dev/onboarding", label: "Onboarding dev" },
   { href: "/dev/dashboard", label: "Dashboard (dev)" },
+  { href: "/dev/cookies", label: "Cookies (reset a chaque chargement)" },
   { href: "/dev/votre-slug", label: "Boutique (dev via slug)" },
 ] as const;
 

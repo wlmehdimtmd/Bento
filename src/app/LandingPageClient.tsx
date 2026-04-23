@@ -18,6 +18,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { AppBrandMark } from "@/components/layout/AppBrandMark";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
+import { CookiePreferencesButton } from "@/components/legal/CookiePreferencesButton";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import type { LandingDemoHeroData } from "@/lib/fetchLandingDemoHero";
 
@@ -581,6 +582,10 @@ export function LandingPageClient({ hero }: { hero: LandingDemoHeroData }) {
             <Link href="/cgv" className="hover:text-foreground transition-colors">
               {t("landing.footer.cgv")}
             </Link>
+            <Link href="/cookies" className="hover:text-foreground transition-colors">
+              {t("landing.footer.cookies")}
+            </Link>
+            <CookiePreferencesButton className="hover:text-foreground transition-colors" />
           </div>
         </div>
       </footer>

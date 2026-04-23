@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "vanilla-cookieconsent/dist/cookieconsent.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -214,6 +215,43 @@
 
   .landing-marquee-track--reverse {
     animation-direction: reverse;
+  }
+
+  #cc-main {
+    --cc-font-family: var(--font-inter), sans-serif;
+    --cc-modal-border-radius: var(--radius-2xl);
+    --cc-btn-border-radius: var(--radius-lg);
+    --cc-bg: var(--card);
+    --cc-primary-color: var(--foreground);
+    --cc-secondary-color: var(--muted-foreground);
+    --cc-btn-primary-bg: var(--primary);
+    --cc-btn-primary-color: var(--primary-foreground);
+    --cc-btn-primary-border-color: var(--primary);
+    --cc-btn-secondary-bg: transparent;
+    --cc-btn-secondary-color: var(--foreground);
+    --cc-btn-secondary-border-color: var(--border);
+    --cc-separator-border-color: var(--border);
+    --cc-cookie-category-block-bg: var(--muted);
+  }
+
+  .dark #cc-main {
+    --cc-cookie-category-block-bg: color-mix(in oklab, var(--card) 92%, white 8%);
+    --cc-cookie-category-block-border: color-mix(in oklab, var(--border) 78%, white 22%);
+    --cc-cookie-category-block-hover-bg: color-mix(in oklab, var(--card) 75%, white 25%);
+    --cc-cookie-category-block-hover-border: color-mix(in oklab, var(--border) 60%, white 40%);
+    --cc-cookie-category-expanded-block-hover-bg: color-mix(in oklab, var(--card) 70%, white 30%);
+    --cc-toggle-on-bg: color-mix(in oklab, var(--color-bento-accent) 90%, white 10%);
+    --cc-toggle-on-knob-bg: #ffffff;
+    --cc-toggle-on-knob-icon-color: #0f172a;
+    --cc-toggle-off-bg: color-mix(in oklab, var(--muted) 82%, white 18%);
+    --cc-toggle-off-knob-bg: #e5e7eb;
+    --cc-toggle-disabled-icon-color: #1f2937;
+    --cc-toggle-readonly-bg: color-mix(in oklab, var(--muted) 70%, white 30%);
+    --cc-toggle-readonly-knob-bg: #f3f4f6;
+    --cc-toggle-readonly-knob-icon-color: #374151;
+    --cc-btn-secondary-hover-bg: color-mix(in oklab, var(--accent) 55%, white 45%);
+    --cc-btn-secondary-hover-color: #ffffff;
+    --cc-btn-secondary-hover-border-color: color-mix(in oklab, var(--border) 42%, white 58%);
   }
 
   /* Dashboard vitrine : placeholder resize + déplacements plus fluides */

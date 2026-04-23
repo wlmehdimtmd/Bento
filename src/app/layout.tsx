@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { RecoveryHashHandler } from "@/components/auth/RecoveryHashHandler";
 import { LocaleClientProvider } from "@/components/i18n/LocaleClientProvider";
+import { CookieConsentProvider } from "@/components/legal/CookieConsentProvider";
 import { resolveLocale, LOCALE_COOKIE_NAME } from "@/lib/i18n";
 import { publicAppUrl } from "@/lib/publicAppUrl";
 import "./globals.css";
@@ -66,6 +67,7 @@ export default async function RootLayout({
             <TooltipProvider delay={200}>
               {/* Avant le contenu : session recovery (hash / PKCE) avant les useEffect des pages. */}
               <RecoveryHashHandler />
+              <CookieConsentProvider />
               {children}
               <Toaster richColors closeButton />
             </TooltipProvider>

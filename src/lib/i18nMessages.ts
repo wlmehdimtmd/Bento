@@ -73,6 +73,7 @@ const fr: FlatMessages = {
   "landing.footer.privacy": "Confidentialité",
   "landing.footer.terms": "Conditions",
   "landing.footer.cgv": "CGV",
+  "landing.footer.cookies": "Cookies",
   "i18n.dialog.title": "Choisir la langue",
   "landing.cta.start": "Commencer gratuitement",
   "landing.cta.demo": "Voir la démo",
@@ -111,6 +112,31 @@ const fr: FlatMessages = {
   "legal.cgv.title": "Conditions générales de vente",
   "legal.notice.title": "Mentions légales",
   "support.title": "Support",
+  "cookies.actions.acceptAll": "Tout accepter",
+  "cookies.actions.rejectAll": "Tout refuser",
+  "cookies.actions.customize": "Personnaliser",
+  "cookies.actions.save": "Enregistrer mes choix",
+  "cookies.actions.close": "Fermer",
+  "cookies.actions.manage": "Gérer mes cookies",
+  "cookies.consent.title": "Préférences de confidentialité",
+  "cookies.consent.description":
+    "Nous utilisons des cookies nécessaires au fonctionnement du site et, avec votre accord, des cookies d'analyse ou marketing pour améliorer votre expérience.",
+  "cookies.preferences.title": "Paramètres des cookies",
+  "cookies.preferences.sections.usage.title": "Comment utilisons-nous les cookies ?",
+  "cookies.preferences.sections.usage.description":
+    "Vous pouvez accepter tous les cookies, tout refuser (hors nécessaires), ou choisir par catégorie.",
+  "cookies.preferences.sections.necessary.title": "Cookies nécessaires",
+  "cookies.preferences.sections.necessary.description":
+    "Indispensables au fonctionnement technique (authentification, sécurité, préférences de base).",
+  "cookies.preferences.sections.analytics.title": "Cookies analytiques",
+  "cookies.preferences.sections.analytics.description":
+    "Mesurent l'audience et l'utilisation pour améliorer le service.",
+  "cookies.preferences.sections.marketing.title": "Cookies marketing",
+  "cookies.preferences.sections.marketing.description":
+    "Permettent des contenus et campagnes plus pertinents selon votre navigation.",
+  "cookies.preferences.sections.more.title": "Plus d'informations",
+  "cookies.preferences.sections.more.description":
+    "Consultez notre politique de confidentialité et notre politique cookies pour le détail des finalités, durées et moyens d'opposition.",
   "dashboard.common.cancel": "Annuler",
   "dashboard.common.save": "Enregistrer",
   "dashboard.common.saving": "Enregistrement…",
@@ -395,6 +421,7 @@ const en: FlatMessages = {
   "landing.footer.privacy": "Privacy",
   "landing.footer.terms": "Terms",
   "landing.footer.cgv": "Terms of Sale",
+  "landing.footer.cookies": "Cookies",
   "i18n.dialog.title": "Choose language",
   "landing.cta.start": "Get started for free",
   "landing.cta.demo": "See demo",
@@ -433,6 +460,31 @@ const en: FlatMessages = {
   "legal.cgv.title": "General Terms of Sale",
   "legal.notice.title": "Legal Notice",
   "support.title": "Support",
+  "cookies.actions.acceptAll": "Accept all",
+  "cookies.actions.rejectAll": "Reject all",
+  "cookies.actions.customize": "Customize",
+  "cookies.actions.save": "Save preferences",
+  "cookies.actions.close": "Close",
+  "cookies.actions.manage": "Manage cookies",
+  "cookies.consent.title": "Privacy preferences",
+  "cookies.consent.description":
+    "We use cookies required for the website to work and, with your consent, analytics or marketing cookies to improve your experience.",
+  "cookies.preferences.title": "Cookie settings",
+  "cookies.preferences.sections.usage.title": "How do we use cookies?",
+  "cookies.preferences.sections.usage.description":
+    "You can accept all cookies, reject all optional cookies, or choose by category.",
+  "cookies.preferences.sections.necessary.title": "Necessary cookies",
+  "cookies.preferences.sections.necessary.description":
+    "Required for technical operation (authentication, security, core preferences).",
+  "cookies.preferences.sections.analytics.title": "Analytics cookies",
+  "cookies.preferences.sections.analytics.description":
+    "Help measure traffic and usage so we can improve the service.",
+  "cookies.preferences.sections.marketing.title": "Marketing cookies",
+  "cookies.preferences.sections.marketing.description":
+    "Used to provide more relevant content and campaigns based on your browsing.",
+  "cookies.preferences.sections.more.title": "More information",
+  "cookies.preferences.sections.more.description":
+    "Read our Privacy Policy and Cookie Policy for details about purposes, retention periods, and how to withdraw consent.",
   "dashboard.common.cancel": "Cancel",
   "dashboard.common.save": "Save",
   "dashboard.common.saving": "Saving...",
