@@ -159,7 +159,7 @@ export default async function ShopPage({
   const sf = MESSAGES[locale];
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-0 py-8 sm:px-4">
       <LocaleRouteSync locale={locale} />
       <StoreView
         shop={shop}

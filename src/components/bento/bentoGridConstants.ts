@@ -1,8 +1,9 @@
-/** Tokens + espacement Bento (sans `display: grid` ni `grid-cols-*`). */
-export const BENTO_GRID_SURFACE_CLASS = "bento-grid gap-4 auto-rows-[14rem]";
+/** Surface Bento en flexbox responsive (1 à 4 cartes max par ligne). */
+export const BENTO_GRID_SURFACE_CLASS =
+  "bento-grid mx-auto flex w-full max-w-[1008px] flex-wrap gap-4";
 
-/** Grille avec `display: grid` (démo / niveau 2 / squelettes). */
-export const BENTO_GRID_BASE_CLASS = `${BENTO_GRID_SURFACE_CLASS} grid`;
+/** Conteneur Bento de base (démo / niveau 2 / squelettes). */
+export const BENTO_GRID_BASE_CLASS = BENTO_GRID_SURFACE_CLASS;
 
 /**
  * Ombre des tuiles vitrine — identique au survol des `BentoCard` interactives.

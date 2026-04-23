@@ -6,7 +6,6 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -17,22 +16,15 @@ import { toast } from "sonner";
 import { useTheme } from "next-themes";
 
 import { createClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/useIsMobile";
 import { useCartStore } from "@/lib/stores/cartStore";
 import type { SocialLinks } from "@/lib/types";
 
-import {
-  BentoGrid,
-  BENTO_GRID_SURFACE_CLASS,
-  BENTO_STAGGER_CONTAINER_VARIANTS,
-} from "./BentoGrid";
+import { BentoGrid } from "./BentoGrid";
 import { BentoCardInfo } from "./BentoCardInfo";
 import { BentoCardCategory } from "./BentoCardCategory";
 import { BentoCardBundle } from "./BentoCardBundle";
 import { BentoCardGallery } from "./BentoCardGallery";
 import { BentoCardBack } from "./BentoCardBack";
-import { BentoCardBackFloating } from "./BentoCardBackFloating";
 import { BentoCardProduct } from "./BentoCardProduct";
 import { BundleDetail } from "./BundleDetail";
 import { ProductDetail, type PublicProduct } from "@/components/product/ProductDetail";
@@ -155,9 +147,6 @@ function scheduleScrollStorefrontToTop() {
   });
 }
 
-/** Desktop : grille 4 cols + placement x,y,w,h (`omitSizeClasses`). Mobile/tablette : `BentoGrid` + spans comme la démo statique. */
-type Level1SizingMode = "explicitGrid" | "bentoCardSpans";
-
 function whToBentoSize(w: number, h: number): BentoSize {
   const cw = Math.min(2, Math.max(1, Math.round(w)));
   const ch = Math.min(2, Math.max(1, Math.round(h)));
@@ -165,20 +154,6 @@ function whToBentoSize(w: number, h: number): BentoSize {
   if (cw === 2 && ch === 1) return "2x1";
   if (cw === 1 && ch === 2) return "1x2";
   return "1x1";
-}
-
-function bentoSizeToMobileSpanClass(size: BentoSize): string {
-  switch (size) {
-    case "2x2":
-      return "col-span-2 row-span-2";
-    case "2x1":
-      return "col-span-2 row-span-1";
-    case "1x2":
-      return "col-span-1 row-span-2";
-    case "1x1":
-    default:
-      return "col-span-1 row-span-1";
-  }
 }
 
 // ── Animation variants ─────────────────────────────────────────
@@ -214,7 +189,6 @@ export function StoreView({
   shopLabels = [],
 }: StoreViewProps) {
   const { locale } = useLocale();
-  const isMobile = useIsMobile();
   const { resolvedTheme } = useTheme();
   const mounted = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
   const isDark = mounted ? resolvedTheme === "dark" : false;
@@ -227,10 +201,6 @@ export function StoreView({
   );
   const addItem = useCartStore((s) => s.addItem);
   const cartItems = useCartStore((s) => s.items);
-  const backCardRef = useRef<HTMLDivElement | null>(null);
-  const [isBackInView, setIsBackInView] = useState(true);
-  /** Après l’anim d’entrée L2 : évite FAB pendant le slide / le chargement (IO instable sans tuile retour). */
-  const [l2ScrollFabEnabled, setL2ScrollFabEnabled] = useState(false);
 
   const visibleStorefrontPhotos = useMemo(
     () => storefrontPhotos.filter((photo) => photo.is_visible),
@@ -279,7 +249,6 @@ export function StoreView({
   );
 
   const [level, setLevel] = useState<"l1" | "l2">("l1");
-  const levelRef = useRef<"l1" | "l2">("l1");
 
   const [direction, setDirection] = useState(1);
   /** Niveau 2 : produits d’une catégorie, ou liste des formules (carte Menu). */
@@ -359,9 +328,7 @@ export function StoreView({
 
   async function goToCategory(cat: CategoryInfo) {
     scheduleScrollStorefrontToTop();
-    setL2ScrollFabEnabled(false);
     setDirection(1);
-    setIsBackInView(true);
     setL2View("category");
     setSelectedCat(cat);
     setProducts([]);
@@ -375,9 +342,7 @@ export function StoreView({
 
   function goToBundlesMenu() {
     scheduleScrollStorefrontToTop();
-    setL2ScrollFabEnabled(false);
     setDirection(1);
-    setIsBackInView(true);
     setL2View("bundles");
     setSelectedCat(null);
     setProducts([]);
@@ -386,7 +351,6 @@ export function StoreView({
   }
 
   function goBack() {
-    setL2ScrollFabEnabled(false);
     setDirection(-1);
     setLevel("l1");
     setSelectedCat(null);
@@ -399,7 +363,6 @@ export function StoreView({
     setSelectedBundle(null);
     setLoadingProducts(false);
     scheduleScrollStorefrontToTop();
-    setL2ScrollFabEnabled(false);
     setDirection(-1);
     setLevel("l1");
     setSelectedCat(null);
@@ -414,50 +377,11 @@ export function StoreView({
     return () => window.removeEventListener(STOREFRONT_NAVIGATE_HOME, onHome);
   }, [navigateToCategoryRoot]);
 
-  useLayoutEffect(() => {
-    levelRef.current = level;
-  }, [level]);
-
   /** À l’entrée en niveau 2 : complète le scroll au clic (après commit / exit L1 sous `AnimatePresence mode="wait"`). */
   useLayoutEffect(() => {
     if (level !== "l2") return;
     scheduleScrollStorefrontToTop();
   }, [level, selectedCat?.id, l2View]);
-
-  useEffect(() => {
-    if (!isMobile || level !== "l2") return;
-    if (l2View === "category" && loadingProducts) return;
-    if (!l2ScrollFabEnabled) return;
-
-    const el = backCardRef.current;
-    if (!el) return;
-
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        requestAnimationFrame(() => {
-          setIsBackInView(entry.isIntersecting);
-        });
-      },
-      { root: null, rootMargin: "0px", threshold: 0 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [
-    isMobile,
-    level,
-    l2View,
-    loadingProducts,
-    selectedCat?.id,
-    products.length,
-    l2ScrollFabEnabled,
-  ]);
-
-  const showFloatingBack =
-    isMobile &&
-    level === "l2" &&
-    l2ScrollFabEnabled &&
-    !(l2View === "category" && loadingProducts) &&
-    !isBackInView;
 
   const cartQuantitiesByProductId = useMemo(() => {
     const quantities = new Map<string, number>();
@@ -500,17 +424,15 @@ export function StoreView({
     toast.success(locale === "en" ? `${product.name} added!` : `${product.name} ajouté !`);
   }
 
-  function renderLevel1Tile(item: StorefrontBentoLayoutItem, sizing: Level1SizingMode) {
+  function renderLevel1Tile(item: StorefrontBentoLayoutItem) {
     const size = whToBentoSize(item.w, item.h);
     const omitSizeClasses = true;
-    const mobileSpanClass = sizing === "bentoCardSpans" ? bentoSizeToMobileSpanClass(size) : undefined;
 
     if (item.i === "info") {
       return (
         <BentoCardInfo
           cardSize={size}
           omitSizeClasses={omitSizeClasses}
-          cardClassName={mobileSpanClass}
           shopName={shop.name}
           shopSlug={shop.slug}
           description={shop.description}
@@ -539,7 +461,6 @@ export function StoreView({
           productCount={cat.productCount}
           size={size}
           omitSizeClasses={omitSizeClasses}
-          className={mobileSpanClass}
           onClick={() => goToCategory(cat)}
         />
       );
@@ -553,7 +474,6 @@ export function StoreView({
           productCount={bundles.length}
           size={size}
           omitSizeClasses={omitSizeClasses}
-          className={mobileSpanClass}
           onClick={goToBundlesMenu}
         />
       );
@@ -572,7 +492,6 @@ export function StoreView({
           slots={bundle.slots}
           size={size}
           omitSizeClasses={omitSizeClasses}
-          className={mobileSpanClass}
           onClick={() => setSelectedBundle(bundle)}
         />
       );
@@ -584,7 +503,6 @@ export function StoreView({
           photos={visibleStorefrontPhotos}
           size={size}
           omitSizeClasses={omitSizeClasses}
-          className={mobileSpanClass}
         />
       );
     }
@@ -628,38 +546,13 @@ export function StoreView({
             exit={slideVars.exit}
             className="bg-transparent"
           >
-            <>
-              {/* Conteneur variants : sans lui, les BentoCard restent en `itemVariant.hidden` (opacité 0). */}
-              <motion.div
-                variants={BENTO_STAGGER_CONTAINER_VARIANTS}
-                initial="hidden"
-                animate="show"
-                className={cn("hidden lg:grid grid-cols-4", BENTO_GRID_SURFACE_CLASS)}
-              >
-                {compactedLevel1Layout.map((item) => (
-                  <div
-                    key={item.i}
-                    style={{
-                      gridColumn: `${item.x + 1} / span ${item.w}`,
-                      gridRow: `${item.y + 1} / span ${item.h}`,
-                    }}
-                    className="min-h-0 min-w-0"
-                  >
-                    {renderLevel1Tile(item, "explicitGrid")}
-                  </div>
-                ))}
-              </motion.div>
-
-              <BentoGrid className="lg:hidden grid-cols-2">
-                {mobileTileOrder(compactedLevel1Layout).map((tileId) => {
-                  const item = level1Map.get(tileId);
-                  if (!item) return null;
-                  return (
-                    <Fragment key={tileId}>{renderLevel1Tile(item, "bentoCardSpans")}</Fragment>
-                  );
-                })}
-              </BentoGrid>
-            </>
+            <BentoGrid>
+              {mobileTileOrder(compactedLevel1Layout).map((tileId) => {
+                const item = level1Map.get(tileId);
+                if (!item) return null;
+                return <Fragment key={tileId}>{renderLevel1Tile(item)}</Fragment>;
+              })}
+            </BentoGrid>
           </motion.div>
         ) : (
           <motion.div
@@ -670,10 +563,6 @@ export function StoreView({
             className="bg-transparent"
             onAnimationComplete={() => {
               scheduleScrollStorefrontToTop();
-              if (levelRef.current === "l2") {
-                setL2ScrollFabEnabled(true);
-                setIsBackInView(true);
-              }
             }}
           >
             {l2View === "category" && loadingProducts ? (
@@ -683,7 +572,6 @@ export function StoreView({
             ) : (
               <BentoGrid>
                 <BentoCardBack
-                  ref={backCardRef}
                   categoryName={
                     l2View === "bundles" ? MENU_CARD_NAME : (selectedCat?.name ?? "")
                   }
@@ -728,7 +616,7 @@ export function StoreView({
                   ))}
 
                 {l2View === "category" && products.length === 0 && (
-                  <div className="col-span-full flex flex-col items-center justify-center gap-2 py-12 text-center text-muted-foreground">
+                  <div className="w-full flex flex-col items-center justify-center gap-2 py-12 text-center text-muted-foreground">
                     <span className="text-4xl">{selectedCat?.icon_emoji}</span>
                     <p>
                       {locale === "en"
@@ -739,7 +627,7 @@ export function StoreView({
                 )}
 
                 {l2View === "bundles" && bundles.length === 0 && (
-                  <div className="col-span-full flex flex-col items-center justify-center gap-2 py-12 text-center text-muted-foreground">
+                  <div className="w-full flex flex-col items-center justify-center gap-2 py-12 text-center text-muted-foreground">
                     <span className="text-4xl">{MENU_CARD_EMOJI}</span>
                     <p>
                       {locale === "en"
@@ -767,20 +655,6 @@ export function StoreView({
         onClose={() => setSelectedBundle(null)}
         loadCategoryProducts={loadProductsForCategory}
         shopLabels={shopLabels}
-      />
-
-      <BentoCardBackFloating
-        open={showFloatingBack}
-        categoryName={
-          l2View === "bundles" ? MENU_CARD_NAME : (selectedCat?.name ?? "")
-        }
-        categoryEmoji={
-          l2View === "bundles" ? MENU_CARD_EMOJI : (selectedCat?.icon_emoji ?? "")
-        }
-        description={
-          l2View === "bundles" ? MENU_CARD_DESCRIPTION : selectedCat?.description
-        }
-        onBack={goBack}
       />
     </div>
   );

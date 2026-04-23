@@ -49,7 +49,7 @@ import { useLocale } from "@/components/i18n/LocaleProvider";
 
 const GridLayoutWithWidth = WidthProvider(ReactGridLayout);
 
-const ROW_HEIGHT_PX = 224; // 14rem @ 16px
+const ROW_HEIGHT_PX = 200;
 
 function whToBentoSize(w: number, h: number): BentoSize {
   const cw = Math.min(2, Math.max(1, Math.round(w)));
@@ -414,7 +414,7 @@ export function StorefrontBentoEditor({
           </div>
         </div>
       ) : (
-        <div className="mx-auto w-full max-w-5xl space-y-4">
+        <div className="mx-auto w-full max-w-[1008px] space-y-4">
           <section className="space-y-3">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>

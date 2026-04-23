@@ -82,7 +82,7 @@ export function BentoCardInfo({
       size={cardSize}
       omitSizeClasses={omitSizeClasses}
       disableHover
-      className={cn("flex flex-col", omitSizeClasses && "h-full min-h-0", cardClassName)}
+      className={cn("flex flex-col", cardClassName)}
     >
       {!hasSingleRowHeight && coverUrl && (
         <div className="relative h-52 w-full shrink-0 bg-muted">

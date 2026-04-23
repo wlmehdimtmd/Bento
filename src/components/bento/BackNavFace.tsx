@@ -30,7 +30,7 @@ export function BackNavFace({
     <div
       className={cn(
         "relative flex min-h-0 items-center rounded-xl",
-        compact ? "gap-2.5 px-3 py-2" : "h-full gap-4 px-5",
+        compact ? "gap-2.5 px-3 py-2" : "h-auto justify-center px-5 py-3 sm:h-full sm:py-0",
         className
       )}
       style={{ backgroundColor: "var(--bento-floating-surface-bg)" }}
@@ -38,7 +38,7 @@ export function BackNavFace({
       <div
         className={cn(
           "flex shrink-0 items-center justify-center rounded-full",
-          compact ? "h-8 w-8" : "h-10 w-10"
+          compact ? "h-8 w-8" : "absolute left-4 top-4 h-10 w-10"
         )}
         style={{ backgroundColor: "color-mix(in srgb, var(--primary) 14%, transparent)" }}
       >
@@ -49,8 +49,18 @@ export function BackNavFace({
         />
       </div>
 
-      <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-center gap-2">
+      <div
+        className={cn(
+          "min-w-0",
+          compact ? "flex-1" : "mx-auto flex w-full max-w-[80%] flex-col items-center text-center"
+        )}
+      >
+        <div
+          className={cn(
+            "flex min-w-0 items-center gap-2",
+            compact ? "" : "justify-center"
+          )}
+        >
           <span className={compact ? "text-xl leading-none" : "text-2xl"}>
             {categoryEmoji}
           </span>

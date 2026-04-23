@@ -26,7 +26,7 @@ export function BentoCardGallery({
     <BentoCard
       size={size}
       omitSizeClasses={omitSizeClasses}
-      className={cn("relative flex h-full min-h-0 flex-col overflow-hidden", className)}
+      className={cn("relative flex flex-col overflow-hidden", className)}
     >
       {coverPhoto ? (
         <Image

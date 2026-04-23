@@ -31,7 +31,7 @@ export function BentoCardCategory({
       size={size}
       omitSizeClasses={omitSizeClasses}
       onClick={onClick}
-      className={cn(omitSizeClasses && "h-full min-h-0", className)}
+      className={className}
     >
       <div
         className="absolute inset-0"

@@ -34,7 +34,7 @@ export function BentoGrid({ children, className }: BentoGridProps) {
       animate="show"
       className={cn(
         BENTO_GRID_BASE_CLASS,
-        "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+        "justify-center",
         className
       )}
     >

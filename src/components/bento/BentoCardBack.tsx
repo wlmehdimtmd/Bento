@@ -16,7 +16,12 @@ export const BentoCardBack = forwardRef<HTMLDivElement, BentoCardBackProps>(func
   ref
 ) {
   return (
-    <BentoCard ref={ref} size="2x1" onClick={onBack} className="h-full min-h-0">
+    <BentoCard
+      ref={ref}
+      size="2x1"
+      onClick={onBack}
+      className="sticky top-2 z-20 h-full min-h-0 self-start"
+    >
       <div
         className="pointer-events-none absolute inset-0 opacity-10"
         style={backNavAccentGradientStyle}

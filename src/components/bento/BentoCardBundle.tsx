@@ -46,11 +46,7 @@ export function BentoCardBundle({
       size={size}
       omitSizeClasses={omitSizeClasses}
       onClick={onClick}
-      className={cn(
-        "flex flex-row overflow-hidden",
-        omitSizeClasses && "h-full min-h-0",
-        className
-      )}
+      className={cn("flex flex-row overflow-hidden", className)}
     >
       {/* Left: image or icon (hidden on 1-row tiles) */}
       {!hasSingleRowHeight && (
