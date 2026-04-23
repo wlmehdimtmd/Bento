@@ -6,18 +6,22 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
 
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useCartStore } from "@/lib/stores/cartStore";
 import type { SocialLinks } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 
 import { BentoGrid } from "./BentoGrid";
 import { BentoCardInfo } from "./BentoCardInfo";
@@ -188,7 +192,9 @@ export function StoreView({
   storefrontThemeOverrides,
   shopLabels = [],
 }: StoreViewProps) {
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
+  /** Vitrine : FAB retour + détection scroll (lg et moins, aligné grille 2–4 cols). */
+  const isCompactStorefront = useIsMobile(1024);
   const { resolvedTheme } = useTheme();
   const mounted = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
   const isDark = mounted ? resolvedTheme === "dark" : false;
@@ -201,6 +207,9 @@ export function StoreView({
   );
   const addItem = useCartStore((s) => s.addItem);
   const cartItems = useCartStore((s) => s.items);
+  const cartCount = useCartStore((s) => s.getCount());
+  const backCardRef = useRef<HTMLDivElement | null>(null);
+  const [isBackCardVisible, setIsBackCardVisible] = useState(true);
 
   const visibleStorefrontPhotos = useMemo(
     () => storefrontPhotos.filter((photo) => photo.is_visible),
@@ -383,6 +392,67 @@ export function StoreView({
     scheduleScrollStorefrontToTop();
   }, [level, selectedCat?.id, l2View]);
 
+  useEffect(() => {
+    if (!isCompactStorefront || level !== "l2") {
+      setIsBackCardVisible(true);
+      return;
+    }
+    if (l2View === "category" && loadingProducts) {
+      setIsBackCardVisible(true);
+      return;
+    }
+
+    let raf = 0;
+    const updateVisibility = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const node = backCardRef.current;
+        if (!node) return;
+        const r = node.getBoundingClientRect();
+        const h = window.innerHeight;
+        const edge = 1;
+        const intersects = r.bottom > edge && r.top < h - edge;
+        setIsBackCardVisible(intersects);
+      });
+    };
+
+    updateVisibility();
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    window.addEventListener("resize", updateVisibility);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", updateVisibility);
+    }
+
+    const node = backCardRef.current;
+    const ro =
+      node && typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(updateVisibility)
+        : null;
+    if (ro && node) ro.observe(node);
+
+    const t0 = window.setTimeout(updateVisibility, 0);
+    const t1 = window.setTimeout(updateVisibility, 120);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(t0);
+      window.clearTimeout(t1);
+      window.removeEventListener("scroll", updateVisibility);
+      window.removeEventListener("resize", updateVisibility);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener("resize", updateVisibility);
+      }
+      ro?.disconnect();
+    };
+  }, [
+    isCompactStorefront,
+    level,
+    l2View,
+    loadingProducts,
+    selectedCat?.id,
+    products.length,
+  ]);
+
   const cartQuantitiesByProductId = useMemo(() => {
     const quantities = new Map<string, number>();
     for (const item of cartItems) {
@@ -513,6 +583,8 @@ export function StoreView({
   // ── Render ─────────────────────────────────────────────────
 
   const slideVars = makeSlideVariants(direction);
+  const showBackShortcut =
+    isCompactStorefront && level === "l2" && !isBackCardVisible && !loadingProducts;
 
   return (
     <div className="bg-transparent" style={storefrontThemeStyle}>
@@ -572,6 +644,7 @@ export function StoreView({
             ) : (
               <BentoGrid>
                 <BentoCardBack
+                  ref={backCardRef}
                   categoryName={
                     l2View === "bundles" ? MENU_CARD_NAME : (selectedCat?.name ?? "")
                   }
@@ -656,6 +729,40 @@ export function StoreView({
         loadCategoryProducts={loadProductsForCategory}
         shopLabels={shopLabels}
       />
+
+      <AnimatePresence>
+        {showBackShortcut ? (
+          <motion.div
+            key="storefront-back-fab"
+            className={cn(
+              "pointer-events-none fixed inset-x-0 z-[51] flex justify-center px-4",
+              cartCount > 0
+                ? // CartButton (flex-col) : pb + langue + mb-2 + hauteur pilule ; 8px entre le bas du FAB et le haut du pilulier panier
+                  "bottom-[calc(max(1rem,env(safe-area-inset-bottom,0px))+1.625rem+0.5rem+3.5rem+8px)]"
+                : "bottom-[calc(max(1rem,env(safe-area-inset-bottom,0px))+2rem)]"
+            )}
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 380, damping: 28 }}
+          >
+            <Button
+              type="button"
+              variant="secondary"
+              size="default"
+              onClick={goBack}
+              className={cn(
+                "pointer-events-auto inline-flex min-h-12 shrink-0 items-center gap-1 rounded-full px-5 py-2.5 text-base font-semibold shadow-xl backdrop-blur-[4px]",
+                "bg-neutral-100/95 text-neutral-900 ring-1 ring-neutral-200/90 hover:bg-neutral-200/90",
+                "dark:bg-secondary/95 dark:text-secondary-foreground dark:ring-border/50 dark:hover:bg-secondary"
+              )}
+            >
+              <ChevronLeft className="h-5 w-5 shrink-0" aria-hidden />
+              <span className="whitespace-nowrap">{t("storefront.backToCategories")}</span>
+            </Button>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

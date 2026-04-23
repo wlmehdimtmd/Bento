@@ -30,7 +30,9 @@ export function BackNavFace({
     <div
       className={cn(
         "relative flex min-h-0 items-center rounded-xl",
-        compact ? "gap-2.5 px-3 py-2" : "h-auto justify-center px-5 py-3 sm:h-full sm:py-0",
+        compact
+          ? "gap-2.5 px-3 py-2"
+          : "h-auto justify-center px-5 py-3 min-[351px]:h-full min-[351px]:py-0",
         className
       )}
       style={{ backgroundColor: "var(--bento-floating-surface-bg)" }}

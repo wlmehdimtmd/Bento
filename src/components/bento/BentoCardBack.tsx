@@ -20,7 +20,7 @@ export const BentoCardBack = forwardRef<HTMLDivElement, BentoCardBackProps>(func
       ref={ref}
       size="2x1"
       onClick={onBack}
-      className="sticky top-2 z-20 h-full min-h-0 self-start"
+      className="h-auto self-start min-[351px]:h-[200px]"
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-10"
