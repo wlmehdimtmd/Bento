@@ -9,6 +9,11 @@ import { buttonVariants } from "@/components/ui/button";
 import type { ProductSavePayload, ProductRow } from "@/components/product/ProductForm";
 
 type Params = Promise<{ id: string }>;
+type ProductOptionMode = "none" | "free" | "paid";
+
+function normalizeProductOptionMode(value: unknown): ProductOptionMode {
+  return value === "free" || value === "paid" ? value : "none";
+}
 
 export default async function AdminManageProductsPage({ params }: { params: Params }) {
   const { id: shopId } = await params;
@@ -52,7 +57,7 @@ export default async function AdminManageProductsPage({ params }: { params: Para
     .order("display_order");
 
   const catMap = Object.fromEntries(cats.map((c) => [c.id, c]));
-  const initialProducts = (products ?? []).map((p) => ({
+  const initialProducts: (ProductRow & { categoryName: string })[] = (products ?? []).map((p) => ({
     id: p.id,
     category_id: p.category_id,
     name: p.name,
@@ -63,7 +68,7 @@ export default async function AdminManageProductsPage({ params }: { params: Para
     option_label: p.option_label,
     option_label_fr: p.option_label_fr,
     option_label_en: p.option_label_en,
-    option_mode: p.option_mode === "free" || p.option_mode === "paid" ? p.option_mode : "none",
+    option_mode: normalizeProductOptionMode(p.option_mode),
     option_price_delta: Number(p.option_price_delta ?? 0),
     option_choices: Array.isArray(p.option_choices) ? (p.option_choices as string[]) : [],
     is_available: p.is_available ?? true,
