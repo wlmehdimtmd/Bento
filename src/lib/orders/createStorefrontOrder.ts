@@ -237,9 +237,6 @@ export async function createStorefrontOrder(
     }
     const optionMode = p.option_mode === "free" || p.option_mode === "paid" ? p.option_mode : "none";
     const hasSelectedOption = Boolean(item.optionValue && item.optionValue.trim().length > 0);
-    if (optionMode !== "none" && !hasSelectedOption) {
-      return fail(400, "Une option obligatoire n'a pas été renseignée.");
-    }
     if (optionMode === "none" && hasSelectedOption) {
       return fail(400, "Option invalide pour ce produit.");
     }

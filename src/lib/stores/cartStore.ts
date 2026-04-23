@@ -19,6 +19,8 @@ export interface CartItem {
   description?: string | null;
   tags?: string[];
   optionValue?: string;
+  optionChoices?: string[];
+  optionPriceDelta?: number;
   specialNote?: string;
   isBundle: boolean;
   bundleId?: string;
@@ -34,6 +36,7 @@ interface CartState {
   addItem: (item: Omit<CartItem, "id">) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
+  updateItemOptionValue: (id: string, optionValue?: string) => void;
   updateItemSpecialNote: (id: string, specialNote?: string) => void;
   clearCart: () => void;
 
@@ -66,7 +69,8 @@ export const useCartStore = create<CartState>()(
               (i) =>
                 !i.isBundle &&
                 i.productId === item.productId &&
-                (i.optionValue ?? "") === (item.optionValue ?? "")
+                (i.optionValue ?? "") === (item.optionValue ?? "") &&
+                (i.specialNote ?? "") === (item.specialNote ?? "")
             );
             if (existing) {
               return {
@@ -94,6 +98,32 @@ export const useCartStore = create<CartState>()(
         }
         set((state) => ({
           items: state.items.map((i) => (i.id === id ? { ...i, quantity } : i)),
+        }));
+      },
+
+      updateItemOptionValue(id, optionValue) {
+        set((state) => ({
+          items: state.items.map((i) =>
+            i.id === id
+              ? (() => {
+                  const nextOption =
+                    optionValue && optionValue.trim().length > 0 ? optionValue.trim() : undefined;
+                  const delta = Number(i.optionPriceDelta ?? 0);
+                  if (!Number.isFinite(delta) || delta <= 0) {
+                    return { ...i, optionValue: nextOption };
+                  }
+                  const hadOption = Boolean(i.optionValue && i.optionValue.trim().length > 0);
+                  const hasNextOption = Boolean(nextOption);
+                  const basePrice = i.price - (hadOption ? delta : 0);
+                  const nextPrice = basePrice + (hasNextOption ? delta : 0);
+                  return {
+                    ...i,
+                    optionValue: nextOption,
+                    price: nextPrice,
+                  };
+                })()
+              : i
+          ),
         }));
       },
 

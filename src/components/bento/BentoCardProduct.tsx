@@ -16,6 +16,7 @@ interface BentoCardProductProps {
   tags?: string[];
   shopLabels?: ProductLabelOption[];
   isAvailable: boolean;
+  cartQuantity?: number;
   onAddToCart: (e: React.MouseEvent) => void;
   onClick: () => void;
 }
@@ -28,6 +29,7 @@ export function BentoCardProduct({
   tags = [],
   shopLabels,
   isAvailable,
+  cartQuantity = 0,
   onAddToCart,
   onClick,
 }: BentoCardProductProps) {
@@ -78,6 +80,20 @@ export function BentoCardProduct({
         >
           <Plus className="h-4 w-4" strokeWidth={3} />
         </button>
+      )}
+
+      {/* Cart quantity badge */}
+      {cartQuantity > 0 && (
+        <span
+          className="absolute top-2 right-11 z-10 rounded-full border border-border/70 bg-background/90 px-2 py-0.5 text-[11px] font-semibold text-foreground shadow-sm backdrop-blur-sm"
+          aria-label={
+            locale === "en"
+              ? `${cartQuantity} in cart for ${name}`
+              : `${cartQuantity} dans le panier pour ${name}`
+          }
+        >
+          {`x${cartQuantity}`}
+        </span>
       )}
 
       {/* Bottom info — fond blanc 85 %, hauteur au contenu (max. largeur carte) */}

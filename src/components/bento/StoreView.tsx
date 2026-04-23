@@ -212,6 +212,7 @@ export function StoreView({
     [storefrontThemeKey, isDark, storefrontThemeOverrides]
   );
   const addItem = useCartStore((s) => s.addItem);
+  const cartItems = useCartStore((s) => s.items);
   const backCardRef = useRef<HTMLDivElement | null>(null);
   const [isBackInView, setIsBackInView] = useState(true);
   /** Après l’anim d’entrée L2 : évite FAB pendant le slide / le chargement (IO instable sans tuile retour). */
@@ -443,6 +444,15 @@ export function StoreView({
     l2ScrollFabEnabled &&
     !(l2View === "category" && loadingProducts) &&
     !isBackInView;
+
+  const cartQuantitiesByProductId = useMemo(() => {
+    const quantities = new Map<string, number>();
+    for (const item of cartItems) {
+      if (item.isBundle) continue;
+      quantities.set(item.productId, (quantities.get(item.productId) ?? 0) + item.quantity);
+    }
+    return quantities;
+  }, [cartItems]);
 
   // ── Cart ───────────────────────────────────────────────────
 
@@ -679,6 +689,7 @@ export function StoreView({
                       tags={p.tags}
                       shopLabels={shopLabels}
                       isAvailable={p.is_available}
+                      cartQuantity={cartQuantitiesByProductId.get(p.id) ?? 0}
                       onAddToCart={(e) => handleQuickAdd(p, e)}
                       onClick={() => setDetailProduct(p)}
                     />

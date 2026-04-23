@@ -18,6 +18,10 @@ function hasSupabaseSession(request: NextRequest): boolean {
     .some(({ name }) => name.startsWith("sb-") && name.endsWith("-auth-token"));
 }
 
+function isRouteSegment(pathname: string, basePath: string): boolean {
+  return pathname === basePath || pathname.startsWith(`${basePath}/`);
+}
+
 function createSupabaseFromRequest(request: NextRequest): {
   response: NextResponse;
   supabase: ReturnType<typeof createServerClient>;
@@ -85,7 +89,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Protected routes — redirect unauthenticated visitors to /login
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) {
+  if (isRouteSegment(pathname, "/dashboard") || isRouteSegment(pathname, "/admin")) {
     if (!hasSupabaseSession(request)) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";

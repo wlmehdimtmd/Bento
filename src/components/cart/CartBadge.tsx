@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/stores/cartStore";
@@ -26,7 +26,7 @@ export function CartBadge() {
       className="relative text-muted-foreground"
       onClick={openDrawer}
     >
-      <ShoppingCart className="h-4 w-4" />
+      <ShoppingBag className="h-5 w-5" />
 
       <AnimatePresence>
         {displayedCount > 0 && (
@@ -36,9 +36,9 @@ export function CartBadge() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.4, opacity: 0 }}
             transition={{ type: "spring", stiffness: 500, damping: 18 }}
-            className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground ring-1 ring-border"
+            className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground ring-1 ring-border"
           >
-            {displayedCount > 9 ? "9+" : displayedCount}
+            {displayedCount > 99 ? "99+" : displayedCount}
           </motion.span>
         )}
       </AnimatePresence>

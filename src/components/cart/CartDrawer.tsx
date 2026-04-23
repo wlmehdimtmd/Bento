@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ShoppingCart, Trash2, ArrowRight, ShoppingBag, X } from "lucide-react";
+import { Trash2, ArrowRight, ShoppingBag, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
@@ -46,11 +46,23 @@ function parseBundle(specialNote: string): { label: string; choice: string }[] {
 function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }) {
   const { locale } = useLocale();
   const removeItem = useCartStore((s) => s.removeItem);
+  const updateItemOptionValue = useCartStore((s) => s.updateItemOptionValue);
   const updateItemSpecialNote = useCartStore((s) => s.updateItemSpecialNote);
+  const [isEditingOption, setIsEditingOption] = useState(false);
+  const [optionDraft, setOptionDraft] = useState(item.optionValue ?? "");
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [noteDraft, setNoteDraft] = useState(item.specialNote ?? "");
   const bundleSteps = item.isBundle && item.specialNote ? parseBundle(item.specialNote) : null;
   const allergenTags = (item.tags ?? []).filter((t) => ALLERGENS.some((a) => a.value === t));
+  const optionChoices = Array.isArray(item.optionChoices)
+    ? item.optionChoices.filter((choice) => choice.trim().length > 0)
+    : [];
+  const optionText =
+    item.optionValue && item.optionValue.trim().length > 0
+      ? item.optionPriceDelta && item.optionPriceDelta > 0
+        ? `${item.optionValue} (+${formatPrice(item.optionPriceDelta)})`
+        : item.optionValue
+      : null;
 
   function handleRemove() {
     removeItem(item.id);
@@ -72,19 +84,22 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
     );
   }
 
+  function handleSaveOption() {
+    updateItemOptionValue(item.id, optionDraft);
+    setIsEditingOption(false);
+    toast.success(
+      locale === "en"
+        ? optionDraft.trim().length > 0
+          ? "Option updated."
+          : "Option removed."
+        : optionDraft.trim().length > 0
+          ? "Option mise a jour."
+          : "Option supprimee."
+    );
+  }
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      {/* Back */}
-      <div className="px-4 py-3 border-b border-border shrink-0">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          {locale === "en" ? "Back to cart" : "Retour au panier"}
-        </button>
-      </div>
-
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {/* Image + name */}
         <div className="flex items-center gap-3">
@@ -198,14 +213,81 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
                 </div>
               </div>
             )}
-            {item.optionValue && (
+            {optionText && (
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
                   {locale === "en" ? "Option" : "Option"}
                 </p>
-                <p className="text-sm">{item.optionValue}</p>
+                <p className="text-sm">{optionText}</p>
               </div>
             )}
+
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  {locale === "en" ? "Edit option" : "Modifier l'option"}
+                </p>
+                {!isEditingOption ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8"
+                    onClick={() => setIsEditingOption(true)}
+                  >
+                    {locale === "en" ? "Edit" : "Modifier"}
+                  </Button>
+                ) : null}
+              </div>
+
+              {isEditingOption ? (
+                <div className="mt-2 space-y-2">
+                  {optionChoices.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {optionChoices.map((choice) => (
+                        <button
+                          key={choice}
+                          type="button"
+                          onClick={() => setOptionDraft(choice)}
+                          className={
+                            optionDraft.trim().toLowerCase() === choice.trim().toLowerCase()
+                              ? "inline-flex min-h-10 items-center rounded-full border border-primary bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary"
+                              : "inline-flex min-h-10 items-center rounded-full border border-border px-3 py-1.5 text-sm text-foreground hover:bg-muted"
+                          }
+                        >
+                          {choice}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {locale === "en"
+                        ? "No predefined options available for this item."
+                        : "Aucune option prédéfinie disponible pour cet article."}
+                    </p>
+                  )}
+                  <div className="flex gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => setIsEditingOption(false)}>
+                      {locale === "en" ? "Cancel" : "Annuler"}
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={() => setOptionDraft("")}>
+                      {locale === "en" ? "Remove option" : "Supprimer l'option"}
+                    </Button>
+                    <Button type="button" size="sm" onClick={handleSaveOption}>
+                      {locale === "en" ? "Save" : "Enregistrer"}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-1 text-sm text-muted-foreground italic">
+                  {optionText
+                    ? optionText
+                    : locale === "en"
+                      ? "No option selected."
+                      : "Aucune option sélectionnée."}
+                </p>
+              )}
+            </div>
             {item.specialNote && (
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
@@ -275,7 +357,7 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-4 border-t border-border shrink-0">
+      <div className="px-4 py-4 border-t border-border shrink-0 space-y-2">
         <Button
           variant="outline"
           className="w-full gap-2 text-destructive border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
@@ -283,6 +365,9 @@ function CartItemReview({ item, onBack }: { item: CartItem; onBack: () => void }
         >
           <Trash2 className="h-4 w-4" />
           {locale === "en" ? "Remove from cart" : "Retirer du panier"}
+        </Button>
+        <Button variant="secondary" className="w-full" onClick={onBack}>
+          {locale === "en" ? "Back to cart" : "Retour au panier"}
         </Button>
       </div>
     </div>
@@ -448,7 +533,7 @@ export function CartDrawer() {
 
   const headerTitle = (
     <div className="flex items-center gap-2">
-      <ShoppingCart
+      <ShoppingBag
         className="h-4 w-4"
         style={{ color: "var(--primary)" }}
       />

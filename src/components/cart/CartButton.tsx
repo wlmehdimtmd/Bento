@@ -24,7 +24,7 @@ export function CartButton({ showLocaleSwitcher = true }: CartButtonProps) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
+    queueMicrotask(() => setIsMounted(true));
   }, []);
 
   const hydratedCount = isMounted ? count : 0;
@@ -56,18 +56,18 @@ export function CartButton({ showLocaleSwitcher = true }: CartButtonProps) {
               <button
                 type="button"
                 onClick={openDrawer}
-                className={cn(STOREFRONT_CART_CTA_CLASSNAME, "shrink-0")}
+                className={cn(STOREFRONT_CART_CTA_CLASSNAME, "shrink-0 min-h-12 px-5 text-base")}
                 aria-label={label}
               >
                 <div className="relative shrink-0">
                   <ShoppingBag className="h-5 w-5" />
                   <span
                     className={cn(
-                      "absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full",
+                      "absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1",
                       countBadgeClass
                     )}
                   >
-                    {hydratedCount > 9 ? "9+" : hydratedCount}
+                    {hydratedCount > 99 ? "99+" : hydratedCount}
                   </span>
                 </div>
                 <span className="font-semibold whitespace-nowrap">{t("cart.seeCart")}</span>

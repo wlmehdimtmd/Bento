@@ -324,7 +324,13 @@ export function CheckoutForm({ onBack }: CheckoutFormProps) {
                 <span className="text-muted-foreground">
                   {item.quantity}× {item.name}
                   {item.optionValue && (
-                    <span className="text-xs"> — {item.optionValue}</span>
+                    <span className="text-xs">
+                      {" "}
+                      —{" "}
+                      {item.optionPriceDelta && item.optionPriceDelta > 0
+                        ? `${item.optionValue} (+${formatPrice(item.optionPriceDelta)})`
+                        : item.optionValue}
+                    </span>
                   )}
                 </span>
                 <span className="tabular-nums font-medium">

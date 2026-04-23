@@ -95,15 +95,6 @@ function ProductDetailContent({
   const unitPriceWithOption = product.price + appliedOptionSurcharge;
 
   function handleAdd() {
-    if (hasProductOption && !optionValue.trim()) {
-      toast.error(
-        locale === "en"
-          ? "Please select an option before adding this item."
-          : "Veuillez sélectionner une option avant d'ajouter cet article."
-      );
-      return;
-    }
-
     addItem({
       productId: product.id,
       name: product.name,
@@ -113,12 +104,10 @@ function ProductDetailContent({
       fallbackEmoji: product.fallback_emoji,
       description: product.description,
       tags: product.tags,
+      optionChoices,
+      optionPriceDelta: optionSurcharge,
       optionValue:
-        selectedOptionValue.length > 0
-          ? appliedOptionSurcharge > 0
-            ? `${selectedOptionValue} (+${formatPrice(appliedOptionSurcharge)})`
-            : selectedOptionValue
-          : undefined,
+        selectedOptionValue.length > 0 ? selectedOptionValue : undefined,
       specialNote: specialNote.trim() || undefined,
       isBundle: false,
     });
@@ -411,7 +400,6 @@ function ProductDetailContent({
                   type="button"
                   className="h-11 w-full"
                   onClick={() => setDetailDrawer(null)}
-                  disabled={detailDrawer === "option" && hasProductOption && !optionValue.trim()}
                 >
                   {locale === "en" ? "Confirm" : "Valider"}
                 </Button>

@@ -15,13 +15,22 @@ interface CartItemRowProps {
 }
 
 export function CartItemRow({ item, onReview }: CartItemRowProps) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
 
   const allergenTags = (item.tags ?? []).filter((t) =>
     ALLERGENS.some((a) => a.value === t)
   );
+
+  const optionText =
+    item.optionValue && item.optionValue.trim().length > 0
+      ? item.optionPriceDelta && item.optionPriceDelta > 0
+        ? `${item.optionValue} (+${formatPrice(item.optionPriceDelta)})`
+        : item.optionValue
+      : null;
+  const optionLabel = locale === "en" ? "Option" : "Option";
+  const noteLabel = locale === "en" ? "Note" : "Note";
 
   return (
     <div className="flex items-start gap-3 py-3">
@@ -62,14 +71,14 @@ export function CartItemRow({ item, onReview }: CartItemRowProps) {
                 {item.description}
               </p>
             )}
-            {item.optionValue && (
+            {optionText && (
               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 italic">
-                {`${t("cart.option")} : ${item.optionValue}`}
+                {`${optionLabel} : ${optionText}`}
               </p>
             )}
             {item.specialNote && (
               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 italic">
-                {`${t("cart.note")} : ${item.specialNote}`}
+                {`${noteLabel} : ${item.specialNote}`}
               </p>
             )}
             {allergenTags.length > 0 && (
@@ -106,8 +115,9 @@ export function CartItemRow({ item, onReview }: CartItemRowProps) {
           <Button
             variant="outline"
             size="icon"
-            className="h-6 w-6 rounded-md"
+            className="h-10 w-10 rounded-md"
             onClick={() => updateQuantity(item.id, item.quantity - 1)}
+            disabled={item.quantity <= 1}
           >
             <Minus className="h-3 w-3" />
           </Button>
@@ -117,7 +127,7 @@ export function CartItemRow({ item, onReview }: CartItemRowProps) {
           <Button
             variant="outline"
             size="icon"
-            className="h-6 w-6 rounded-md"
+            className="h-10 w-10 rounded-md"
             onClick={() => updateQuantity(item.id, item.quantity + 1)}
             disabled={item.quantity >= 20}
           >
@@ -139,7 +149,7 @@ export function CartItemRow({ item, onReview }: CartItemRowProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-foreground"
+              className="h-10 w-10 text-muted-foreground hover:text-foreground"
               onClick={onReview}
               aria-label={t("cart.details")}
             >
@@ -149,7 +159,7 @@ export function CartItemRow({ item, onReview }: CartItemRowProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            className="h-10 w-10 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             onClick={() => removeItem(item.id)}
             aria-label={t("cart.remove")}
           >
