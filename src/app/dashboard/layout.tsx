@@ -20,9 +20,7 @@ export default async function Layout({
     redirect("/login");
   }
 
-  if (await resolveIsAdmin(supabase, user)) {
-    redirect("/admin");
-  }
+  const isAdmin = await resolveIsAdmin(supabase, user);
 
   // Onboarding guard: redirect new users who haven't completed onboarding
   const { data: primaryShop } = await supabase
@@ -78,6 +76,7 @@ export default async function Layout({
     <DashboardLayout
       shops={(shopsForNav ?? []).map((s) => ({ id: s.id as string, name: s.name as string }))}
       activeOrdersCount={activeOrdersCount}
+      isAdmin={isAdmin}
       disableAutoLogout={userPreferences?.disable_auto_logout ?? false}
       autoLogoutTimeoutMinutes={userPreferences?.auto_logout_timeout_minutes ?? 15}
     >

@@ -14,6 +14,7 @@ interface DashboardLayoutProps {
   shops: { id: string; name: string }[];
   /** Commandes à traiter (hors livrées / annulées), pour le badge « Commandes ». */
   activeOrdersCount?: number;
+  isAdmin?: boolean;
   disableAutoLogout?: boolean;
   autoLogoutTimeoutMinutes?: number;
   children: React.ReactNode;
@@ -31,6 +32,7 @@ const INACTIVITY_EVENTS: Array<keyof WindowEventMap> = [
 export function DashboardLayout({
   shops,
   activeOrdersCount = 0,
+  isAdmin = false,
   disableAutoLogout = false,
   autoLogoutTimeoutMinutes = 15,
   children,
@@ -112,7 +114,7 @@ export function DashboardLayout({
   return (
     <MerchantDashboardShell className="flex min-h-screen">
       {/* Desktop sidebar */}
-      <DashboardSidebar shops={shops} activeOrdersCount={activeOrdersCount} />
+      <DashboardSidebar shops={shops} activeOrdersCount={activeOrdersCount} isAdmin={isAdmin} />
 
       {/* Mobile sheet sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -121,7 +123,12 @@ export function DashboardLayout({
           className="p-0 w-[85%] min-w-[280px] max-w-none sm:max-w-none sm:w-[85%]"
         >
           <SheetTitle className="sr-only">Navigation</SheetTitle>
-          <DashboardSidebar shops={shops} activeOrdersCount={activeOrdersCount} forSheet />
+          <DashboardSidebar
+            shops={shops}
+            activeOrdersCount={activeOrdersCount}
+            isAdmin={isAdmin}
+            forSheet
+          />
         </SheetContent>
       </Sheet>
 

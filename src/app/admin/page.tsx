@@ -5,6 +5,10 @@ import { AdminLogoutButton } from "./AdminLogoutButton";
 import { AdminDemoBanner } from "./AdminDemoBanner";
 import { AdminShopsDesktopTable } from "./AdminShopsDesktopTable";
 import { AdminShopsMobileList, type AdminShopMobileRow } from "./AdminShopsMobileList";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Admin — Toutes les boutiques" };
 
@@ -81,6 +85,16 @@ export default async function AdminPage() {
       <div className="mx-auto min-w-0 max-w-6xl space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
+            <Link
+              href="/dashboard"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                "mb-3 inline-flex items-center gap-1.5"
+              )}
+            >
+              <ChevronLeft className="h-4 w-4" aria-hidden />
+              Dashboard vitrine
+            </Link>
             <h1 className="text-3xl font-bold" style={{ fontFamily: "var(--font-onest)" }}>
               Admin — Boutiques
             </h1>

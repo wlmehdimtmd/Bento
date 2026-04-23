@@ -16,6 +16,7 @@ import {
   SlidersHorizontal,
   Store,
   Tags,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/components/i18n/LocaleProvider";
@@ -25,6 +26,8 @@ interface DashboardSidebarProps {
   shops: { id: string; name: string }[];
   /** Commandes actives (pending → ready), toutes boutiques du compte. */
   activeOrdersCount?: number;
+  /** Affiche la passerelle dashboard -> admin pour les comptes admin. */
+  isAdmin?: boolean;
   /** Contenu identique au desktop, pour le panneau latéral mobile (drawer). */
   forSheet?: boolean;
 }
@@ -40,11 +43,13 @@ function parseShopIdFromPath(pathname: string): string | null {
 function SidebarColumn({
   shops,
   activeOrdersCount = 0,
+  isAdmin = false,
   className,
   forSheet = false,
 }: {
   shops: { id: string; name: string }[];
   activeOrdersCount?: number;
+  isAdmin?: boolean;
   className?: string;
   /** Panneau mobile : largeur généreuse + cibles type bouton `size="lg"`. */
   forSheet?: boolean;
@@ -72,6 +77,7 @@ function SidebarColumn({
   const ordersHref = shopBase ? `${shopBase}/orders` : "/dashboard";
 
   const settingsHref = "/dashboard/settings";
+  const adminHref = "/admin";
 
   const contextualShopName = useMemo(() => {
     if (routeShopId) {
@@ -329,6 +335,22 @@ function SidebarColumn({
           </p>
         ) : null}
 
+        {isAdmin ? (
+          <Link
+            href={adminHref}
+            className={cn(
+              "flex items-center rounded-lg font-medium transition-colors",
+              navItemClass,
+              isActive(adminHref)
+                ? activeItemClass
+                : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            )}
+          >
+            <Shield className={iconClass} />
+            {tr("Admin", "Admin")}
+          </Link>
+        ) : null}
+
         <Link
           href={settingsHref}
           className={cn(
@@ -362,6 +384,7 @@ function SidebarColumn({
 export function DashboardSidebar({
   shops,
   activeOrdersCount = 0,
+  isAdmin = false,
   forSheet,
 }: DashboardSidebarProps) {
   if (forSheet) {
@@ -369,6 +392,7 @@ export function DashboardSidebar({
       <SidebarColumn
         shops={shops}
         activeOrdersCount={activeOrdersCount}
+        isAdmin={isAdmin}
         className="h-full"
         forSheet
       />
@@ -377,7 +401,12 @@ export function DashboardSidebar({
 
   return (
     <aside className="hidden md:flex md:flex-col md:w-[260px] md:shrink-0 h-screen sticky top-0 border-r border-sidebar-border">
-      <SidebarColumn shops={shops} activeOrdersCount={activeOrdersCount} className="h-full" />
+      <SidebarColumn
+        shops={shops}
+        activeOrdersCount={activeOrdersCount}
+        isAdmin={isAdmin}
+        className="h-full"
+      />
     </aside>
   );
 }
